@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/intd4232/public_html/antree
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp * $DEPLOYPATH
