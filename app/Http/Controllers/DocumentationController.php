@@ -7,6 +7,10 @@ use App\Models\Documentation;
 
 class DocumentationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function previewDokumentasi($id)
     {
         $dokum = Documentation::where('antrian_id', $id)->get();
