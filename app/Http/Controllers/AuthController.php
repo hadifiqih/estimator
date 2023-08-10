@@ -144,7 +144,7 @@ class AuthController extends Controller
         $employee->save();
 
         //mengubah sales yang dipilih menjadi sales yang baru dibuat
-        if($request->salesApa != null)
+        if($request->salesApa)
         $sales = Sales::where('id', $request->salesApa)->get();
         $sales->employee_id = $employee->id;
         $sales->save();
