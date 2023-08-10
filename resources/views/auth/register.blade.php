@@ -149,6 +149,7 @@
                         <option value="Marketing">Marketing</option>
                         <option value="Keuangan">Keuangan</option>
                         <option value="Sales">Sales</option>
+                        <option value="Desainer">Desainer</option>
                         <option value="Produksi Stempel">Produksi Stempel</option>
                         <option value="Produksi Advertising">Produksi Advertising</option>
                         <option value="IT">IT</option>
