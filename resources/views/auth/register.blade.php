@@ -14,6 +14,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Daftar Akun - Antree</title>
 
@@ -74,15 +75,11 @@
               <form id="formAuthentication" class="mb-3" action="{{ route('auth.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 {{-- Menampilkan error dari validator --}}
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                              <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                @error('password')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
 
                 <div class="mb-3">
                   <label for="name" class="form-label">Nama Lengkap</label>
@@ -120,11 +117,12 @@
                       id="password"
                       class="form-control"
                       name="password"
-                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      placeholder="Masukkan password"
                       aria-describedby="password"
                     />
                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                   </div>
+                  <div class="invalid-feedback" id="passwordError"></div>
                 </div>
 
                 <div class="mb-3">
@@ -134,9 +132,7 @@
                       class="form-control"
                       id="tahun"
                       name="tahunMasuk"
-                      placeholder="Tahun Masuk Kerja"
-                      autofocus
-                    />
+                      placeholder="Tahun Masuk Kerja"/>
                   </div>
 
                 <div class="mb-3">
@@ -149,7 +145,7 @@
                         <option value="Marketing">Marketing</option>
                         <option value="Keuangan">Keuangan</option>
                         <option value="Sales">Sales</option>
-                        <option value="Desainer">Desainer</option>
+                        <option value="Desain">Desain</option>
                         <option value="Produksi Stempel">Produksi Stempel</option>
                         <option value="Produksi Advertising">Produksi Advertising</option>
                         <option value="IT">IT</option>
@@ -185,7 +181,7 @@
                     </label>
                   </div>
                 </div>
-                <button class="btn btn-primary d-grid w-100">Daftar</button>
+                <button type="submit" class="btn btn-primary d-grid w-100">Daftar</button>
               </form>
 
               <p class="text-center">
@@ -233,6 +229,14 @@
                   $("#inputSales").hide();
               }
           });
+
+          $('#formAuthentication').submit(function(event) {
+                var passwordValue = $('#password').val();
+                if (passwordValue.includes(' ')) {
+                    event.preventDefault();
+                    $('#passwordError').text('Password tidak boleh mengandung spasi.');
+                }
+            });
       });
   </script>
 
