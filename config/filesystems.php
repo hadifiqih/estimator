@@ -71,6 +71,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('ref-desain') => storage_path('app/public/ref-desain'),
     ],
 
 ];
