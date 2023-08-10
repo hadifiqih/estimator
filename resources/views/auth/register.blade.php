@@ -181,7 +181,7 @@
                     </label>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary d-grid w-100">Daftar</button>
+                <button class="btn btn-primary d-grid w-100">Daftar</button>
               </form>
 
               <p class="text-center">
@@ -230,13 +230,18 @@
               }
           });
 
-          $('#formAuthentication').submit(function(event) {
-                var passwordValue = $('#password').val();
-                if (passwordValue.includes(' ')) {
-                    event.preventDefault();
-                    $('#passwordError').text('Password tidak boleh mengandung spasi.');
-                }
-            });
+          $("#password").keyup(function() {
+            var password = $(this).val();
+            var passwordError = $("#passwordError");
+
+            if (password.length < 8) {
+              passwordError.html("Password minimal 8 karakter");
+            } else if (password.includes(" ")) {
+              passwordError.html("Password tidak boleh mengandung spasi");
+            } else {
+              passwordError.html("");
+            }
+          });
       });
   </script>
 
