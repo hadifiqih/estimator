@@ -24,11 +24,7 @@ class AntrianController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         // Ambil data antrian dari database yang memiliki relasi dengan sales, customer, job, design, operator, dan finishing dan statusnya 1 (aktif)
@@ -37,22 +33,11 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.index', compact('antrians', 'antrianSelesai'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    public function download($id){
+        $antrian = Antrian::where('id', $id);
+        $file = $antrian->order->desain;
+        return Storage::download('storage/file-cetak/' . $file);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
 
      public function store(Request $request)
      {
@@ -105,23 +90,6 @@ class AntrianController extends Controller
         return redirect()->route('antrian.index')->with('successToAntrian', 'Data antrian berhasil ditambahkan!');
      }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
 
@@ -138,13 +106,6 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.edit', compact('antrian', 'employees', 'qualitys', 'rekanan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
 

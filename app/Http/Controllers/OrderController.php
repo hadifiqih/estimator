@@ -85,7 +85,7 @@ class OrderController extends Controller
         $file = $request->file('refdesain');
         if($file){
             $fileName = time() . '.' . $file->getClientOriginalName();
-            $file->move(storage_path('app/public/ref-desain'), $fileName);
+            $file->storeAs('ref-desain', $fileName);
         }else{
             return redirect()->back()->with('error', 'File tidak ditemukan !');
         }
@@ -114,10 +114,10 @@ class OrderController extends Controller
         //Menyimpan file cetak dari form dropzone
         $file = $request->file('file');
         $fileName = time() . '.' . $file->getClientOriginalName();
-        $path = $file->storeAs('public/file-cetak', $fileName);
+        $file->storeAs('file-cetak', $fileName);
 
         //Menyimpan nama file cetak ke database
-        $order = Order::find($request->id);
+        $order = Order::where('id', $request->id);
         $order->file_cetak = $fileName;
         $order->save();
 
@@ -144,4 +144,5 @@ class OrderController extends Controller
 
         return view ('page.antrian-workshop.create', compact('order'));
     }
+
 }

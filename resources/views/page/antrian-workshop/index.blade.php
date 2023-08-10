@@ -189,8 +189,8 @@
                                                     </td>
                                                 @else
                                                     <td><a class="btn btn-dark btn-sm"
-                                                            href="storage/file-cetak/{{ $antrian->design->file_name }}"
-                                                            download>Download</a></td>
+                                                            href="{{ route('design.download', $antrian->id) }}"
+                                                            >Download</a></td>
                                                 @endif
 
                                                 <td>
