@@ -264,7 +264,7 @@
                                     @php
                                         $refImage = strlen($desain->desain) > 15 ? substr($desain->desain, 0, 15) . '...' : $desain->desain;
                                     @endphp
-                                        <td scope="row"><a href="{{ storage_path('app/public/ref-desain/'.$desain->desain) }}" target="_blank">{{ $refImage }}</a></td>
+                                        <td scope="row"><a href="{{ 'antree/'.storage_path('app/public/ref-desain/'.$refImage) }}" target="_blank">{{ $refImage }}</a></td>
                                 @else
                                         <td scope="row">-</td>
                                 @endif
