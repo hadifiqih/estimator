@@ -61,14 +61,13 @@ class AuthController extends Controller
             'divisi' => 'required',
             'lokasi' => 'required',
             'terms' => 'required'
-
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
 
         if ($validator->fails()) {
-            return redirect()->route('auth.register')->withErrors($validator);
+            return redirect()->route('auth.register')->withErrors($validator)->withInput();
         }
 
         //menentukan lokasi kerja
