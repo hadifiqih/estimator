@@ -50,6 +50,7 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());
 
         //Membuat rules validasi
         $rules = [
@@ -144,10 +145,11 @@ class AuthController extends Controller
         $employee->save();
 
         //mengubah sales yang dipilih menjadi sales yang baru dibuat
-        if($request->salesApa)
+        if($request->salesApa){
         $sales = Sales::where('id', $request->salesApa)->get();
-        $sales->employee_id = $employee->id;
+        $sales->user_id = $user->id;
         $sales->save();
+    }
 
         //jika user berhasil dibuat
         return redirect()->route('auth.login')->with('success-register', 'Registrasi berhasil, silahkan login');
