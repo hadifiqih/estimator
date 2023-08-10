@@ -33,7 +33,7 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.index', compact('antrians', 'antrianSelesai'));
     }
 
-    public function download($id){
+    public function downloadPrintFile($id){
         $antrian = Antrian::where('id', $id);
         $file = $antrian->order->desain;
         return Storage::download('storage/file-cetak/' . $file);
