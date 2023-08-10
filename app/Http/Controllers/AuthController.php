@@ -68,7 +68,7 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return redirect()->route('auth.register')->withErrors($validator)->withInput();
-        }
+        }else{
 
         //menentukan lokasi kerja
         $tempatKerja = $request->lokasi;
@@ -148,7 +148,7 @@ class AuthController extends Controller
         $sales->user_id = $user->id;
         $sales->save();
         }
-
+    }
         //jika user berhasil dibuat
         return redirect()->route('auth.login')->with('success-register', 'Registrasi berhasil, silahkan login');
     }
