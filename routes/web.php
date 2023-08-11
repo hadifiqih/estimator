@@ -70,7 +70,7 @@ Route::controller(OrderController::class)->group(function(){
     Route::post('/order/upload-print-file', 'uploadPrintFile')->name('design.upload');
     Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
     Route::get('/order/{id}/toAntrian', 'toAntrian')->middleware(['auth', 'checkrole:sales'])->name('order.toAntrian');
-    Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
+
 });
 
 Route::controller(AntrianController::class)->group(function(){
@@ -78,6 +78,7 @@ Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/{id}/updateDeadline', 'updateDeadline')->middleware(['auth', 'checkrole:sales'])->name('antrian.updateDeadline');
     Route::get('/antrian/dokumentasi/{id}', 'showDokumentasi')->middleware(['auth', 'checkrole:dokumentasi'])->name('antrian.showDokumentasi');
     Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware(['auth', 'checkrole:dokumentasi'])->name('antrian.storeDokumentasi');
+    Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
 });
 
 Route::controller(ProductController::class)->group(function(){
