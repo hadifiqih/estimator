@@ -35,8 +35,9 @@ class AntrianController extends Controller
 
     public function downloadPrintFile($id){
         $antrian = Antrian::where('id', $id);
+        $path = "/storage/file-cetak/" . $antrian->order->desain;
         $file = $antrian->order->desain;
-        return Storage::download('storage/file-cetak/' . $file);
+        return response()->download($path, $file);
     }
 
      public function store(Request $request)
@@ -78,7 +79,7 @@ class AntrianController extends Controller
 
         $antrian = new Antrian();
         $antrian->ticket_order = $ticketOrder;
-        $antrian->sales_id = auth()->user()->id;
+        $antrian->sales_id = $request->input('sales');
         $antrian->customer_id = $request->input('nama');
         $antrian->job_id = $request->input('namaPekerjaan');
         $antrian->note = $request->input('keterangan');

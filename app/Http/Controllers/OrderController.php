@@ -33,7 +33,6 @@ class OrderController extends Controller
         $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
         $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->get();
         $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->get();
-
         return view('page.antrian-desain.index', compact('listDesain', 'listDikerjakan', 'listSelesai'));
     }
 

@@ -190,7 +190,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Data Desain (Otomatis)</h2>
+                    <h2 class="card-title">Data Desain</h2>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="idOrder" value="{{ $order->id }}">
@@ -232,6 +232,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body text-right">
+                        <input type="hidden" name="sales" value="{{ $order->sales_id }}">
                         {{-- Tombol Submit --}}
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
@@ -265,7 +266,8 @@
                         <input type="text" class="form-control" id="modalAlamat" placeholder="Alamat Pelanggan" name="modalAlamat">
                     </div>
                     <div class="form-group">
-
+                        <label for="instansi">Instansi</label>
+                        <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan">
                     </div>
                     <div class="form-group">
                         <label for="infoPelanggan">Info Iklan</label>

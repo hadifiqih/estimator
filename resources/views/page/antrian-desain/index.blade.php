@@ -110,6 +110,45 @@
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary {{ Auth::user()->role != 'sales' ? 'disabled' : '' }}"><i class="fas fa-edit"></i></a>
                                     <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success {{ Auth::user()->role != 'desain' ? 'disabled' : '' }}"><i class="fas fa-hand-paper"></i></a>
+                                    {{-- Tombol Modal Detail Keterangan Desain --}}
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    {{-- Modal Keterangan Desain --}}
+                                    <div class="modal fade" id="detail{{ $desain->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $desain->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h5 class="modal-title" id="detailLabel{{ $desain->id }}">Detail #{{ $desain->ticket_order }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="namaSales">Nama Sales</label>
+                                                    <input type="text" class="form-control" id="namaSales" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="judulDesain">Judul Desain</label>
+                                                    <input type="text" class="form-control" id="judulDesain" name="judulDesain" value="{{ $desain->title }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="jenisPekerjaan">Jenis Pekerjaan</label>
+                                                    <input type="text" class="form-control" id="jenisPekerjaan" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="keterangan">Keterangan</label>
+                                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="refDesain">Referensi Desain</label><br>
+                                                    <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                            </div>
                                 </td>
 
                         </tr>
@@ -184,6 +223,44 @@
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary {{ Auth::user()->role != 'sales' || $desain->status == 2 ? 'disabled' : '' }}"><i class="fas fa-edit"></i></a>
                                     {{-- Button untuk menampilkan modal Upload --}}
                                     <button type="button" class="btn btn-sm btn-success {{ Auth::user()->role != 'desain' ? 'disabled' : '' }}" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}"><i class="fas fa-upload"></i></button>
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    {{-- Modal Keterangan Desain --}}
+                                    <div class="modal fade" id="detail{{ $desain->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $desain->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h5 class="modal-title" id="detailLabel{{ $desain->id }}">Detail #{{ $desain->ticket_order }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="namaSales">Nama Sales</label>
+                                                    <input type="text" class="form-control" id="namaSales" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="judulDesain">Judul Desain</label>
+                                                    <input type="text" class="form-control" id="judulDesain" name="judulDesain" value="{{ $desain->title }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="jenisPekerjaan">Jenis Pekerjaan</label>
+                                                    <input type="text" class="form-control" id="jenisPekerjaan" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="keterangan">Keterangan</label>
+                                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="refDesain">Referensi Desain</label><br>
+                                                    <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                            </div>
                                     {{-- Modal Upload --}}
                                     <div class="modal fade" id="modalUpload{{ $desain->id }}">
                                         <div class="modal-dialog modal-dialog-centered" role="document">
