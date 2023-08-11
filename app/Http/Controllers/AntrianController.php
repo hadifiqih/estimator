@@ -34,11 +34,11 @@ class AntrianController extends Controller
     }
 
     public function downloadPrintFile($id){
-        $antrian = Antrian::where('id', $id);
+        $antrian = Antrian::where('id', $id)->first();
         $file = $antrian->order->file_cetak;
         $path = storage_path('app/public/file-cetak/' . $file);
-        dd($path);
         return response()->download($path);
+
     }
 
      public function store(Request $request)

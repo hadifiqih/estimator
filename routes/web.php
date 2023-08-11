@@ -70,7 +70,6 @@ Route::controller(OrderController::class)->group(function(){
     Route::post('/order/upload-print-file', 'uploadPrintFile')->name('design.upload');
     Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
     Route::get('/order/{id}/toAntrian', 'toAntrian')->middleware(['auth', 'checkrole:sales'])->name('order.toAntrian');
-
 });
 
 Route::controller(AntrianController::class)->group(function(){
