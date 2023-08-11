@@ -61,7 +61,7 @@
                 </div>
                 <div class="card-body">
                 {{-- Menampilkan Antrian Desain --}}
-                <table id="tableAntrianDesain" class="table table-bordered table-hover">
+                <table id="tableAntrianDesain" class="table table-bordered table-hover table-responsive">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -170,7 +170,7 @@
                     </div>
                     <div class="card-body">
                     {{-- Menampilkan Antrian Desain --}}
-                    <table id="tableAntrianDikerjakan" class="table table-bordered table-hover">
+                    <table id="tableAntrianDikerjakan" class="table table-bordered table-hover table-responsive">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -309,7 +309,7 @@
                     </div>
                     <div class="card-body">
                     {{-- Menampilkan Antrian Desain --}}
-                    <table id="tableAntrianSelesai" class="table table-bordered table-hover">
+                    <table id="tableAntrianSelesai" class="table table-bordered table-hover table-responsive">
                         <thead>
                             <tr>
                                 <th>No</th>
