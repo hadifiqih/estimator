@@ -83,8 +83,8 @@
                                                     </td>
                                                 @else
                                                     <td><a class="btn btn-dark btn-sm"
-                                                            href="/storage/file-cetak/{{ $antrian->order->file_cetak }}"
-                                                            download>Download</a></td>
+                                                            href="{{ asset('storage/file-cetak'.$antrian->order->file_cetak) }}"
+                                                            download="{{ $antrian->order->file_cetak }}">Download</a></td>
                                                 @endif
 
                                                 <td>
