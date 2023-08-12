@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Documentation;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -157,75 +158,79 @@ class AntrianController extends Controller
     return response()->json(['message' => 'Melewati Deadline !']);
     }
     //--------------------------------------------------------------------------
-    // fungsi untuk check documentasi sudah terisi id atau belum
-    public function checkDocumentation($id)
-{
-    $antrian = Antrian::find($id);
 
-    // Periksa apakah ada dokumentasi (documentation_id terisi)
-    if ($antrian->documentation_id) {
-        // Hentikan timer
-        $antrian->timer_stop = now();
-        // Ganti deadline_status menjadi 2 (sesuai deadline)
-        $antrian->deadline_status = 2;
-        $antrian->save();
-
-        return response()->json([
-            'documentation_id' => $antrian->documentation_id
-        ]);
-    }
-
-    return response()->json([
-        'documentation_id' => null
-    ]);
-}
-
-public function design(){
-    //Melarang akses langsung ke halaman ini sebelum login
-    if (!auth()->check()) {
-        return redirect()->route('auth.login')->with('belum-login', 'Silahkan login terlebih dahulu');
-    }
-
-    $list_desain = AntrianDesain::get();
-    return view('antriandesain.index', compact('list_desain'));
-}
-
-public function tambahDesain(){
-
-    $list_antrian = Antrian::get();
-    return view('antriandesain.create', compact('list_antrian'));
-
-}
-
-//fungsi untuk menggunggah & menyimpan file gambar dokumentasi
-public function showDokumentasi($id){
-    $antrian = Antrian::find($id);
-    return view ('page.antrian-workshop.dokumentasi' , compact('antrian'));
-}
-
-public function storeDokumentasi(Request $request){
-    $uploadedFiles = [];
-
-        if ($request->hasFile('file')) {
-            $files = $request->file('file');
-
-
-            foreach ($files as $file) {
-                //Rename nama file
-                $nama_file = $file->getClientOriginalName();
-                $nama_file = time()."_".$nama_file;
-                $path = $file->move('storage/dokumentasi', $nama_file);// Simpan file di direktori 'storage/app/dokumentasi'
-                $uploadedFiles[] = $path;
-
-                //simpan nama file ke database (table documentations)
-                $documentation = new Documentation();
-                $documentation->antrian_id = $request->input('antrian_id');
-                $documentation->filename = $nama_file;
-                $documentation->save();
-            }
+    public function design(){
+        //Melarang akses langsung ke halaman ini sebelum login
+        if (!auth()->check()) {
+            return redirect()->route('auth.login')->with('belum-login', 'Silahkan login terlebih dahulu');
         }
 
-        return response()->json(['uploaded_files' => $uploadedFiles], 200);
-}
+        $list_desain = AntrianDesain::get();
+        return view('antriandesain.index', compact('list_desain'));
+    }
 
-}
+    public function tambahDesain(){
+        $list_antrian = Antrian::get();
+        return view('antriandesain.create', compact('list_antrian'));
+    }
+
+//fungsi untuk menggunggah & menyimpan file gambar dokumentasi
+    public function showDokumentasi($id){
+        $antrian = Antrian::find($id);
+        return view ('page.antrian-workshop.dokumentasi' , compact('antrian'));
+    }
+
+    public function storeDokumentasi(Request $request){
+        $files = $request->file('files');
+        $id = $request->input('idAntrian');
+
+        foreach($files as $file){
+            $filename = time()."_".$file->getClientOriginalName();
+            $path = $file->storeAs('public/dokumentasi', $filename);
+
+            $dokumentasi = new Documentation();
+            $dokumentasi->antrian_id = $id;
+            $dokumentasi->filename = $filename;
+            $dokumentasi->type_file = $file->getClientOriginalExtension();
+            $dokumentasi->path_file = $path;
+            $dokumentasi->job_id = $request->input('jobType');
+            $dokumentasi->save();
+        }
+
+        return response()->json(['success'=>'You have successfully upload file.']);
+    }
+
+    public function submitDokumentasi($id){
+
+        $antrian = Antrian::find($id);
+        $antrian->timer_stop = Carbon::now();
+        $antrian->status = 2;
+        $antrian->save();
+
+        return redirect()->route('antrian.index')->with('success-dokumentasi', 'Dokumentasi berhasil diunggah!');
+    }
+
+    }
+
+// $files = $request->file('files');
+        // $id = $request->input('idAntrian');
+
+        // foreach ($files as $file) {
+        //     //Rename nama file
+        //     $uploadedFile = [];
+        //     $nama_file = $file->getClientOriginalName();
+        //     $nama_file = time()."_".$nama_file;
+        //     $path = $file->storeAs('storage/dokumentasi', $nama_file);// Simpan gambar yang diupload ke folder public/dokumentasi
+        //     $uploadedFile[] = $path;
+
+        //     $dokumentasi = new Dokumentasi();
+        //     $dokumentasi->antrian_id = $id;
+        //     $dokumentasi->filename = $nama_file;
+        //     $dokumentasi->path_file = $path;
+        //     $dokumentasi->type_file = $file->getClientOriginalExtension();
+        //     $dokumentasi->job_id = $request->input('type_job');
+        //     $dokumentasi->save();
+
+        // }
+
+        // return response()->json(['success' => $uploadedFile]);

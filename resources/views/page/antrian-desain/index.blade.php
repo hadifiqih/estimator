@@ -108,8 +108,8 @@
 
                             {{-- Jika role = desain, maka tampilkan tombol aksi --}}
                                 <td>
-                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary {{ Auth::user()->role != 'sales' ? 'disabled' : '' }}"><i class="fas fa-edit"></i></a>
-                                    <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success {{ Auth::user()->role != 'desain' ? 'disabled' : '' }}"><i class="fas fa-hand-paper"></i></a>
+                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
+                                    <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-hand-paper"></i></a>
                                     {{-- Tombol Modal Detail Keterangan Desain --}}
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
@@ -156,9 +156,11 @@
                     </tbody>
                 </table>
                 {{-- End Menampilkan Antrian Desain --}}
-              </div>
+                    </div>
                 </div>
             </div>
+
+
             <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
                 <div class="card">
                     <div class="card-header">
@@ -220,9 +222,9 @@
                                 @endif
 
                                 <td>
-                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary {{ Auth::user()->role != 'sales' || $desain->status == 2 ? 'disabled' : '' }}"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
                                     {{-- Button untuk menampilkan modal Upload --}}
-                                    <button type="button" class="btn btn-sm btn-success {{ Auth::user()->role != 'desain' ? 'disabled' : '' }}" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}"><i class="fas fa-upload"></i></button>
+                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-upload"></i></button>
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
@@ -319,7 +321,9 @@
                                 <th>Jenis Pekerjaan</th>
                                 <th>Desainer</th>
                                 <th>Status</th>
+                                @if(Auth::user()->role == 'sales')
                                 <th>Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -341,7 +345,7 @@
                                     @php
                                         $refImage = strlen($desain->desain) > 15 ? substr($desain->desain, 0, 15) . '...' : $desain->desain;
                                     @endphp
-                                        <td scope="row"><a href="{{ asset('storage/ref-desain/'.$desain->desain) }}" target="_blank">{{ $refImage }}</a></td>
+                                        <td scope="row"><a href="{{ asset('storage/ref-desain/'.$desain->desain) }}  p0-" target="_blank">{{ $refImage }}</a></td>
                                 @else
                                         <td scope="row">-</td>
                                 @endif
@@ -358,10 +362,12 @@
                                     <td><span class="badge badge-success">Selesai</span></td>
                                 @endif
 
+                                @if(Auth::user()->role == 'sales')
                                 <td>
-                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary {{ Auth::user()->role != 'sales' || $desain->status == 2 ? 'disabled' : '' }}"><i class="fas fa-edit"></i></a>
-                                    <a href="{{ route('order.toAntrian', $desain->id) }}" class="btn btn-sm btn-warning {{ Auth::user()->role != 'sales' ? 'disabled' : '' }}"><i class="fas fa-arrow-circle-right"></i></a>
+                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ route('order.toAntrian', $desain->id) }}" class="btn btn-sm btn-warning"><i class="fas fa-arrow-circle-right"></i></a>
                                 </td>
+                                @endif
 
                             </tr>
                             @endforeach
@@ -387,7 +393,7 @@
         @foreach($listDikerjakan as $desain)
         Dropzone.options.myDropzone{{ $desain->id }} = { // camelized version of the `id`
             paramName: "file", // The name that will be used to transfer the file
-            maxFilesize: 25, // MB
+            maxFilesize: 25MB, // MB
             clickable: true,
             acceptedFiles: ".jpeg,.jpg,.png,.pdf,.cdr,.ai,.psd",
             dictInvalidFileType: "Type file ini tidak dizinkan",

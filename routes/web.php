@@ -75,9 +75,10 @@ Route::controller(OrderController::class)->group(function(){
 Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/storeToAntrian', 'store')->middleware('auth')->name('antrian.store');
     Route::post('/antrian/{id}/updateDeadline', 'updateDeadline')->middleware(['auth', 'checkrole:sales'])->name('antrian.updateDeadline');
-    Route::get('/antrian/dokumentasi/{id}', 'showDokumentasi')->middleware(['auth', 'checkrole:dokumentasi'])->name('antrian.showDokumentasi');
-    Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware(['auth', 'checkrole:dokumentasi'])->name('antrian.storeDokumentasi');
+    Route::get('/antrian/dokumentasi/{id}', 'showDokumentasi')->middleware('auth')->name('antrian.showDokumentasi');
+    Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware('auth')->name('antrian.storeDokumentasi');
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
+    Route::get('/antrian/submitDokumentasi/{id}', 'submitDokumentasi')->middleware('auth')->name('antrian.submitDokumentasi');
 });
 
 Route::controller(ProductController::class)->group(function(){

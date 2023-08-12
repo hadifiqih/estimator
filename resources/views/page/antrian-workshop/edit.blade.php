@@ -11,10 +11,13 @@
 @section('content')
     <div class="col-md-12">
         <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="card-title">Edit Antrian #{{ $antrian->ticket_order }}</h2>
+            </div>
             <div class="card-body">
     <form action="{{ route('antrian.update', $antrian->id) }}" method="POST">
     @csrf
-    @method('PATCH')
+    @method('PUT')
     <div class="row ml-1">
       <h6>Pilih Operator :</h6>
       @foreach($employees as $employee)
@@ -41,7 +44,7 @@
       </div>
     </div>
     <hr>
-    
+
 
     <div class="row ml-1">
       <h6>Pilih Finishing :</h6>
@@ -101,7 +104,7 @@
         {{-- Masukkan Deadline --}}
         <label for="deadline" class="form-label">Deadline</label>
         <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="deadline" value="{{ $antrian->end_job }}">
-    </div> 
+    </div>
     <button type="submit" class="btn btn-primary">Simpan</button>
 </form>
 </div>

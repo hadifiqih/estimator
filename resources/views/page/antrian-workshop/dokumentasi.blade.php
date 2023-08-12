@@ -15,13 +15,21 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title"></h2>
+                    <h2 class="card-title">Dokumentasi #{{ $antrian->ticket_order }}</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('antrian.storeDokumentasi') }}" method="POST" class="dropzone" id="my-dropzone" enctype="multipart/form-data">
-                        <input type="hidden" name="id" value="{{ $antrian->id }}">
-                        <button type="submit" class="btn btn-sm btn-primary" id="submit-all">Upload</button>
+                    <form action="{{ route('antrian.storeDokumentasi') }}" class="dropzone" id="my-dropzone" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="jobType" value="{{ $antrian->job_id }}">
+                        <input type="hidden" name="idAntrian" value="{{ $antrian->id }}">
                     </form>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <a href="{{ route('antrian.index') }}" class="btn btn-secondary">Kembali</a>
+                            <a href="{{ route('antrian.submitDokumentasi', $antrian->id) }}" class="btn btn-primary float-right">Upload</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -33,42 +41,15 @@
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 <script>
    //Script Dropzone
-    Dropzone.options.myDropzone = {
-     headers: {
-          'X-CSRF-TOKEN': "{{ csrf_token() }}"
-     },
-     url: "{{ route('antrian.storeDokumentasi') }}",
-     autoProcessQueue: false,
-     uploadMultiple: true,
-     parallelUploads: 5,
-     maxFiles: 5,
-     maxFilesize: 30,
-     acceptedFiles: 'image/*, .mp4, .mkv ',
-     addRemoveLinks: true,
-     dictRemoveFile: 'Hapus',
-     dictFileTooBig: 'Ukuran file terlalu besar ({{ ini_get('upload_max_filesize') }}MB). Max ukuran file 30MB',
-     dictInvalidFileType: 'Tipe file tidak didukung',
-     dictMaxFilesExceeded: 'Maksimal file yang diupload 5 file',
-     init: function() {
-          var submitButton = document.querySelector("#submit-all");
-          myDropzone = this;
-          submitButton.addEventListener("click", function() {
-                myDropzone.processQueue();
-          });
-          this.on("complete", function() {
-                if (this.getQueuedFiles().length == 0 && this.getUploadingFiles().length == 0) {
-                 var _this = this;
-                 _this.removeAllFiles();
-                }
-                list_image();
-          });
-     },
-     success: function(file, response) {
-          list_image();
-     },
-     error: function(file, response) {
-          return false;
-     }
-    };
+   Dropzone.options.myDropzone = {
+            paramName: 'files',
+            acceptedFiles: 'image/*, video/*',
+            maxFilesize: 30,
+            uploadMultiple: true,
+            //mengirim token ke server
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+        };
 </script>
 @endsection

@@ -27,7 +27,7 @@
                     {{-- Form Data Pelanggan --}}
                     <div class="form-group">
                         <label for="noHp">No. HP</label>
-                        <input type="text" class="form-control" id="noHp" name="noHp" placeholder="Nomor Telepon">
+                        <input type="tel" class="form-control" id="noHp" name="noHp" placeholder="Nomor Telepon">
                     </div>
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan</label>
@@ -141,7 +141,7 @@
                     <div class="form-group">
                         {{-- Total Pembayaran --}}
                         <label for="totalPembayaran">Total Omset Penjualan</label>
-                        <input type="text" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
+                        <input type="number" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
                     </div>
                     <div class="form-group">
                         <label for="jenisPembayaran">Jenis Pembayaran</label>
@@ -169,7 +169,7 @@
                     {{-- Tampilkan sisa pembayaran jika status pembayaran = DP, tampilkan Lunas jika status pembayaran Lunas --}}
                     <div class="form-group">
                         <label for="sisaPembayaran">Sisa Pembayaran</label>
-                        <input type="text" class="form-control rupiah" id="sisaPembayaran" placeholder="Rp" name="sisaPembayaran" readonly>
+                        <input type="number" class="form-control rupiah" id="sisaPembayaran" placeholder="Rp" name="sisaPembayaran" readonly>
                     </div>
 
                     <div class="form-group">
@@ -255,7 +255,7 @@
                     @csrf
                     <div class="form-group">
                         <label for="noHp">No. HP</label>
-                        <input type="text" class="form-control" id="modalTelepon" placeholder="Nomor Telepon" name="modalTelepon">
+                        <input type="tel" class="form-control" id="modalTelepon" placeholder="Nomor Telepon" name="modalTelepon">
                     </div>
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan</label>

@@ -24,7 +24,12 @@
 </div>
 @endif
 
-{{-- Alert successToSelesai --}}
+{{-- Alert success-dokumentasi --}}
+@if(session('success-dokumentasi'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  {{ session('success-dokumentasi') }}
+</div>
+@endif
 
 {{-- Content Table --}}
     <div class="container-fluid">
