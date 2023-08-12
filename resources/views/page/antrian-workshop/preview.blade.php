@@ -23,7 +23,7 @@
                         <div class="carousel-inner">
                             @foreach ($dokum as $item)
                             <div class="carousel-item {{ $loop->first ? 'active' : '' }} text-center">
-                                <img class="d-block w-100" src="{{ asset('storage/dokumentasi/'.$item->filename) }}" alt="First slide">
+                                <img class="img-fluid" src="{{ asset('storage/dokumentasi/'.$item->filename) }}" alt="First slide">
                                 {{-- Tombol Download --}}
                                 <a href="{{ asset('storage/dokumentasi/'.$item->filename) }}" class="btn btn-sm btn-primary mt-2" download>Download</a>
                             </div>

@@ -84,7 +84,7 @@ class OrderController extends Controller
         $file = $request->file('refdesain');
         if($file){
             $fileName = time() . '.' . $file->getClientOriginalName();
-            $file->storeAs('ref-desain', $fileName);
+            $file->storeAs('public/ref-desain', $fileName);
         }else{
             return redirect()->back()->with('error', 'File tidak ditemukan !');
         }
@@ -113,7 +113,7 @@ class OrderController extends Controller
         //Menyimpan file cetak dari form dropzone
         $file = $request->file('file');
         $fileName = time() . '.' . $file->getClientOriginalName();
-        $file->storeAs('file-cetak', $fileName);
+        $file->storeAs('public/file-cetak', $fileName);
 
         //Menyimpan nama file cetak ke database
         $order = Order::where('id', $request->id);

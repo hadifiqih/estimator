@@ -29,8 +29,14 @@ class AntrianController extends Controller
     public function index()
     {
         // Ambil data antrian dari database yang memiliki relasi dengan sales, customer, job, design, operator, dan finishing dan statusnya 1 (aktif)
-        $antrians = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing')->where('status', '1')->get();
-        $antrianSelesai = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing')->where('status', '2')->get();
+        $antrians = Antrian::with(['order' => function ($query) {
+                                $query->orderByDesc('is_priority');
+                            }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+                            ->orderByDesc('created_at')
+                            ->where('status', '1')->get();
+        $antrianSelesai = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order')
+                            ->orderByDesc('created_at')
+                            ->where('status', '2')->get();
         return view('page.antrian-workshop.index', compact('antrians', 'antrianSelesai'));
     }
 
@@ -60,7 +66,7 @@ class AntrianController extends Controller
         $buktiPembayaran = $request->file('buktiPembayaran');
         $namaBuktiPembayaran = $buktiPembayaran->getClientOriginalName();
         $namaBuktiPembayaran = Carbon::now()->format('Ymd') . '_' . $namaBuktiPembayaran;
-        $buktiPembayaran->move(storage_path('app/public/bukti-pembayaran/'), $namaBuktiPembayaran);
+        $buktiPembayaran->storeAs('public/bukti-pembayaran/', $namaBuktiPembayaran);
 
         $payment = new Payment();
         $payment->ticket_order = $ticketOrder;
@@ -74,7 +80,7 @@ class AntrianController extends Controller
         $accDesain = $request->file('accDesain');
         $namaAccDesain = $accDesain->getClientOriginalName();
         $namaAccDesain = Carbon::now()->format('Ymd') . '_' . $namaAccDesain;
-        $accDesain->move(storage_path('app/public/acc-desain/'), $namaAccDesain);
+        $accDesain->storeAs('public/acc-desain/', $namaAccDesain);
 
         $order->acc_desain = $namaAccDesain;
         $order->save();
