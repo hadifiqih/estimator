@@ -111,7 +111,7 @@ Route::controller(DocumentationController::class)->group(function(){
 Route::controller(UserController::class)->group(function(){
     Route::get('/user/superadmin', 'index')->middleware(['auth', 'checkrole:superadmin'])->name('user.index');
     Route::get('/user/create', 'create')->middleware(['auth', 'checkrole:superadmin'])->name('user.create');
-    Route::get('/user/profile/{id}', 'show')->middleware(['auth', 'checkrole:superadmin'])->name('user.show');
+    Route::get('/user/profile/{id}', 'show')->middleware('auth')->name('user.show');
     Route::get('/user/{id}/edit', 'edit')->middleware(['auth', 'checkrole:superadmin'])->name('user.edit');
     Route::put('/user/update/{id}', 'update')->middleware(['auth', 'checkrole:superadmin'])->name('user.update');
     Route::delete('/user/{id}', 'destroy')->middleware(['auth', 'checkrole:superadmin'])->name('user.destroy');
