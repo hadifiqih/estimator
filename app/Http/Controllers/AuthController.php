@@ -41,6 +41,9 @@ class AuthController extends Controller
     }
 
     public function logout(){
+
+        $request->session()->flush();
+
         //logout user
         Auth::logout();
 

@@ -68,46 +68,6 @@
                     <h2 class="card-title">Data Pekerjaan</h2>
                 </div>
                 <div class="card-body">
-                    {{-- Tambah Pelanggan Baru --}}
-                    <button type="button" class="btn btn-sm btn-primary mb-3" data-toggle="modal" data-target="#exampleModalProduk">
-                        Tambah Jasa
-                    </button>
-
-                    <!-- Modal -->
-                    <div class="modal fade" id="exampleModalProduk" tabindex="-1" role="dialog" aria-labelledby="exampleModalProdukLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalProdukLabel">Tambah Jasa Baru</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="modalNamaPekerjaan">Nama Pekerjaan</label>
-                                <input type="text" class="form-control" id="modalNamaPekerjaan" placeholder="Nama Pekerjaan" name="modalNamaPekerjaan">
-                            </div>
-                            <div class="form-group">
-                                <label for="modalJenisPekerjaan">Jenis Pekerjaan</label>
-                                <select class="custom-select rounded-0" id="modalJenisPekerjaan" name="modalJenisPekerjaan">
-                                    <option value="Stempel">Stempel</option>
-                                    <option value="Advertising">Advertising</option>
-                                    <option value="Non Stempel">Non Stempel</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="modalKeterangan">Keterangan</label>
-                                <textarea class="form-control" id="modalKeterangan" rows="5" placeholder="Keterangan" name="modalKeterangan"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                            <button type="button" class="btn btn-primary">Tambah</button>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
                     <div class="form-group">
                         <label for="namaPekerjaan">Nama Pekerjaan</label>
                         {{-- Nama Pekerjaan Select2 --}}

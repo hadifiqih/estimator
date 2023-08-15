@@ -54,6 +54,9 @@
           @endforeach
         </select>
       </div>
+      <button type="button" class="btn btn-sm btn-outline-primary mb-3" data-toggle="modal" data-target="#exampleModalProduk">
+        Tambah Produk
+      </button>
 
       <div class="mb-3">
         <label for="description" class="form-label">Keterangan</label>
@@ -92,6 +95,44 @@
       <button type="submit" class="btn btn-primary">Tambah</button>
     </form>
   </div>
+  {{-- Modal Tambah Jenis Produk --}}
+  <div class="modal fade" id="exampleModalProduk" tabindex="-1" role="dialog" aria-labelledby="exampleModalProdukLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalProdukLabel">Tambah Produk Baru</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="produkForm" action="{{ route('tambahProdukByModal') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="modalNamaPekerjaan">Nama Produk</label>
+                <input type="text" class="form-control" id="modalNamaPekerjaan" placeholder="Nama Pekerjaan" name="modalNamaProduk">
+            </div>
+            <div class="form-group">
+                <label for="modalJenisPekerjaan">Jenis Produk</label>
+                <select class="custom-select rounded-0" id="modalJenisPekerjaan" name="modalJenisProduk">
+                    <option value="Stempel">Stempel</option>
+                    <option value="Advertising">Advertising</option>
+                    <option value="Non Stempel">Non Stempel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalKeterangan">Keterangan</label>
+                <textarea class="form-control" id="modalKeterangan" rows="5" placeholder="Keterangan" name="modalKeterangan"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Tambah</button>
+        </div>
+        </form>
+        </div>
+    </div>
+    </div>
 </div>
 @endsection
 
@@ -100,6 +141,50 @@
 <script>
   $(document).ready(function() {
     bsCustomFileInput.init();
+
+    $('#produkForm').submit(function(e) {
+      e.preventDefault();
+      var namaProduk = $('#modalNamaPekerjaan').val();
+      var jenisProduk = $('#modalJenisPekerjaan').val();
+      var keterangan = $('#modalKeterangan').val();
+      $.ajax({
+        url: "{{ route('tambahProdukByModal') }}",
+        type: "POST",
+        data: {
+          "_token": "{{ csrf_token() }}",
+          "namaProduk": namaProduk,
+          "jenisProduk": jenisProduk,
+          "keterangan": keterangan
+        },
+        success: function(data) {
+          $('#exampleModalProduk').modal('hide');
+          //menghapus inputan pada modal
+            $('#modalNamaPekerjaan').val('');
+            $('#modalJenisPekerjaan').val('');
+            $('#modalKeterangan').val('');
+          //muncul sweetalert2 success
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: data.message,
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+            //reload halaman
+            location.reload();
+        },
+        error: function(data) {
+          //muncul sweetalert2 error
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.message,
+            });
+        }
+      });
+    });
+
   });
 </script>
 

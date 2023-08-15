@@ -6,7 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>Software Antree | Kassab Syariah</title>
-
+  @vite('resources/js/app.js')
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome Icons -->
@@ -25,6 +25,7 @@
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   {{-- Dropzone --}}
   <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -91,7 +92,7 @@
           <img src="{{ asset('adminlte') }}/dist/img/user-kosong.png" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="{{ route('user.show', Auth::user()->id) }}" class="d-block">@yield('username')</a>
+          <a href="#" class="d-block">@yield('username')</a>
         </div>
       </div>
 
@@ -176,6 +177,9 @@
 
   <!-- Main Footer -->
   <footer class="main-footer">
+    <audio id="myAudio" autoplay="" muted="true">
+        <source src="{{ asset('audio') }}/notifikasi.mp3" type="audio/mpeg">
+    </audio>
     <strong>Copyright &copy; 2023 <a href="https://adminlte.io">by Hadii</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">

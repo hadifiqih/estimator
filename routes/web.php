@@ -13,6 +13,8 @@ use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserController;
 
+use App\Events\MessageCreated;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,7 +27,11 @@ use App\Http\Controllers\UserController;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('welcome');
+});
+
+Route::get('/message/created', function () {
+    MessageCreated::dispatch('Antrian Baru!');
 });
 
 Route::group(['middleware' => 'auth'], function () {
@@ -40,14 +46,6 @@ Route::group(['middleware' => 'checkrole:admin'], function () {
     Route::get('/antrian/{id}/edit', [AntrianController::class, 'edit'])->name('antrian.edit');
     Route::put('/antrian/{id}', [AntrianController::class, 'update'])->name('antrian.update');
     Route::delete('/antrian/{id}', [AntrianController::class, 'destroy'])->name('antrian.destroy');
-});
-
-Route::group(['middleware' => 'checkrole:designer'], function() {
-    //Menuju Design Controller (Designer)
-    Route::post('/design/upload-print-file', [DesignController::class, 'uploadPrintFile'])->name('design.uploadPrintFile');
-    Route::get('/design/{id}/edit', [DesignController::class, 'edit'])->name('design.edit');
-    Route::put('/design/{id}', [DesignController::class, 'update'])->name('design.update');
-    Route::delete('/design/{id}', [DesignController::class, 'destroy'])->name('design.destroy');
 });
 
 //membuat route group untuk AuthController
@@ -70,6 +68,7 @@ Route::controller(OrderController::class)->group(function(){
     Route::post('/order/upload-print-file', 'uploadPrintFile')->name('design.upload');
     Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
     Route::get('/order/{id}/toAntrian', 'toAntrian')->middleware(['auth', 'checkrole:sales'])->name('order.toAntrian');
+    Route::post('/order/tambahProdukByModal', 'tambahProdukByModal')->name('tambahProdukByModal');
 });
 
 Route::controller(AntrianController::class)->group(function(){
@@ -115,7 +114,6 @@ Route::controller(UserController::class)->group(function(){
     Route::get('/user/{id}/edit', 'edit')->middleware(['auth', 'checkrole:superadmin'])->name('user.edit');
     Route::put('/user/update/{id}', 'update')->middleware(['auth', 'checkrole:superadmin'])->name('user.update');
     Route::delete('/user/{id}', 'destroy')->middleware(['auth', 'checkrole:superadmin'])->name('user.destroy');
-
 });
 
 Route::get('/error', function () {

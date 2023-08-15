@@ -20,13 +20,6 @@ class OrderController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-
-    }
 
     public function antrianDesain(){
 
@@ -49,9 +42,6 @@ class OrderController extends Controller
 
     public function create()
     {
-        if (!auth()->check()) {
-            return redirect()->route('auth.login')->with('belum-login', 'Silahkan login terlebih dahulu');
-        }
 
         $sales = Sales::all();
         $jobs = Job::all();
@@ -144,4 +134,31 @@ class OrderController extends Controller
         return view ('page.antrian-workshop.create', compact('order'));
     }
 
+    public function tambahProdukByModal(Request $request){
+        $validator = Validator::make($request->all(), [
+            'namaProduk' => 'required',
+            'jenisProduk' => 'required',
+            'keterangan' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Produk gagal ditambahkan'
+            ]);
+        }
+
+        $job = new Job;
+        $job->job_name = $request->namaProduk;
+        $job->job_type = $request->jenisProduk;
+        $job->note = $request->keterangan;
+        $job->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Produk berhasil ditambahkan'
+        ]);
+    }
+
 }
+

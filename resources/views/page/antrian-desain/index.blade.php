@@ -387,6 +387,15 @@
 @endsection
 
 @section('script')
+<script>
+    //membunyikan notifikasi music saat table mengalami perubahan
+    $(document).ready(function(){
+        $("#tableAntrianDesain").on('change', function(){
+            var audio = new Audio('{{ asset('audio/notifikasi.mp3') }}');
+            audio.play();
+        });
+    });
+</script>
 
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <script>
