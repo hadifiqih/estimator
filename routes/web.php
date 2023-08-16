@@ -27,11 +27,16 @@ use App\Events\MessageCreated;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/message/created', function () {
     MessageCreated::dispatch('Antrian Baru!');
+    return view('loader.index');
+});
+
+Route::get('/test', function () {
+    return view('loader.test');
 });
 
 Route::group(['middleware' => 'auth'], function () {

@@ -95,7 +95,8 @@ class OrderController extends Controller
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
 
-        return redirect()->route('design.index')->with('success-design', 'Order berhasil ditambahkan');
+        $url = route('design.index');
+        return view('loader.index', compact('url'));
     }
 
     public function uploadPrintFile(Request $request)

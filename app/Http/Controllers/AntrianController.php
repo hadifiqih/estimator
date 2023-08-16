@@ -96,6 +96,9 @@ class AntrianController extends Controller
         $antrian->order_id = $request->input('idOrder');
         $antrian->save();
 
+        $url = route('antrian.index');
+        return view('loader.index', compact('url'));
+
         return redirect()->route('antrian.index')->with('successToAntrian', 'Data antrian berhasil ditambahkan!');
      }
 
