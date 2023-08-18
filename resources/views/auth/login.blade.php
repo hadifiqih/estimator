@@ -81,7 +81,7 @@
               <!-- Logo -->
               <div class="app-brand justify-content-center">
                 <a href="index.html" class="app-brand-link gap-2">
-                  
+
                   <span class="app-brand-text demo text-body fw-bolder">Antree</span>
                 </a>
               </div>
@@ -123,7 +123,7 @@
                 </div>
                 <div class="mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember-me" />
+                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember"/>
                     <label class="form-check-label" for="remember-me"> Ingat saya </label>
                   </div>
                 </div>

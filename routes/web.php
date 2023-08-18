@@ -31,8 +31,8 @@ Route::get('/', function () {
 });
 
 Route::get('/message/created', function () {
-    MessageCreated::dispatch('Antrian Baru!');
     return view('loader.index');
+    MessageCreated::dispatch('Antrian Baru!');
 });
 
 Route::get('/test', function () {

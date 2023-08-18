@@ -159,9 +159,9 @@
                 <div class="mb-3" id="inputSales" style="display: none;">
                   <label for="inputSalesField" class="form-label">Brand</label>
                   <select id="inputSalesField" class="form-select" name="salesApa">
-                    <option selected disabled>-- Pilih --</option>
+                    <option value="" selected disabled>-- Pilih --</option>
                     @foreach ($sales as $item)
-                      <option value="{{ $item->id}}">{{ $item->sales_name }}</option>
+                      <option value="{{ $item->id }}">{{ $item->sales_name }}</option>
                     @endforeach
                   </select>
                 </div>

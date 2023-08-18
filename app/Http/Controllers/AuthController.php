@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Sales;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Sales;
+use Illuminate\Support\Facades\Cookie;
+
 
 class AuthController extends Controller
 {
@@ -25,25 +27,26 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
+        $remember = $request->has('remember');
         //cek apakah email dan password benar
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             //menyimpan data pengguna ke dalam session
             $request->session()->put('user', $user);
+
+            if(Auth::attempt($credentials, $remember)){
+                $cookie = Cookie::make('user', $user, 1440);
+                return redirect()->route('antrian.index')->with('success', 'Login berhasil !')->withCookie($cookie);
+            }
             //jika email dan password benar
             return redirect()->route('antrian.index')->with('success', 'Login berhasil !');
         }
-
         //jika email dan password salah
         return redirect()->route('auth.login')->with('error', 'Email atau password salah !');
 
     }
 
     public function logout(){
-
-        $request->session()->flush();
-
         //logout user
         Auth::logout();
 
@@ -145,11 +148,15 @@ class AuthController extends Controller
         $employee->user_id = $user->id;
         $employee->save();
 
-        //mengubah sales yang dipilih menjadi sales yang baru dibuat
-        if($request->salesApa){
-        $sales = Sales::where('id', $request->salesApa)->get();
-        $sales->user_id = $user->id;
-        $sales->save();
+        //mengubah user_id pada tabel sales dengan id user yang baru dibuat
+        if(!empty($request->salesApa)){
+            $sales = Sales::where('id', $request->salesApa)->first();
+            if($sales){
+                $sales->user_id = $user->id;
+                $sales->save();
+            }else{
+                return redirect()->route('auth.register')->with('error', 'Sales tidak ditemukan!');
+            }
         }
     }
         //jika user berhasil dibuat
