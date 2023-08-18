@@ -387,22 +387,12 @@
 @endsection
 
 @section('script')
-<script>
-    //membunyikan notifikasi music saat table mengalami perubahan
-    $(document).ready(function(){
-        $("#tableAntrianDesain").on('change', function(){
-            var audio = new Audio('{{ asset('audio/notifikasi.mp3') }}');
-            audio.play();
-        });
-    });
-</script>
 
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <script>
         @foreach($listDikerjakan as $desain)
         Dropzone.options.myDropzone{{ $desain->id }} = { // camelized version of the `id`
             paramName: "file", // The name that will be used to transfer the file
-            maxFilesize: 25MB, // MB
             clickable: true,
             acceptedFiles: ".jpeg,.jpg,.png,.pdf,.cdr,.ai,.psd",
             dictInvalidFileType: "Type file ini tidak dizinkan",
