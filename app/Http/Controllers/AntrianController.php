@@ -28,12 +28,25 @@ class AntrianController extends Controller
 
     public function index()
     {
-        // Ambil data antrian dari database yang memiliki relasi dengan sales, customer, job, design, operator, dan finishing dan statusnya 1 (aktif)
+        if(auth()->user()->role == 'sales'){
+            $sales = Sales::where('user_id', auth()->user()->id)->first();
+            $salesId = $sales->id;
+
+            $antrians = Antrian::with(['order' => function ($query) {
+                $query->orderByDesc('is_priority');
+            }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+            ->orderByDesc('created_at')
+            ->where('status', '1')
+            ->where('sales_id', $salesId)->get();
+        }
+
         $antrians = Antrian::with(['order' => function ($query) {
-                                $query->orderByDesc('is_priority');
-                            }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
-                            ->orderByDesc('created_at')
-                            ->where('status', '1')->get();
+                        $query->orderByDesc('is_priority');
+                    }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+                    ->orderByDesc('created_at')
+                    ->where('status', '1')->get();
+        // Ambil data antrian dari database yang memiliki relasi dengan sales, customer, job, design, operator, dan finishing dan statusnya 1 (aktif)
+
         $antrianSelesai = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order')
                             ->orderByDesc('created_at')
                             ->where('status', '2')->get();
@@ -63,10 +76,14 @@ class AntrianController extends Controller
         $designerID = $order->user_id;
         $ticketOrder = $order->ticket_order;
 
+        if($request->file('buktiPembayaran')){
         $buktiPembayaran = $request->file('buktiPembayaran');
         $namaBuktiPembayaran = $buktiPembayaran->getClientOriginalName();
         $namaBuktiPembayaran = Carbon::now()->format('Ymd') . '_' . $namaBuktiPembayaran;
         $buktiPembayaran->storeAs('public/bukti-pembayaran/', $namaBuktiPembayaran);
+        }else{
+            $namaBuktiPembayaran = null;
+        }
 
         $payment = new Payment();
         $payment->ticket_order = $ticketOrder;
@@ -82,24 +99,25 @@ class AntrianController extends Controller
         $namaAccDesain = Carbon::now()->format('Ymd') . '_' . $namaAccDesain;
         $accDesain->storeAs('public/acc-desain/', $namaAccDesain);
 
+
         $order->acc_desain = $namaAccDesain;
+        $order->toWorkshop = 1;
         $order->save();
 
-        $antrian = new Antrian();
-        $antrian->ticket_order = $ticketOrder;
-        $antrian->sales_id = $request->input('sales');
-        $antrian->customer_id = $request->input('nama');
-        $antrian->job_id = $request->input('namaPekerjaan');
-        $antrian->note = $request->input('keterangan');
-        $antrian->design_id = $designerID;
-        $antrian->omset = $request->input('totalPembayaran');
-        $antrian->order_id = $request->input('idOrder');
-        $antrian->save();
+        $antrian = Antrian::create([
+            'ticket_order' => $ticketOrder,
+            'sales_id' => $request->input('sales'),
+            'customer_id' => $request->input('nama'),
+            'job_id' => $request->input('namaPekerjaan'),
+            'note' => $request->input('keterangan'),
+            'design_id' => $designerID,
+            'omset' => $request->input('totalPembayaran'),
+            'order_id' => $request->input('idOrder')
+        ]);
 
         $url = route('antrian.index');
         return view('loader.index', compact('url'));
 
-        return redirect()->route('antrian.index')->with('successToAntrian', 'Data antrian berhasil ditambahkan!');
      }
 
     public function edit($id)

@@ -7,6 +7,11 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+use App\Models\Antrian;
+use App\Models\Order;
+use App\Observers\AntrianObserver;
+use App\Observers\OrderObserver;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -25,7 +30,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Antrian::observe(AntrianObserver::class);
+        Order::observe(OrderObserver::class);
     }
 
     /**

@@ -11,7 +11,7 @@
 @section('content')
 
 <div class="card card-warning">
-  <h5 class="card-header">Tambah Antrian Desain</h5>
+  <h5 class="card-header">Edit Antrian Desain</h5>
 
   {{-- Tampilkan jika ada error apapun --}}
   @if ($errors->any())
@@ -26,32 +26,36 @@
   @endif
 
   <div class="card-body">
-    <form action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
-      @csrf
+    <form action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    @method('PUT')
 
       {{-- Inputan untuk judul desain --}}
       <div class="mb-3">
         <label for="title" class="form-label">Judul Gambar (Keyword)<span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="title" name="title" placeholder="Judul Desain">
+        <input type="text" class="form-control" id="title" name="title" placeholder="Judul Desain" value="{{ $order->title }}">
       </div>
 
       {{-- Input Sales bertipe Hidden --}}
       <input type="hidden" name="sales" value="{{ $sales->id }}">
 
       <div class="mb-3">
-        <label for="kategori" class="form-label">Kategori</label>
+        <label for="kategori" class="form-label">Kategori<span class="text-danger">*</span></label>
         <select class="custom-select rounded-2" name="kategori" id="kategori">
-            <option selected disabled>--Pilih Kategori--</option>
-            <option value="Stempel">Stempel</option>
-            <option value="Non Stempel">Non Stempel</option>
-            <option value="Advertising">Advertising</option>
+            <option disabled>--Pilih Kategori--</option>
+            <option value="Stempel" {{ $job->job_type == "Stempel" ? 'selected' : "" }}>Stempel</option>
+            <option value="Non Stempel" {{ $job->job_type == "Non Stempel" ? 'selected' : "" }}>Non Stempel</option>
+            <option value="Advertising" {{ $job->job_type == "Advertising" ? 'selected' : "" }}>Advertising</option>
         </select>
       </div>
 
       <div class="mb-3">
-        <label for="job" class="form-label">Jenis Produk</label>
+        <label for="job" class="form-label">Jenis Produk<span class="text-danger">*</span></label>
         <select class="custom-select rounded-2" name="job" id="job">
-
+            <option disabled>--Pilih Jenis Produk--</option>
+            @foreach ($jobs as $job)
+            <option value="{{ $job->id }}" {{ $order->job_id == $job->id ? 'selected' : "" }}>{{ $job->job_name }}</option>
+            @endforeach
         </select>
       </div>
       <button type="button" class="btn btn-sm btn-outline-primary mb-3" data-toggle="modal" data-target="#exampleModalProduk">
@@ -59,23 +63,23 @@
       </button>
 
       <div class="mb-3">
-        <label for="description" class="form-label">Keterangan</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        <label for="description" class="form-label">Keterangan<span class="text-danger">*</span></label>
+        <textarea class="form-control" id="description" name="description" rows="3">{{ $order->description }}</textarea>
       </div>
 
       <h6 class="font-weight-bold">Jenis Pekerjaan<span class="text-danger">*</span></h6>
       <div class="form-check form-check-inline mb-3">
-        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio1" value="baru">
+        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio1" value="baru" {{ $order->type_work == 'baru' ? 'checked' : '' }}>
         <label class="form-check-label" for="inlineRadio1">Desain Baru</label>
       </div>
       <div class="form-check form-check-inline mb-3">
-        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio2" value="edit">
+        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio2" value="edit" {{ $order->type_work == 'edit' ? 'checked' : '' }}>
         <label class="form-check-label" for="inlineRadio2">Edit Desain</label>
       </div>
 
       {{-- Uplaoad File Referensi Desain --}}
       <div class="mb-3" id="refDesain">
-        <h6><strong>File Ref. Desain</strong><span class="text-secondary font-italic"> (.jpeg / .jpg / .png / .cdr )</span></h6>
+        <h6><strong>File Ref. Desain </strong><span class="font-italic text-secondary text-sm">(Jika tidak ada perubahan, biarkan kosong)</span></h6>
         <div class="input-group">
           <div class="custom-file">
             <input type="file" class="custom-file-input" id="refDesain" name="refdesain">
@@ -86,15 +90,15 @@
 
       {{-- Menangani jika ada error file tidak ditemukan --}}
       @if ($errors->has('design'))
-        <div class="alert alert-danger" role="alert">
-            {{ $errors->first('design') }}
-        </div>
+      <div class="alert alert-danger" role="alert">
+        {{ $errors->first('design') }}
+      </div>
       @endif
 
       {{-- Checkbox untuk pesanan prioritas / tidak --}}
       <div class="mb-3">
         <div class="custom-control custom-checkbox">
-          <input class="custom-control-input custom-control-input-danger" type="checkbox" id="defaultCheck" value="1" name="priority">
+          <input class="custom-control-input custom-control-input-danger" type="checkbox" id="defaultCheck" value="1" name="priority" {{ $order->is_priority == 1 ? 'checked' : '' }}>
           <label class="custom-control-label" for="defaultCheck">
             Prioritas
           </label>
@@ -119,12 +123,12 @@
             <form id="produkForm" action="{{ route('tambahProdukByModal') }}" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
-                <label for="modalNamaProduk">Nama Produk</label>
-                <input type="text" class="form-control" id="modalNamaProduk" placeholder="Nama Pekerjaan" name="modalNamaProduk">
+                <label for="modalNamaPekerjaan">Nama Produk</label>
+                <input type="text" class="form-control" id="modalNamaPekerjaan" placeholder="Nama Pekerjaan" name="modalNamaProduk">
             </div>
             <div class="form-group">
-                <label for="modalJenisProduk">Kategori Produk</label>
-                <select class="custom-select rounded-0" id="modalJenisProduk" name="modalJenisProduk">
+                <label for="modalJenisPekerjaan">Kategori Produk</label>
+                <select class="custom-select rounded-0" id="modalJenisPekerjaan" name="modalJenisProduk">
                     <option value="Stempel">Stempel</option>
                     <option value="Advertising">Advertising</option>
                     <option value="Non Stempel">Non Stempel</option>
@@ -148,23 +152,33 @@
   $(document).ready(function() {
     bsCustomFileInput.init();
 
+    //Jika radio button desain baru checked, maka tampilkan inputan refdesain
+    if ($('#inlineRadio1').is(':checked')) {
+      $('#refDesain').show();
+    }else{
+      $('#refDesain').hide();
+    }
+
     $('#produkForm').submit(function(e) {
       e.preventDefault();
-      var modalNamaProduk = $('#modalNamaProduk').val();
-      var modalJenisProduk = $('#modalJenisProduk').val();
+      var namaProduk = $('#modalNamaPekerjaan').val();
+      var jenisProduk = $('#modalJenisPekerjaan').val();
+      var keterangan = $('#modalKeterangan').val();
       $.ajax({
         url: "{{ route('tambahProdukByModal') }}",
         type: "POST",
         data: {
           "_token": "{{ csrf_token() }}",
-          "namaProduk": modalNamaProduk,
-          "jenisProduk": modalJenisProduk,
+          "namaProduk": namaProduk,
+          "jenisProduk": jenisProduk,
+          "keterangan": keterangan
         },
         success: function(data) {
           $('#exampleModalProduk').modal('hide');
           //menghapus inputan pada modal
-            $('#modalNamaProduk').val('');
-            $('#modalJenisProduk').val('');
+            $('#modalNamaPekerjaan').val('');
+            $('#modalJenisPekerjaan').val('');
+            $('#modalKeterangan').val('');
           //muncul sweetalert2 success
             Swal.fire({
                 icon: 'success',
@@ -177,7 +191,7 @@
             //reload halaman
             setInterval(() => {
                 location.reload();
-            }, 2500);
+            }, 3500);
 
         },
         error: function(data) {
@@ -185,6 +199,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
+                text: data.message,
             });
         }
       });
@@ -215,6 +230,19 @@
                 }
             });
         }
+    });
+</script>
+
+<script>
+    //menampilkan input refdesain jika memilih desain baru & menghilangkan input refdesain jika memilih edit desain
+    $(document).ready(function() {
+        $('input[type="radio"]').click(function() {
+            if ($(this).attr('id') == 'inlineRadio1') {
+                $('#refDesain').show();
+            } else {
+                $('#refDesain').hide();
+            }
+        });
     });
 </script>
 

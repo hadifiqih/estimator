@@ -10,20 +10,17 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageCreated implements ShouldBroadcast
+class SendGlobalNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
-
     /**
      * Create a new event instance.
      */
     public function __construct($message)
     {
         $this->message = $message;
-
-        // $this->dontBroadcastToCurrentUser();
     }
 
     /**
@@ -33,7 +30,13 @@ class MessageCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [new Channel('messages')];
+        return [
+            new Channel('global'),
+        ];
+    }
 
+    public function broadcastAs(): string
+    {
+        return 'global-notif';
     }
 }

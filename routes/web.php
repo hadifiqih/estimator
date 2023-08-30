@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AntrianController;
@@ -13,7 +14,9 @@ use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserController;
 
-use App\Events\MessageCreated;
+use App\Models\Employee;
+
+use App\Events\SendGlobalNotification;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,13 +33,14 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/message/created', function () {
-    return view('loader.index');
-    MessageCreated::dispatch('Antrian Baru!');
+
+
+Route::get('/dashboard', function () {
+    return view('page.dashboard');
 });
 
 Route::get('/test', function () {
-    return view('loader.test');
+    dd(public_path().'/images/profile/');
 });
 
 Route::group(['middleware' => 'auth'], function () {
@@ -62,6 +66,12 @@ Route::controller(AuthController::class)->group(function(){
     Route::get('/logout', 'logout')->name('auth.logout');
 });
 
+Route::controller(EmployeeController::class)->group(function(){
+    Route::get('/profile/{id}', 'show')->middleware('auth')->name('employee.show');
+    Route::put('/profile/{id}', 'update')->middleware(['auth'])->name('employee.update');
+    Route::post('/profile/upload-foto', 'uploadFoto')->middleware(['auth'])->name('employee.uploadFoto');
+});
+
 Route::controller(OrderController::class)->group(function(){
     Route::get('/order/create', 'create')->name('order.create');
     Route::post('/order', 'store')->name('order.store');
@@ -74,6 +84,7 @@ Route::controller(OrderController::class)->group(function(){
     Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
     Route::get('/order/{id}/toAntrian', 'toAntrian')->middleware(['auth', 'checkrole:sales'])->name('order.toAntrian');
     Route::post('/order/tambahProdukByModal', 'tambahProdukByModal')->name('tambahProdukByModal');
+    Route::get('/get-jobs-by-category/{category_id}', 'getJobsByCategory')->name('getJobsByCategory');
 });
 
 Route::controller(AntrianController::class)->group(function(){
@@ -115,7 +126,6 @@ Route::controller(DocumentationController::class)->group(function(){
 Route::controller(UserController::class)->group(function(){
     Route::get('/user/superadmin', 'index')->middleware(['auth', 'checkrole:superadmin'])->name('user.index');
     Route::get('/user/create', 'create')->middleware(['auth', 'checkrole:superadmin'])->name('user.create');
-    Route::get('/user/profile/{id}', 'show')->middleware('auth')->name('user.show');
     Route::get('/user/{id}/edit', 'edit')->middleware(['auth', 'checkrole:superadmin'])->name('user.edit');
     Route::put('/user/update/{id}', 'update')->middleware(['auth', 'checkrole:superadmin'])->name('user.update');
     Route::delete('/user/{id}', 'destroy')->middleware(['auth', 'checkrole:superadmin'])->name('user.destroy');

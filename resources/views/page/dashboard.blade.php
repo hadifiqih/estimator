@@ -26,23 +26,6 @@
   {{-- Dropzone --}}
   <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
-  @yield('style')
-  {{-- Pusher --}}
-  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-  <script>
-    navigator.serviceWorker.register('/service-worker.js');
-  </script>
-  <script>
-    var pusher = new Pusher('041462e3ef025d960fee', {
-      cluster: 'ap1'
-    });
-
-    var channel = pusher.subscribe('global');
-    channel.bind('global-notif', function(data) {
-      notif(data);
-    });
-  </script>
-
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -66,7 +49,7 @@
         <div class="navbar-search-block">
           <form class="form-inline">
             <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" id="searchTop" name="searchTop">
+              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
               <div class="input-group-append">
                 <button class="btn btn-navbar" type="submit">
                   <i class="fas fa-search"></i>
@@ -106,17 +89,17 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="{{ Auth::user()->employee->photo == null ? asset('adminlte/dist/img/user-kosong.png') :  asset('storage/profile/'. Auth::user()->employee->photo)  }}" class="img-circle elevation-2" alt="User Image">
+          <img src="{{ asset('adminlte') }}/dist/img/user-kosong.png" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="{{ route('employee.show', Auth::user()->id) }}" class="d-block">{{ Auth::user()->name }}</a>
+          <a href="#" class="d-block">{{ Auth::user()->name }}</a>
         </div>
       </div>
 
       <!-- SidebarSearch Form -->
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
-          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search" id="searchSide" name="searchSide">
+          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
           <div class="input-group-append">
             <button class="btn btn-sidebar">
               <i class="fas fa-search fa-fw"></i>
@@ -131,7 +114,7 @@
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item menu-open">
-            <a href="{{ url('/dashboard') }}" class="nav-link active">
+            <a href="#" class="nav-link active">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Antrian
@@ -140,13 +123,13 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') || request()->routeIs('order.edit') ? 'active' : '' }}">
+                <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Antrian Desain</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') ? 'active' : '' }}">
+                <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Antrian Workshop</p>
                 </a>
@@ -162,27 +145,22 @@
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>@yield('page')</h1>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">@yield('page')</a></li>
-              <li class="breadcrumb-item active">@yield('breadcrumb')</li>
-            </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </section>
-    <!-- /.content-header -->
-
     <!-- Main content -->
     <section class="content">
-      @yield('content')
+      {{-- Menyambut user dengan namanya --}}
+      <div class="container-fluid">
+        <div class="d-flex flex-column bd-highlight">
+        <div class="p-2 bd-highlight">
+            <h1 class="ml-4 pt-3">Selamat Datang, <br> <strong>{{ Auth::user()->name }}</strong>&#128075;</h1>
+        </div>
+        <div class="p-2 bd-highlight">
+            <h5 class="ml-4">Berikan yang terbaik untuk setiap tanggung jawab pekerjaan kamu ! &#128170;</h5>
+        </div>
+        <div class="p-2 bd-highlight">
+            <img src="{{ asset('adminlte') }}/dist/img/team-dashboard.png" class="img-fluid mt-3" alt="Team Dashboard">
+        </div>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -194,6 +172,9 @@
 
   <!-- Main Footer -->
   <footer class="main-footer">
+    <audio id="myAudio" autoplay="" muted="true">
+        <source src="{{ asset('audio') }}/notifikasi.mp3" type="audio/mpeg">
+    </audio>
     <strong>Copyright &copy; 2023 <a href="#">by Kassab Syariah</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
@@ -235,44 +216,9 @@
 <!-- AdminLTE -->
 <script src="{{ asset('adminlte') }}/dist/js/adminlte.js"></script>
 
-{{-- Pusher Beam --}}
-{{-- <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
-
-<script>
-    const beamsClient = new PusherPushNotifications.Client({
-      instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
-    });
-
-    beamsClient.start()
-      .then((beamsClient) => beamsClient.getDeviceId())
-      .then((deviceId) => console.log("Successfully registered with Beams. Device ID:", deviceId))
-      .catch(console.error);
-  </script> --}}
-
 <!-- OPTIONAL SCRIPTS -->
-<script>
-
-    function notif(data) {
-        if(data.message.title == 'Antrian Workshop') {
-            $(document).Toasts('create', {
-            class: 'bg-warning',
-            body: data.message.body,
-            title: data.message.title,
-            icon: 'fas fa-envelope fa-lg',
-            });
-        }else if(data.message.title == 'Antrian Desain') {
-            $(document).Toasts('create', {
-            class: 'bg-info',
-            body: data.message.body,
-            title: data.message.title,
-            icon: 'fas fa-envelope fa-lg',
-            });
-        }
-
-    };
-</script>
-
 @yield('script')
 
 </body>
 </html>
+

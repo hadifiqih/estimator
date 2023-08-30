@@ -140,20 +140,15 @@
                   </div>
 
                 <div class="mb-3">
-                    <label for="divisi" class="form-label">Divisi</label>
+                    <label for="divisi" class="form-label">Divisi/Jabatan</label>
                     <select id="divisi" class="form-select" name="divisi">
-                        <option selected disabled>-- Pilih Divisi --</option>
-                        <option value="CEO">CEO</option>
-                        <option value="Direktur">Direktur</option>
-                        <option value="HRD">HRD</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Keuangan">Keuangan</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Desain">Desain</option>
-                        <option value="Produksi Stempel">Produksi Stempel</option>
-                        <option value="Produksi Advertising">Produksi Advertising</option>
-                        <option value="IT">IT</option>
-                      </select>
+                        <option value="" selected disabled>-- Pilih Divisi --</option>
+                        <option value="produksi">Produksi</option>
+                        <option value="sales">Pemasaran & Penjualan</option>
+                        <option value="desain">Desain Grafis</option>
+                        <option value="keuangan">Keuangan & Administrasi</option>
+                        <option value="logistik">Logistik & Pengiriman</option>
+                    </select>
                 </div>
 
                 <div class="mb-3" id="inputSales" style="display: none;">
@@ -166,10 +161,55 @@
                   </select>
                 </div>
 
+                <div class="mb-3" id="inputRoleProduksi" style="display: none">
+                    <label for="roleProduksi" class="form-label">Jabatan</label>
+                    <select id="roleProduksi" class="form-select" name="roleProduksi">
+                        <option value="" selected>-- Pilih --</option>
+                        <option value="manager">Manager</option>
+                        <option value="supervisor">Supervisor / Quality Control</option>
+                        <option value="stempel">Staff Stempel</option>
+                        <option value="advertising">Staff Advertising</option>
+                        <option value="admin">Admin Workshop</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="inputRoleSales" style="display: none">
+                    <label for="roleSales" class="form-label">Jabatan</label>
+                    <select id="roleSales" class="form-select" name="roleSales">
+                        <option value="" selected>-- Pilih --</option>
+                        <option value="manager">Manager</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="sales">Sales</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="inputRoleDesain" style="display: none">
+                    <label for="roleDesain" class="form-label">Jabatan</label>
+                    <select id="roleDesain" class="form-select" name="roleDesain">
+                        <option value="" selected>-- Pilih --</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="desain">Staff Desain</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="inputRoleKeuangan" style="display: none">
+                    <label for="roleKeuangan" class="form-label">Jabatan</label>
+                    <select id="roleKeuangan" class="form-select" name="roleKeuangan">
+                        <option value="" selected>-- Pilih --</option>
+                        <option value="manager">Kepala Keuangan</option>
+                        <option value="staff">Staff Admin</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="inputRoleLogistik" style="display: none">
+                    <label for="roleLogistik" class="form-label">Jabatan</label>
+                    <select id="roleLogistik" class="form-select" name="roleLogistik">
+                        <option value="" selected>-- Pilih --</option>
+                        <option value="kepala">Kepala Gudang</option>
+                        <option value="staff">Staff Gudang / Logistik</option>
+                    </select>
+                </div>
+
                 <div class="mb-3">
                     <label for="lokasi" class="form-label">Tempat Kerja</label>
                     <select id="lokasi" class="form-select" name="lokasi">
-                        <option selected disabled>-- Pilih Tempat Kerja</option>
+                        <option selected disabled>-- Pilih Tempat Kerja --</option>
                         <option value="Malang">Malang</option>
                         <option value="Surabaya">Surabaya</option>
                         <option value="Kediri">Kediri</option>
@@ -185,7 +225,7 @@
                     </label>
                   </div>
                 </div>
-                <button class="btn btn-primary d-grid w-100">Daftar</button>
+                <button id="btnDaftar" type="submit" class="btn btn-primary d-grid w-100" disabled>Daftar</button>
               </form>
 
               <p class="text-center">
@@ -224,15 +264,55 @@
           $("#divisi").change(function() {
               var selectedDivisi = $(this).val();
 
+                //reset semua select ke default
+                $('#roleProduksi').prop('selectedIndex',0);
+                $('#roleSales').prop('selectedIndex',0);
+                $('#roleDesain').prop('selectedIndex',0);
+                $('#roleKeuangan').prop('selectedIndex',0);
+                $('#roleLogistik').prop('selectedIndex',0);
+
               // Cek apakah pilihan yang dipilih adalah "Sales"
-              if (selectedDivisi === "Sales") {
-                  // Tampilkan input tambahan untuk Sales
-                  $("#inputSales").show();
-              } else {
-                  // Sembunyikan input tambahan jika pilihan bukan "Sales"
-                  $("#inputSales").hide();
+              if (selectedDivisi == "sales") {
+
+                    $("#inputSales").show();
+                    $("#inputRoleSales").show();
+                    $("#inputRoleDesain").hide();
+                    $("#inputRoleKeuangan").hide();
+                    $("#inputRoleLogistik").hide();
+                    $("#inputRoleProduksi").hide();
+
+              } else if (selectedDivisi == "desain") {
+                    $("#inputSales").hide();
+                    $("#inputRoleSales").hide();
+                    $("#inputRoleDesain").show();
+                    $("#inputRoleKeuangan").hide();
+                    $("#inputRoleLogistik").hide();
+                    $("#inputRoleProduksi").hide();
+              } else if (selectedDivisi == "keuangan") {
+                    $("#inputSales").hide();
+                    $("#inputRoleSales").hide();
+                    $("#inputRoleDesain").hide();
+                    $("#inputRoleKeuangan").show();
+                    $("#inputRoleLogistik").hide();
+                    $("#inputRoleProduksi").hide();
+
+              } else if (selectedDivisi == "logistik") {
+                    $("#inputSales").hide();
+                    $("#inputRoleSales").hide();
+                    $("#inputRoleDesain").hide();
+                    $("#inputRoleKeuangan").hide();
+                    $("#inputRoleLogistik").show();
+                    $("#inputRoleProduksi").hide();
+
+              } else if (selectedDivisi == "produksi") {
+                    $("#inputSales").hide();
+                    $("#inputRoleSales").hide();
+                    $("#inputRoleDesain").hide();
+                    $("#inputRoleKeuangan").hide();
+                    $("#inputRoleLogistik").hide();
+                    $("#inputRoleProduksi").show();
               }
-          });
+            });
 
           $("#password").keyup(function() {
             var password = $(this).val();
@@ -246,6 +326,14 @@
               passwordError.html("");
             }
           });
+          //Jika tombol checkbox dicentang maka tombol submit akan aktif
+            $("#terms-conditions").click(function() {
+                if ($(this).is(":checked")) {
+                $("#btnDaftar").removeAttr("disabled");
+                } else {
+                $("#btnDaftar").attr("disabled", true);
+                }
+            });
       });
   </script>
 

@@ -36,10 +36,10 @@ class AuthController extends Controller
 
             if(Auth::attempt($credentials, $remember)){
                 $cookie = Cookie::make('user', $user, 1440);
-                return redirect()->route('antrian.index')->with('success', 'Login berhasil !')->withCookie($cookie);
+                return view('page.dashboard')->withCookie($cookie);
             }
             //jika email dan password benar
-            return redirect()->route('antrian.index')->with('success', 'Login berhasil !');
+            return view('page.dashboard');
         }
         //jika email dan password salah
         return redirect()->route('auth.login')->with('error', 'Email atau password salah !');
@@ -76,6 +76,20 @@ class AuthController extends Controller
             return redirect()->route('auth.register')->withErrors($validator)->withInput();
         }else{
 
+        if($request->roleProduksi){
+            $role = $request->roleProduksi;
+        }else if($request->roleSales){
+            $role = $request->roleSales;
+        }else if($request->roleDesain){
+            $role = $request->roleDesain;
+        }else if($request->roleKeuangan){
+            $role = $request->roleKeuangan;
+        }else if($request->roleLogistik){
+            $role = $request->roleLogistik;
+        }else{
+            $role = null;
+        }
+
         //menentukan lokasi kerja
         $tempatKerja = $request->lokasi;
         if ($tempatKerja == "Surabaya"){
@@ -89,36 +103,6 @@ class AuthController extends Controller
 
         //menentukan divisi
         $divisi = $request->divisi;
-        if ($divisi == "CEO"){
-            $divisi = "1";
-        }else if ($divisi == "Direktur"){
-            $divisi = "2";
-        }else if ($divisi == "HRD"){
-            $divisi = "3";
-        }else if ($divisi == "Keuangan"){
-            $divisi = "4";
-        }else if ($divisi == "Marketing Online"){
-            $divisi = "5";
-        }else if ($divisi == "Sales"){
-            $divisi = "6";
-        }else if ($divisi == "Produksi Stempel"){
-            $divisi = "7";
-        }else if ($divisi == "Produksi Advertising"){
-            $divisi = "8";
-        }else if ($divisi == "Gudang/Logistik"){
-            $divisi = "9";
-        }else if ($divisi == "IT"){
-            $divisi = "10";
-        }else if ($divisi == "Desain"){
-            $divisi = "11";
-        }else if ($divisi == "Dokumentasi"){
-            $divisi = "12";
-        }
-
-        //$divisi ditambah 0 jika index divisi kurang dari 10
-        if ($divisi < 10){
-            $divisi = "0".$divisi;
-        }
 
         //tahun masuk
         $tahunMasuk = $request->tahunMasuk;
@@ -130,12 +114,12 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->phone = $request->telepon;
         $user->password = bcrypt($request->password);
-        $user->role = strtolower($request->divisi);
+        $user->role = $role;
         $user->divisi = $request->divisi;
         $user->save();
 
         //membuat nip baru dengan mengambil 2 digit terakhir index tempat kerja, 2 digit terakhir tahun masuk, 2 digit terakhir index divisi, dan 2 digit terakhir index user
-        $nip = $tempatKerja.$divisi.$tahunMasuk.$user->id;
+        $nip = $tempatKerja.$tahunMasuk.$user->id;
 
         //membut employee baru
         $employee = new Employee;

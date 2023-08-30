@@ -44,9 +44,9 @@
                         <input type="text" class="form-control" id="instansi" placeholder="Instansi Pelanggan">
                     </div>
                     <div class="form-group">
-                        <label for="infoPelanggan">Info Iklan</label>
+                        <label for="infoPelanggan">Sumber Pelanggan</label>
                         <select class="custom-select rounded-0" id="infoPelanggan" name="infoPelanggan">
-                            <option value="default" selected>Pilih Info Iklan</option>
+                            <option value="default" selected>Pilih Sumber Pelanggan</option>
                             <option value="Google">Google</option>
                             <option value="Facebook">Facebook</option>
                             <option value="Tokopedia">Tokopedia</option>
@@ -84,7 +84,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="keterangan">Keterangan</label>
+                        <label for="keterangan">Keterangan Spesfikasi</label>
                         <textarea class="form-control" id="keterangan" rows="5" placeholder="Keterangan" name="keterangan"></textarea>
                     </div>
               </div>
@@ -100,7 +100,7 @@
                 <div class="card-body">
                     <div class="form-group">
                         {{-- Total Pembayaran --}}
-                        <label for="totalPembayaran">Total Omset Penjualan</label>
+                        <label for="totalPembayaran">Total Harga</label>
                         <input type="number" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
                     </div>
                     <div class="form-group">
@@ -111,8 +111,9 @@
                             <option value="Transfer BNI">Transfer BNI</option>
                             <option value="Transfer BRI">Transfer BRI</option>
                             <option value="Transfer Mandiri">Transfer Mandiri</option>
-                            <option value="Saldo Tokopedia">Saldo Tokopedia</option>
-                            <option value="Saldo Shopee">Saldo Shopee</option>
+                            <option value="Saldo Tokopedia">Marketplace Tokopedia</option>
+                            <option value="Saldo Shopee">Marketplace Shopee</option>
+                            <option value="Saldo Shopee">Marketplace Bukalapak</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -227,19 +228,27 @@
                     </div>
                     <div class="form-group">
                         <label for="instansi">Instansi</label>
-                        <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan">
+                        <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan" name="modalInstansi">
                     </div>
                     <div class="form-group">
-                        <label for="infoPelanggan">Info Iklan</label>
+                        <label for="infoPelanggan">Sumber Pelanggan</label>
                         <select class="custom-select rounded-0" id="infoPelanggan" name="modalInfoPelanggan">
-                            <option value="default" selected>Pilih Info Iklan</option>
+                            <option value="default" selected>Pilih Sumber Pelanggan</option>
                             <option value="Google">Google</option>
                             <option value="Facebook">Facebook</option>
                             <option value="Tokopedia">Tokopedia</option>
                             <option value="Shopee">Shopee</option>
+                            <option value="Bukalapak">Bukalapak</option>
                             <option value="Instagram">Instagram</option>
                             <option value="Tiktok">Tiktok</option>
+                            <option value="Youtube">Youtube</option>
+                            <option value="Snackvideo">Snackvideo</option>
+                            <option value="OLX">OLX</option>
                             <option value="Teman/Keluarga/Kerabat">Teman/Keluarga/Kerabat</option>
+                            <option value="Iklan Facebook">Iklan Facebook</option>
+                            <option value="Iklan Instagram">Iklan Instagram</option>
+                            <option value="Iklan Google">Iklan Google</option>
+                            <option value="Iklan Tiktok">Iklan Tiktok</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>
                     </div>
@@ -331,6 +340,7 @@
                             $('#alamat').val(item.alamat);
                             $('#instansi').val(item.instansi);
                             $('#noHp').val(item.telepon);
+                            $('#instansi').val(item.instansi);
                             $('#infoPelanggan').val(item.infoPelanggan);
                         })
                     }
@@ -383,14 +393,23 @@
             success:function(response){
                 if(response.success){
                     $('#exampleModal').modal('hide');
+                    //Mengosongkan Form pada Modal
+                    $('#modalTelepon').val('');
+                    $('#modalNama').val('');
+                    $('#modalAlamat').val('');
+                    $('#modalInstansi').val('');
+                    $('#infoPelanggan').val('default');
 
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil',
                         text: 'Data Pelanggan Berhasil Ditambahkan',
+                        timer: 2500
                     });
 
-                    location.reload();
+                    setInterval(() => {
+                        location.reload();
+                    }, 2500);
                 }
 
             }

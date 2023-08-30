@@ -50,6 +50,7 @@
                 </li>
             </ul>
             <div class="tab-content" id="custom-content-below-tabContent">
+
             <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
                 <div class="card">
                 <div class="card-header">
@@ -65,10 +66,11 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Sales</th>
+                            <th>Keyword</th>
                             <th>Ref. Desain</th>
                             <th>Jenis Pekerjaan</th>
                             <th>Status</th>
+                            <th>Waktu Dibuat</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -83,7 +85,7 @@
                                 @endif
                             </td>
 
-                            <td>{{ $desain->sales->sales_name }}</td>
+                            <td>{{ $desain->title }}</td>
 
                             {{-- Jika desain tidak kosong, maka tampilkan nama file desain, jika kosong, maka tampilkan tanda strip (-) --}}
                             @if($desain->desain != null)
@@ -95,7 +97,19 @@
                                     <td scope="row">-</td>
                             @endif
 
-                            <td>{{ $desain->job->job_name }}</td>
+                            <td>
+                                @php
+                                if($desain->type_work){
+                                    if($desain->type_work == 'baru'){
+                                        echo 'Desain Baru';
+                                    }elseif($desain->type_work == 'edit'){
+                                        echo 'Edit Desain';
+                                    }
+                                }else{
+                                    echo '-';
+                                }
+                                @endphp
+                            </td>
 
                             {{-- Jika status = 0, maka tampilkan badge warning, jika status = 1, maka tampilkan badge primary, jika status = 2, maka tampilkan badge success --}}
                             @if($desain->status == '0')
@@ -106,56 +120,74 @@
                                 <td><span class="badge badge-success">Selesai</span></td>
                             @endif
 
+                            <td>{{ $desain->created_at }}</td>
+
                             {{-- Jika role = desain, maka tampilkan tombol aksi --}}
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
                                     <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-hand-paper"></i></a>
                                     {{-- Tombol Modal Detail Keterangan Desain --}}
-                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
+                                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    {{-- Modal Keterangan Desain --}}
-                                    <div class="modal fade" id="detail{{ $desain->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $desain->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                            <h5 class="modal-title" id="detailLabel{{ $desain->id }}">Detail #{{ $desain->ticket_order }}</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label for="namaSales">Nama Sales</label>
-                                                    <input type="text" class="form-control" id="namaSales" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="judulDesain">Judul Desain</label>
-                                                    <input type="text" class="form-control" id="judulDesain" name="judulDesain" value="{{ $desain->title }}" readonly>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="jenisPekerjaan">Jenis Pekerjaan</label>
-                                                    <input type="text" class="form-control" id="jenisPekerjaan" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="keterangan">Keterangan</label>
-                                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="refDesain">Referensi Desain</label><br>
-                                                    <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                                            </div>
                                 </td>
-
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
                 {{-- End Menampilkan Antrian Desain --}}
+                {{-- Modal Keterangan Desain --}}
+                <div class="modal fade" id="detailWorking{{ $desain->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title">Detail #{{ $desain->ticket_order }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="createdAtWorking{{ $desain->id }}">Waktu Dibuat</label>
+                                        <input type="text" class="form-control" id="createdAtWorking{{ $desain->id }}" name="createdAt" value="{{ $desain->created_at }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="lastUpdateWorking{{ $desain->id }}">Terakhir Diupdate</label>
+                                        <input type="text" class="form-control" id="lastUpdateWorking{{ $desain->id }}" name="lastUpdate" value="{{ $desain->updated_at }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="namaSalesWorking{{ $desain->id }}">Nama Sales</label>
+                                <input type="text" class="form-control" id="namaSalesWorking{{ $desain->id }}" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="judulDesainWorking{{ $desain->id }}">Judul Desain</label>
+                                <input type="text" class="form-control" id="judulDesainWorking{{ $desain->id }}" name="judulDesain" value="{{ $desain->title }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="jenisProdukWorking{{ $desain->id }}">Jenis Produk</label>
+                                <input type="text" class="form-control" id="jenisProdukWorking{{ $desain->id }}" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="keteranganWorking{{ $desain->id }}">Keterangan</label>
+                                <textarea class="form-control" id="keteranganWorking{{ $desain->id }}" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <h6><strong>Referensi Desain</strong></h6><br>
+                                <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
@@ -225,78 +257,99 @@
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
                                     {{-- Button untuk menampilkan modal Upload --}}
                                     <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-upload"></i></button>
-                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detail{{ $desain->id }}">
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
                                     {{-- Modal Keterangan Desain --}}
-                                    <div class="modal fade" id="detail{{ $desain->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $desain->id }}" aria-hidden="true">
+                                    <div class="modal fade" id="detailWorking{{ $desain->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                            <h5 class="modal-title" id="detailLabel{{ $desain->id }}">Detail #{{ $desain->ticket_order }}</h5>
+                                            <h5 class="modal-title">Detail #{{ $desain->ticket_order }}</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                             </div>
                                             <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label for="namaSales">Nama Sales</label>
-                                                    <input type="text" class="form-control" id="namaSales" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="createdAtWorking{{ $desain->id }}">Waktu Dibuat</label>
+                                                            <input type="text" class="form-control" id="createdAtWorking{{ $desain->id }}" name="createdAt" value="{{ $desain->created_at }}" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="lastUpdateWorking{{ $desain->id }}">Terakhir Diupdate</label>
+                                                            <input type="text" class="form-control" id="lastUpdateWorking{{ $desain->id }}" name="lastUpdate" value="{{ $desain->updated_at }}" readonly>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="judulDesain">Judul Desain</label>
-                                                    <input type="text" class="form-control" id="judulDesain" name="judulDesain" value="{{ $desain->title }}" readonly>
+                                                    <label for="namaSalesWorking{{ $desain->id }}">Nama Sales</label>
+                                                    <input type="text" class="form-control" id="namaSalesWorking{{ $desain->id }}" name="namaSales" value="{{ $desain->sales->sales_name }}" readonly>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="jenisPekerjaan">Jenis Pekerjaan</label>
-                                                    <input type="text" class="form-control" id="jenisPekerjaan" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
+                                                    <label for="judulDesainWorking{{ $desain->id }}">Judul Desain</label>
+                                                    <input type="text" class="form-control" id="judulDesainWorking{{ $desain->id }}" name="judulDesain" value="{{ $desain->title }}" readonly>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="keterangan">Keterangan</label>
-                                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
+                                                    <label for="jenisProdukWorking{{ $desain->id }}">Jenis Produk</label>
+                                                    <input type="text" class="form-control" id="jenisProdukWorking{{ $desain->id }}" name="jenisPekerjaan" value="{{ $desain->job->job_name }}" readonly>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="refDesain">Referensi Desain</label><br>
+                                                    <label for="keteranganWorking{{ $desain->id }}">Keterangan</label>
+                                                    <textarea class="form-control" id="keteranganWorking{{ $desain->id }}" name="keterangan" rows="3" readonly>{{ $desain->description }}</textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <h6><strong>Referensi Desain</strong></h6><br>
                                                     <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                                             </div>
-                                    {{-- Modal Upload --}}
-                                    <div class="modal fade" id="modalUpload{{ $desain->id }}">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h4 class="modal-title">File Upload #{{ $desain->id }}</h4>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    {{-- Dropzone JS --}}
-                                                    <form action="{{ route('design.upload') }}" class="dropzone" id="my-dropzone{{ $desain->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <input type="hidden" name="id" value="{{ $desain->id }}">
-                                                    </form>
-                                                </div>
-
-                                                <div class="modal-footer justify-content-between">
-                                                    <a type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary">Upload</a>
-                                                </div>
-
-                                            </div>
-                                            <!-- /.modal-content -->
                                         </div>
-                                        <!-- /.modal-dialog -->
+                                        </div>
                                     </div>
-                                    {{-- End Modal Upload --}}
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                     {{-- End Menampilkan Antrian Desain --}}
+                    {{-- Modal Upload --}}
+                    @foreach ($listDikerjakan as $desain)
+                    <div class="modal fade" id="modalUpload{{ $desain->id }}" aria-labelledby="modalUpload{{ $desain->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">File Upload #{{ $desain->id }}</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    {{-- Dropzone JS --}}
+                                    <form action="{{ route('design.upload') }}" class="dropzone" id="my-dropzone{{ $desain->id }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="id" value="{{ $desain->id }}">
+                                    </form>
+                                    <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
+                                    <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
+                                </div>
+
+                                <div class="modal-footer justify-content-between">
+                                    <a type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary">Upload</a>
+                                </div>
+
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    {{-- End Modal Upload --}}
+                    @endforeach
                   </div>
                 </div>
             </div>
@@ -345,7 +398,7 @@
                                     @php
                                         $refImage = strlen($desain->desain) > 15 ? substr($desain->desain, 0, 15) . '...' : $desain->desain;
                                     @endphp
-                                        <td scope="row"><a href="{{ asset('storage/ref-desain/'.$desain->desain) }}  p0-" target="_blank">{{ $refImage }}</a></td>
+                                        <td scope="row"><a href="{{ asset('storage/ref-desain/'.$desain->desain) }}" target="_blank">{{ $refImage }}</a></td>
                                 @else
                                         <td scope="row">-</td>
                                 @endif
@@ -364,8 +417,11 @@
 
                                 @if(Auth::user()->role == 'sales')
                                 <td>
-                                    <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                                    @if($desain->toWorkshop == 0)
                                     <a href="{{ route('order.toAntrian', $desain->id) }}" class="btn btn-sm btn-warning"><i class="fas fa-arrow-circle-right"></i></a>
+                                    @else
+                                    <a href="#" class="btn btn-sm btn-success"><i class="fas fa-check"></i></a>
+                                    @endif
                                 </td>
                                 @endif
 
@@ -382,8 +438,6 @@
             </div>
         </div>
         </div>
-
-    </div>
 @endsection
 
 @section('script')
@@ -392,13 +446,13 @@
     <script>
         @foreach($listDikerjakan as $desain)
         Dropzone.options.myDropzone{{ $desain->id }} = { // camelized version of the `id`
-            paramName: "file", // The name that will be used to transfer the file
+            paramName: "fileCetak", // The name that will be used to transfer the file
             clickable: true,
-            acceptedFiles: ".jpeg,.jpg,.png,.pdf,.cdr,.ai,.psd",
+            acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
             dictInvalidFileType: "Type file ini tidak dizinkan",
             addRemoveLinks: true,
             dictRemoveFile: "Hapus file",
-            timeout: 50000,
+            timeout: 5000,
         };
         @endforeach
     </script>
@@ -408,6 +462,7 @@
         $("#tableAntrianDesain").DataTable({
             "responsive": true,
             "autoWidth": false,
+
         });
         $("#tableAntrianDikerjakan").DataTable({
             "responsive": true,

@@ -22,25 +22,26 @@ window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: import.meta.env.PUSHER_APP_KEY,
-    cluster: import.meta.env.PUSHER_APP_CLUSTER ?? 'ap1',
-    forceTLS: true,
+    key: import.meta.env.VITE_PUSHER_APP_KEY,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'ap1',
+    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
+    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
 });
-
-window.Echo.channel('messages').listen('MessageCreated', (e) => {
     //Menampilkan notifikasi sweetalert2 toastr
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 6000,
-            timerProgressBar: true,
-        })
-        Toast.fire({
-            icon: 'info',
-            title: 'Antrian baru telah ditambahkan, Cek Sekarang!'
-      });
+    //     const Toast = Swal.mixin({
+    //         toast: true,
+    //         position: 'top-end',
+    //         showConfirmButton: false,
+    //         timer: 6000,
+    //         timerProgressBar: true,
+    //     })
+    //     Toast.fire({
+    //         icon: 'info',
+    //         title: 'Antrian baru telah ditambahkan, Cek Sekarang!'
+    //   });
 
-      //go to route antrian.index
-        window.location.href = '/antrian';
-    });
+    //   //go to route antrian.index
+    //     window.location.href = '/antrian';

@@ -9,6 +9,7 @@
 @section('breadcrumb', 'Edit Antrian')
 
 @section('content')
+<div class="container-fluid">
     <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header">
@@ -107,6 +108,7 @@
     </div>
     <button type="submit" class="btn btn-primary">Simpan</button>
 </form>
+</div>
 </div>
 </div>
 </div>

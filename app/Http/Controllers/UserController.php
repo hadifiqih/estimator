@@ -37,16 +37,6 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $profil = User::find($id);
-
-        return view('auth.profile-show', compact('profil'));
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)

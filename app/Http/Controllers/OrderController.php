@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 use App\Models\Sales;
 use App\Models\Job;
@@ -14,6 +16,8 @@ use App\Models\Customer;
 use App\Models\Design;
 use App\Models\User;
 
+use App\Events\SendGlobalNotification;
+
 class OrderController extends Controller
 {
     public function __construct()
@@ -21,11 +25,26 @@ class OrderController extends Controller
         $this->middleware('auth');
     }
 
-    public function antrianDesain(){
+    public function notifTest(){
+        $users = User::all();
+        $notification = new AntrianNew();
 
-        $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
-        $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->get();
-        $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->get();
+        Notification::send($users, $notification);
+    }
+
+    public function antrianDesain(){
+        if(auth()->user()->role == 'sales'){
+            $sales = Sales::where('user_id', auth()->user()->id)->first();
+            $salesId = $sales->id;
+            $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->where('sales_id', $salesId)->get();
+            $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->where('sales_id', $salesId)->get();
+            $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->where('sales_id', $salesId)->get();
+        }else{
+            $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
+            $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->get();
+            $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->get();
+        }
+
         return view('page.antrian-desain.index', compact('listDesain', 'listDikerjakan', 'listSelesai'));
     }
 
@@ -43,12 +62,61 @@ class OrderController extends Controller
     public function create()
     {
 
-        $sales = Sales::all();
+        $sales = Sales::where('user_id', auth()->user()->id)->first();
         $jobs = Job::all();
 
         return view('page.order.add', compact('sales', 'jobs'));
     }
 
+    public function edit($id)
+    {
+        $order = Order::find($id);
+        $sales = Sales::where('user_id', auth()->user()->id)->first();
+        $job = Job::where('id', $order->job_id)->first();
+        $jobs = Job::all();
+
+        return view('page.order.edit', compact('order', 'sales', 'job', 'jobs'));
+    }
+
+    public function update(Request $request, $id){
+        // Validasi form add.blade.php
+        $rules = [
+            'title' => 'required',
+            'sales' => 'required',
+            'job' => 'required',
+            'description' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        // Jika validasi gagal, kembali ke halaman add.blade.php dengan membawa pesan error
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator);
+        }
+
+        //ubah nama file
+        if($request->file('refdesain')){
+            $file = $request->file('refdesain');
+            $fileName = time() . '.' . $file->getClientOriginalName();
+            $file->storeAs('public/ref-desain', $fileName);
+        }
+
+        // Jika validasi berhasil, simpan data ke database
+        $order = Order::find($id);
+        $order->title = $request->title;
+        $order->sales_id = $request->sales;
+        $order->job_id = $request->job;
+        $order->description = $request->description;
+        $order->type_work = $request->jenisPekerjaan;
+        if($request->file('refdesain')){
+            $order->desain = $fileName;
+        }
+        $order->is_priority = $request->priority ? '1' : '0';
+        $order->save();
+
+        $url = route('design.index');
+        return view('loader.index', compact('url'));
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -60,7 +128,7 @@ class OrderController extends Controller
             'sales' => 'required',
             'job' => 'required',
             'description' => 'required',
-            'refdesain' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'jenisPekerjaan' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -71,12 +139,12 @@ class OrderController extends Controller
         }
 
         //ubah nama file
-        $file = $request->file('refdesain');
-        if($file){
+        if($request->file('refdesain')){
+            $file = $request->file('refdesain');
             $fileName = time() . '.' . $file->getClientOriginalName();
             $file->storeAs('public/ref-desain', $fileName);
         }else{
-            return redirect()->back()->with('error', 'File tidak ditemukan !');
+            $fileName = null;
         }
 
         $lastId = Order::latest()->first();
@@ -89,11 +157,25 @@ class OrderController extends Controller
         $order->title = $request->title;
         $order->sales_id = $request->sales;
         $order->job_id = $request->job;
+        $order->user_id = auth()->user()->id;
         $order->description = $request->description;
-        $order->desain = $fileName;
+        $order->type_work = $request->jenisPekerjaan;
+        if($request->file('refdesain')){
+            $order->desain = $fileName;
+        }
         $order->status = '0';
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
+
+        // $sales = Sales::where('id', $request->input('sales'))->first();
+
+        // $notification = [
+        //     'title' => 'Antrian Desain',
+        //     'body' => 'Desain baru dari ' . $sales->sales_name,
+        // ];
+
+        // //Mengirimkan notifikasi ke semua user ketika ada penambahan antrian
+        // event(new SendGlobalNotification($notification));
 
         $url = route('design.index');
         return view('loader.index', compact('url'));
@@ -102,12 +184,12 @@ class OrderController extends Controller
     public function uploadPrintFile(Request $request)
     {
         //Menyimpan file cetak dari form dropzone
-        $file = $request->file('file');
+        $file = $request->file('fileCetak');
         $fileName = time() . '.' . $file->getClientOriginalName();
         $file->storeAs('public/file-cetak', $fileName);
 
         //Menyimpan nama file cetak ke database
-        $order = Order::where('id', $request->id);
+        $order = Order::where('id', $request->id)->first();
         $order->file_cetak = $fileName;
         $order->save();
 
@@ -136,23 +218,10 @@ class OrderController extends Controller
     }
 
     public function tambahProdukByModal(Request $request){
-        $validator = Validator::make($request->all(), [
-            'namaProduk' => 'required',
-            'jenisProduk' => 'required',
-            'keterangan' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Produk gagal ditambahkan'
-            ]);
-        }
 
         $job = new Job;
         $job->job_name = $request->namaProduk;
         $job->job_type = $request->jenisProduk;
-        $job->note = $request->keterangan;
         $job->save();
 
         return response()->json([
@@ -161,5 +230,10 @@ class OrderController extends Controller
         ]);
     }
 
+    public function getJobsByCategory($category_id){
+        $jobs = Job::where('job_type', $category_id)->get();
+
+        return response()->json($jobs);
+    }
 }
 

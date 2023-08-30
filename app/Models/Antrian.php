@@ -19,18 +19,21 @@ class Antrian extends Model
 
     protected $fillable = [
         'ticket_order',
-        'nama_customer',
-        'no_customer',
-        'info_customer',
+        'customer_id',
         'sales_id',
         'job_id',
         'note',
-        'acc_design',
-        'status',
-        'employee_id',
-        'customer_id',
+        'end_job',
         'design_id',
+        'operator_id',
+        'finisher_id',
+        'qc_id',
         'omset',
+        'working_at',
+        'order_id',
+        'timer_stop',
+        'status',
+        'deadline_status'
     ];
 
     public function sales()

@@ -7,6 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+use NotificationChannels\PusherPushNotifications\PusherChannel;
+use NotificationChannels\PusherPushNotifications\PusherMessage;
+
 class AntrianNew extends Notification
 {
     use Queueable;
@@ -26,7 +29,7 @@ class AntrianNew extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return [PusherChannel::class];
     }
 
     /**
@@ -50,5 +53,19 @@ class AntrianNew extends Notification
         return [
             //
         ];
+    }
+
+    /**
+     * Get the Pusher Push Notification representation of the notification.
+     *
+     * @return \NotificationChannels\PusherPushNotifications\PusherMessage
+     */
+    public function toPushNotification(object $notifiable): PusherMessage
+    {
+        return PusherMessage::create()
+            ->title('Antrian Baru')
+            ->body('Antrian baru telah ditambahkan! Silahkan cek daftar antrian.')
+            ->badge(1)
+            ->data(['extra_data' => 'Antrian dibuat oleh ' . auth()->user()->name]);
     }
 }
