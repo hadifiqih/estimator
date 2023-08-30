@@ -137,6 +137,7 @@
                 </table>
                 {{-- End Menampilkan Antrian Desain --}}
                 {{-- Modal Keterangan Desain --}}
+                @foreach ($listDesain as $desain)
                 <div class="modal fade" id="detailWorking{{ $desain->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                     <div class="modal-content">
@@ -188,6 +189,7 @@
                     </div>
                     </div>
                 </div>
+                @endforeach
                     </div>
                 </div>
             </div>
