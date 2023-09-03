@@ -32,6 +32,12 @@ class OrderController extends Controller
         Notification::send($users, $notification);
     }
 
+    public function cobaPush(){
+
+
+
+    }
+
     public function antrianDesain(){
         if(auth()->user()->role == 'sales'){
             $sales = Sales::where('user_id', auth()->user()->id)->first();
@@ -96,9 +102,17 @@ class OrderController extends Controller
 
         //ubah nama file
         if($request->file('refdesain')){
+            //Hapus file lama / sebelumnya diupload
+            $orderLama = Order::find($id);
+            $oldFile = $orderLama->desain;
+            if($oldFile != '-'){
+                Storage::disk('public')->delete('ref-desain/' . $oldFile);
+            }
+
             $file = $request->file('refdesain');
             $fileName = time() . '.' . $file->getClientOriginalName();
-            $file->storeAs('public/ref-desain', $fileName);
+            $path = 'ref-desain/' . $fileName;
+            Storage::disk('public')->put($path, $file->get());
         }
 
         // Jika validasi berhasil, simpan data ke database
@@ -142,13 +156,18 @@ class OrderController extends Controller
         if($request->file('refdesain')){
             $file = $request->file('refdesain');
             $fileName = time() . '.' . $file->getClientOriginalName();
-            $file->storeAs('public/ref-desain', $fileName);
+            $path = 'ref-desain/' . $fileName;
+            Storage::disk('public')->put($path, $file->get());
         }else{
-            $fileName = null;
+            $fileName = '-';
         }
 
         $lastId = Order::latest()->first();
-        $lastId = $lastId->id + 1;
+        if($lastId == null){
+            $lastId = 1;
+        }else{
+            $lastId = $lastId->id + 1;
+        }
         $ticketOrder = date('Ymd') . $lastId;
 
         // Jika validasi berhasil, simpan data ke database
@@ -160,9 +179,7 @@ class OrderController extends Controller
         $order->user_id = auth()->user()->id;
         $order->description = $request->description;
         $order->type_work = $request->jenisPekerjaan;
-        if($request->file('refdesain')){
-            $order->desain = $fileName;
-        }
+        $order->desain = $fileName;
         $order->status = '0';
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
@@ -186,7 +203,8 @@ class OrderController extends Controller
         //Menyimpan file cetak dari form dropzone
         $file = $request->file('fileCetak');
         $fileName = time() . '.' . $file->getClientOriginalName();
-        $file->storeAs('public/file-cetak', $fileName);
+        $path = 'file-cetak/' . $fileName;
+        Storage::disk('public')->put($path, $file->get());
 
         //Menyimpan nama file cetak ke database
         $order = Order::where('id', $request->id)->first();
