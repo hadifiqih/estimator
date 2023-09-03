@@ -2,7 +2,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/intd4232/public_html/
-    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R public/* $DEPLOYPATH
 
     - export DEPLOYPATH=/home/intd4232/antree
     - /bin/cp -R app $DEPLOYPATH
