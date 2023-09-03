@@ -102,7 +102,6 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         $employee = Employee::where('user_id', $id)->first();
         $employee->name = $request->nama;
         $employee->email = $request->email;

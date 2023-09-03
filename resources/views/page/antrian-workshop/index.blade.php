@@ -63,9 +63,7 @@
                                             <th scope="col">Finishing</th>
                                             <th scope="col">QC</th>
                                             <th scope="col">Tempat</th>
-                                            @if(auth()->user()->role == 'admin')
-                                                <th scope="col">Aksi</th>
-                                            @elseif(auth()->user()->role == 'dokumentasi')
+                                            @if(auth()->user()->role == 'admin' || auth()->user()->role == 'dokumentasi')
                                                 <th scope="col">Aksi</th>
                                             @endif
                                         </tr>
@@ -94,17 +92,17 @@
 
                                                 <td>
                                                     @if($antrian->operator_id)
-                                                        {{ $antrian->operator->name }}
+                                                    {{ $antrian->operator_id == 'rekanan' ? 'Rekanan' : $antrian->operator->name }}
                                                     @else
-                                                        -
+                                                    -
                                                     @endif
                                                 </td>
 
                                                 <td>
                                                     @if($antrian->finisher_id)
-                                                        {{ $antrian->finishing->name }}
+                                                    {{ $antrian->finisher_id == 'rekanan' ? 'Rekanan' : $antrian->finishing->name }}
                                                     @else
-                                                        -
+                                                    -
                                                     @endif
                                                 </td>
 
@@ -143,11 +141,12 @@
                                                 @elseif(auth()->user()->role == 'dokumentasi')
                                                     <td>
                                                         {{-- Tombol Upload Dokumentasi --}}
-                                                        @if($antrian->timer_stop == null)
+                                                        @if($antrian->timer_stop == null && $antrian->end_job != null)
                                                             <a type="button" class="btn btn-outline-dark btn-sm"
                                                                 href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
                                                         @else
-                                                            -
+                                                        <a type="button" class="btn btn-outline-dark btn-sm disabled"
+                                                        href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
                                                         @endif
                                                     </td>
                                                 @endif
@@ -200,7 +199,7 @@
 
                                                 <td>
                                                     @if($antrian->operator_id)
-                                                        {{ $antrian->operator->name }}
+                                                        {{ $antrian->operator_id == 'rekanan' ? 'Rekanan' : $antrian->operator->name }}
                                                     @else
                                                         -
                                                     @endif
@@ -208,7 +207,7 @@
 
                                                 <td>
                                                     @if($antrian->finisher_id)
-                                                        {{ $antrian->finishing->name }}
+                                                        {{ $antrian->finisher_id == 'rekanan' ? 'Rekanan' : $antrian->finishing->name }}
                                                     @else
                                                         -
                                                     @endif
@@ -259,13 +258,18 @@
             });
         });
     </script>
-    <script>
+
+        {{-- Script untuk countdown timer --}}
     @foreach($antrians as $antrian)
+    <script>
     @if($antrian->end_job != null)
     // Set the date we're counting down to
     var countDownDate{{ $antrian->id }} = new Date("{{ $antrian->end_job }}").getTime();
     var endJob{{ $antrian->id }} = new Date("{{ $antrian->end_job }}");
+    var deadline{{ $antrian->id }} = "{{ $antrian->deadline_status }}";
     var timerStop{{ $antrian->id }} = new Date("{{ $antrian->timer_stop }}");
+
+
     // Update the count down every 1 second
     var x{{ $antrian->id }} = setInterval(function() {
         // Get today's date and time
@@ -282,48 +286,28 @@
             minutes{{ $antrian->id }} + "m " + seconds{{ $antrian->id }} + "s ";
         // If the count down is over, write some text
         if (distance{{ $antrian->id }} < 0) {
-            if (endJob{{ $antrian->id }} < timerStop{{ $antrian->id }}) {
                 clearInterval(x{{ $antrian->id }});
-                document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-danger'>TERLAMBAT</span>";
                 //memperbarui deadline_status menjadi terlambat
-                $.ajaxSetup({
-                    headers: { 'csrftoken' : '{{ csrf_token() }}' }
-                });
                 $.ajax({
-                    url: "{{ url('antrian/'.$antrian->id.'/updateDeadline') }}",
+                    url: "{{ route('antrian.updateDeadline', $antrian->id) }}",
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        deadline_status: "2"
+                        deadline_status: 2
                     },
-                    success: function(response) {
-                        console.log(response);
-                    }
-                });
-            } else {
-                clearInterval(x{{ $antrian->id }});
-                document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-success'>SESUAI</span>";
-                //memperbarui deadline_status menjadi sesuai
-                $.ajaxSetup({
-                    headers: { 'csrftoken' : '{{ csrf_token() }}' }
-                });
-                $.ajax({
-                    url: "{{ url('antrian/'.$antrian->id.'/updateDeadline') }}",
-                    method: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        deadline_status: "1"
-                    },
-                    success: function(response) {
-                        console.log(response);
+                    success: function(data) {
+                        if(data.success) {
+                            document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-danger'>Tepat Waktu</span>";
+                        }else{
+                            document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-danger'>Terlambat</span>";
+                        }
                     }
                 });
             }
-        }
-    }, 1000);
+        }, 1000);
     @else
-    document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-success'>-</span>";
+        document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-success'>-</span>";
     @endif
+    </script>
     @endforeach
-</script>
 @endsection

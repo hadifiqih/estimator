@@ -30,18 +30,14 @@ use App\Events\SendGlobalNotification;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('auth.index');
 });
-
-
 
 Route::get('/dashboard', function () {
     return view('page.dashboard');
 });
 
-Route::get('/test', function () {
-    dd(public_path().'/images/profile/');
-});
+Route::get('/test', [OrderController::class, 'cobaPush'])->name('testPush');
 
 Route::group(['middleware' => 'auth'], function () {
     //Menuju Antrian Controller (Admin)
@@ -89,7 +85,7 @@ Route::controller(OrderController::class)->group(function(){
 
 Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/storeToAntrian', 'store')->middleware('auth')->name('antrian.store');
-    Route::post('/antrian/{id}/updateDeadline', 'updateDeadline')->middleware(['auth', 'checkrole:sales'])->name('antrian.updateDeadline');
+    Route::post('/antrian/{id}/updateDeadline', 'updateDeadline')->middleware('auth')->name('antrian.updateDeadline');
     Route::get('/antrian/dokumentasi/{id}', 'showDokumentasi')->middleware('auth')->name('antrian.showDokumentasi');
     Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware('auth')->name('antrian.storeDokumentasi');
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');

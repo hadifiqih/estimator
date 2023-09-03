@@ -1,3 +1,10 @@
+{{-- Jika sudah ada sesi login, redirect to Dashboard--}}
+@if (auth()->check())
+<script>
+window.location.href = "/dashboard";
+</script>
+@endif
+
 <!DOCTYPE html>
 
 <html

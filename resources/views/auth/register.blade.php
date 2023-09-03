@@ -170,6 +170,7 @@
                         <option value="stempel">Staff Stempel</option>
                         <option value="advertising">Staff Advertising</option>
                         <option value="admin">Admin Workshop</option>
+                        <option value="dokumentasi">Staff Dokumentasi</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleSales" style="display: none">

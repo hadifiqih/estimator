@@ -235,6 +235,7 @@
                         <select class="custom-select rounded-0" id="infoPelanggan" name="modalInfoPelanggan">
                             <option value="default" selected>Pilih Sumber Pelanggan</option>
                             <option value="Google">Google</option>
+                            <option value="G-Maps">G-Maps</option>
                             <option value="Facebook">Facebook</option>
                             <option value="Tokopedia">Tokopedia</option>
                             <option value="Shopee">Shopee</option>

@@ -1,0 +1,10 @@
+{
+    "interests": ["hello"],
+    "web": {
+      "notification": {
+        "title": "Antree",
+        "body": "Ada Antrian Baru ! Cek Sekarang !",
+        "deep_link": "https://interatama.my.id/"
+      }
+    }
+}

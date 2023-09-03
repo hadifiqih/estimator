@@ -180,7 +180,7 @@
                             </div>
                             <div class="form-group">
                                 <h6><strong>Referensi Desain</strong></h6><br>
-                                <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
+                                <img src="{{ asset('storage/ref-desain/'. $desain->desain) }}" class="img-fluid" alt="Preview Image">
                             </div>
                         </div>
                         <div class="modal-footer">

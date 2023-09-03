@@ -127,7 +127,7 @@ class AuthController extends Controller
         $employee->name = ucwords(strtolower($request->nama));
         $employee->email = $request->email;
         $employee->phone = $request->telepon;
-        $employee->division = $request->divisi;
+        $employee->division = ucwords($request->divisi);
         $employee->office = $request->lokasi;
         $employee->user_id = $user->id;
         $employee->save();

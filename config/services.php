@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'pusher' => [
+        'driver' => 'pusher',
+        'secretKey' => '9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109',
+        'instanceId' => '0958376f-0b36-4f59-adae-c1e55ff3b848'
+    ],
+
+
 ];

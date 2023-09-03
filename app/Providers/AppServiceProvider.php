@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind('pusher', function () {
+            return new PushNotifications(config('services.pusher'));
+        });
     }
 
     /**

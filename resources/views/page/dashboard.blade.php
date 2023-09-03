@@ -160,6 +160,7 @@
             <img src="{{ asset('adminlte') }}/dist/img/team-dashboard.png" class="img-fluid mt-3" alt="Team Dashboard">
         </div>
         </div>
+        <a href="{{ route('testPush') }}" class="btn btn-primary mt-3 ml-4">Coba Push</a>
       </div>
     </section>
   </div>

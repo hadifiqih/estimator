@@ -80,7 +80,8 @@ class AntrianController extends Controller
         $buktiPembayaran = $request->file('buktiPembayaran');
         $namaBuktiPembayaran = $buktiPembayaran->getClientOriginalName();
         $namaBuktiPembayaran = Carbon::now()->format('Ymd') . '_' . $namaBuktiPembayaran;
-        $buktiPembayaran->storeAs('public/bukti-pembayaran/', $namaBuktiPembayaran);
+        $path = 'bukti-pembayaran/' . $namaBuktiPembayaran;
+        Storage::disk('public')->put($path, $buktiPembayaran->get());
         }else{
             $namaBuktiPembayaran = null;
         }
@@ -97,7 +98,8 @@ class AntrianController extends Controller
         $accDesain = $request->file('accDesain');
         $namaAccDesain = $accDesain->getClientOriginalName();
         $namaAccDesain = Carbon::now()->format('Ymd') . '_' . $namaAccDesain;
-        $accDesain->storeAs('public/acc-desain/', $namaAccDesain);
+        $path = 'acc-desain/' . $namaAccDesain;
+        Storage::disk('public')->put($path, $accDesain->get());
 
 
         $order->acc_desain = $namaAccDesain;
@@ -129,11 +131,9 @@ class AntrianController extends Controller
 
         $employees = Employee::where('division', $jenis)->get();
 
-        $qualitys = Employee::where('can_qc', $jenis)->get();
+        $qualitys = Employee::where('can_qc', 1)->get();
 
-        $rekanan = Employee::where('id', '9999')->first();
-
-        return view('page.antrian-workshop.edit', compact('antrian', 'employees', 'qualitys', 'rekanan'));
+        return view('page.antrian-workshop.edit', compact('antrian', 'employees', 'qualitys'));
     }
 
     public function update(Request $request, $id)
@@ -154,12 +154,21 @@ class AntrianController extends Controller
 
     public function updateDeadline(Request $request, $id)
     {
+        // dd(request()->all());
         // melakukan update ajax untuk deadline_status
         $antrian = Antrian::find($id);
-        $antrian->deadline_status = $request->input('deadline_status');
+        $status = $request->input('deadline_status');
+
+        $antrian->deadline_status = $status;
         $antrian->save();
 
-        return response()->json(['message' => 'Melewati Deadline !']);
+        if($status == 1){
+            return response()->json(['success' => true]);
+        }elseif($status == 2){
+            return response()->json(['success' => false]);
+        }
+
+
     }
     public function destroy($id)
     {
@@ -173,16 +182,6 @@ class AntrianController extends Controller
         } else {
             return redirect()->route('antrian.index')->with('error-delete', 'Data antrian gagal dihapus!');
         }
-    }
-
-    //--------------------------------------------------------------------------
-    public function updateDeadlineStatus(Request $request, $id)
-    {
-    $antrian = Antrian::find($id);
-    $antrian->deadline_status = $request->input('deadline_status');
-    $antrian->save();
-
-    return response()->json(['message' => 'Melewati Deadline !']);
     }
     //--------------------------------------------------------------------------
 
@@ -213,7 +212,8 @@ class AntrianController extends Controller
 
         foreach($files as $file){
             $filename = time()."_".$file->getClientOriginalName();
-            $path = $file->storeAs('public/dokumentasi', $filename);
+            $path = 'dokumentasi/'.$filename;
+            Storage::disk('public')->put($path, $file->get());
 
             $dokumentasi = new Documentation();
             $dokumentasi->antrian_id = $id;
@@ -227,10 +227,20 @@ class AntrianController extends Controller
         return response()->json(['success'=>'You have successfully upload file.']);
     }
 
-    public function submitDokumentasi($id){
+    public function submitDokumentasi($id)
+    {
+        //cek apakah waktu sekarang sudah melebihi waktu deadline
+
 
         $antrian = Antrian::find($id);
         $antrian->timer_stop = Carbon::now();
+
+        if($antrian->deadline_status = 1){
+            $antrian->deadline_status = 1;
+        }
+        elseif($antrian->deadline_status = 0){
+            $antrian->deadline_status = 2;
+        }
         $antrian->status = 2;
         $antrian->save();
 
