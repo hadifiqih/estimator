@@ -32,12 +32,6 @@ class OrderController extends Controller
         Notification::send($users, $notification);
     }
 
-    public function cobaPush(){
-
-
-
-    }
-
     public function antrianDesain(){
         if(auth()->user()->role == 'sales'){
             $sales = Sales::where('user_id', auth()->user()->id)->first();
@@ -69,6 +63,7 @@ class OrderController extends Controller
     {
 
         $sales = Sales::where('user_id', auth()->user()->id)->first();
+
         $jobs = Job::all();
 
         return view('page.order.add', compact('sales', 'jobs'));

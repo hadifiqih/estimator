@@ -71,16 +71,14 @@
                     <div class="form-group">
                         <label for="namaPekerjaan">Nama Pekerjaan</label>
                         {{-- Nama Pekerjaan Select2 --}}
-                        <select class="form-control select2" id="namaPekerjaan" name="namaPekerjaan" style="width: 100%">
-
-                        </select>
+                        <input type="text" class="form-control" id="namaPekerjaan" placeholder="Nama Pekerjaan" name="namaPekerjaan" value="{{ $order->job->job_name }}" readonly>
                     </div>
                     <div class="form-group">
                         <label for="jenisPekerjaan">Jenis Pekerjaan</label>
                         <select class="custom-select rounded-0" id="jenisPekerjaan" name="jenisPekerjaan">
-                            <option value="Stempel">Stempel</option>
-                            <option value="Advertising">Advertising</option>
-                            <option value="Non Stempel">Non Stempel</option>
+                            <option value="Stempel" {{ $order->job->job_type == 'Stempel' ? 'selected' : '' }}>Stempel</option>
+                            <option value="Advertising" {{ $order->job->job_type == 'Advertising' ? 'selected' : '' }}>Advertising</option>
+                            <option value="Non Stempel {{ $order->job->job_type == 'Non Stempel' ? 'selected' : '' }}">Non Stempel</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -281,27 +279,7 @@
                             results: $.map(data, function(item){
                                 return{
                                     id: item.id,
-                                    text: item.nama,
-                                }
-                            })
-                        }
-                    },
-                    cache: true
-                }
-            });
-
-            $('#namaPekerjaan').select2({
-                placeholder: 'Pilih Pekerjaan',
-                ajax:{
-                    url:"{{ route('job.search') }}",
-                    processResults: function(data){
-                        $('#namaPekerjaan').val('');
-                        $('#keterangan').val('');
-                        return{
-                            results: $.map(data, function(item){
-                                return{
-                                    id: item.id,
-                                    text: item.job_name,
+                                    text: item.nama+ ' ' + '-' + ' ' +item.telepon,
                                 }
                             })
                         }

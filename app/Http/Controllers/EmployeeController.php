@@ -69,8 +69,8 @@ class EmployeeController extends Controller
                     $image_type = $image_type_aux[1];
                     $image_base64 = base64_decode($image_parts[1]);
                     $filename = uniqid() . '.'.$image_type;
-                    $path = public_path() . '/storage/profile/' . $filename;
-                    file_put_contents($path, $image_base64);
+                    $path = 'profile/' . $filename;
+                    Storage::disk('public')->put($path, $image_base64);
 
                     $employee = Employee::where('email', Auth::user()->email)->first();
                     $employee->photo = $filename;

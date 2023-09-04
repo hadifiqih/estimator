@@ -69,7 +69,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Judul Desain</th>
+                            <th>Keyword</th>
                             <th>Ref. Desain</th>
                             <th>Jenis Pekerjaan</th>
                             <th>Status</th>
@@ -364,13 +364,11 @@
                             <tr>
                                 <th>No</th>
                                 <th>Sales</th>
-                                <th>Judul Desain</th>
+                                <th>Keyword</th>
                                 <th>Waktu Selesai</th>
-                                <th>Periode</th>
-                                <th>Produk</th>
+                                <th>Jenis Pekerjaan</th>
                                 <th>Desainer</th>
                                 <th>Status</th>
-                                <th>File Cetak</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -390,17 +388,6 @@
 
                                 <td>{{ $desain->time_end }}</td>
 
-                                <td>
-                                    @php
-                                        //Hitung periode waktu (time_end - time_taken)
-                                        $time_end = strtotime($desain->time_end);
-                                        $time_taken = strtotime($desain->time_taken);
-                                        $periode = $time_end - $time_taken;
-                                        //tampilkan dengan format jam:menit:detik
-                                        echo gmdate("H:i:s", $periode);
-                                    @endphp
-                                </td>
-
                                 <td>{{ $desain->job->job_name }}</td>
 
                                 <td>{{ $desain->user->name }}</td>
@@ -412,8 +399,6 @@
                                 @elseif($desain->status == '2')
                                     <td><span class="badge badge-success">Selesai</span></td>
                                 @endif
-
-                                <td>{{ $desain->file_cetak }}</td>
 
                             </tr>
                             @endforeach
@@ -437,8 +422,9 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Sales</th>
-                                    <th>Judul Desain</th>
-                                    <th>Jenis Produk</th>
+                                    <th>Keyword</th>
+                                    <th>Ref. Desain</th>
+                                    <th>Jenis Pekerjaan</th>
                                     <th>Desainer</th>
                                     <th>Status</th>
                                     @if(Auth::user()->role == 'sales')
@@ -460,6 +446,15 @@
                                     <td>{{ $desain->sales->sales_name }}</td>
 
                                     <td>{{ $desain->title }}</td>
+
+                                    @if($desain->desain != null)
+                                        @php
+                                            $refImage = strlen($desain->desain) > 15 ? substr($desain->desain, 0, 15) . '...' : $desain->desain;
+                                        @endphp
+                                            <td scope="row"><a href="{{ asset('storage/ref-desain/'.$desain->desain) }}" target="_blank">{{ $refImage }}</a></td>
+                                    @else
+                                            <td scope="row">-</td>
+                                    @endif
 
                                     <td>{{ $desain->job->job_name }}</td>
 

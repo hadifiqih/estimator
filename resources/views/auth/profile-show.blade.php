@@ -20,7 +20,6 @@
 @if (session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <strong>Sukses!</strong> {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
 
@@ -28,7 +27,6 @@
 @if (session('error'))
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <strong>Whoops!</strong> {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
 
@@ -73,11 +71,11 @@
                     <label for="divisi" class="form-label">Divisi<span class="text-danger">*</span></label>
                     <select id="divisi" class="custom-select rounded-1" name="divisi">
                         <option value='' {{ Auth::user()->employee->divisi == null ? 'selected disabled' : '' }}>Pilih Divisi</option>
-                        <option value="produksi" {{ Auth::user()->employee->division == 'produksi' ? 'selected' : '' }}>Produksi</option>
-                        <option value="sales" {{ Auth::user()->employee->division == 'sales' ? 'selected' : '' }}>Sales</option>
-                        <option value="desain" {{ Auth::user()->employee->division == 'desain' ? 'selected' : '' }}>Desain</option>
-                        <option value="keuangan" {{ Auth::user()->employee->division == 'keuangan' ? 'selected' : '' }}>Keuangan</option>
-                        <option value="logistik" {{ Auth::user()->employee->division == 'logistik' ? 'selected' : '' }}>Logistik</option>
+                        <option value="produksi" {{ Auth::user()->employee->division == 'Produksi' ? 'selected' : '' }}>Produksi</option>
+                        <option value="sales" {{ Auth::user()->employee->division == 'Sales' ? 'selected' : '' }}>Pemasaran & Penjualan</option>
+                        <option value="desain" {{ Auth::user()->employee->division == 'Desain' ? 'selected' : '' }}>Desain Grafis</option>
+                        <option value="keuangan" {{ Auth::user()->employee->division == 'Keuangan' ? 'selected' : '' }}>Keuangan & Administrasi</option>
+                        <option value="logistik" {{ Auth::user()->employee->division == 'Logistik' ? 'selected' : '' }}>Logistik & Pengiriman</option>
                     </select>
                 </div>
 
