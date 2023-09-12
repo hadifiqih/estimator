@@ -26,25 +26,25 @@
 
                     {{-- Form Data Pelanggan --}}
                     <div class="form-group">
-                        <label for="noHp">No. HP</label>
+                        <label for="noHp">No. HP <span class="text-danger">*</span></label>
                         <input type="tel" class="form-control" id="noHp" name="noHp" placeholder="Nomor Telepon">
                     </div>
                     <div class="form-group">
-                        <label for="nama">Nama Pelanggan</label>
+                        <label for="nama">Nama Pelanggan <span class="text-danger">*</span></label>
                         <select class="form-control select2" id="nama" name="nama" style="width: 100%">
 
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="alamat">Alamat</label>
+                        <label for="alamat">Alamat <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="alamat" placeholder="Alamat Pelanggan">
                     </div>
                     <div class="form-group">
-                        <label for="instansi">Instansi</label>
+                        <label for="instansi">Instansi <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="instansi" placeholder="Instansi Pelanggan">
                     </div>
                     <div class="form-group">
-                        <label for="infoPelanggan">Sumber Pelanggan</label>
+                        <label for="infoPelanggan">Sumber Pelanggan </label>
                         <select class="custom-select rounded-0" id="infoPelanggan" name="infoPelanggan">
                             <option value="default" selected>Pilih Sumber Pelanggan</option>
                             <option value="Google">Google</option>
@@ -56,7 +56,7 @@
                             <option value="Teman/Keluarga/Kerabat">Teman/Keluarga/Kerabat</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>
-                      </div>
+                    </div>
               </div>
             </div>
         </div>
@@ -69,20 +69,35 @@
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="namaPekerjaan">Nama Pekerjaan</label>
+                        <label for="namaPekerjaan">Nama Produk <span class="text-danger">*</span></label>
                         {{-- Nama Pekerjaan Select2 --}}
-                        <input type="text" class="form-control" id="namaPekerjaan" placeholder="Nama Pekerjaan" name="namaPekerjaan" value="{{ $order->job->job_name }}" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="jenisPekerjaan">Jenis Pekerjaan</label>
-                        <select class="custom-select rounded-0" id="jenisPekerjaan" name="jenisPekerjaan">
-                            <option value="Stempel" {{ $order->job->job_type == 'Stempel' ? 'selected' : '' }}>Stempel</option>
-                            <option value="Advertising" {{ $order->job->job_type == 'Advertising' ? 'selected' : '' }}>Advertising</option>
-                            <option value="Non Stempel {{ $order->job->job_type == 'Non Stempel' ? 'selected' : '' }}">Non Stempel</option>
+                        <select class="custom-select rounded-0" id="namaPekerjaan" name="namaPekerjaan" style="width: 100%">
+                            <option value="{{ $order->job->id }}" selected>{{ $order->job->job_name }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="keterangan">Keterangan Spesfikasi</label>
+                        <label for="jenisPekerjaan">Jenis Produk <span class="text-danger">*</span></label>
+                        <select class="custom-select rounded-0" id="jenisPekerjaan" name="jenisPekerjaan">
+                            <option value="{{ $order->job->id }}" selected>{{ $order->job->job_type }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        {{-- File Purchase Order --}}
+                        <label for="filePO">File Purchase Order <span class="text-sm text-muted font-italic">(Opsional)</span></label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="filePO" name="filePO">
+                                <label class="custom-file-label" for="filePO">Pilih File</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{-- Input Qty Barang / Produk --}}
+                        <label for="qtyProduk">Qty Barang / Produk<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="qtyProduk" placeholder="Qty Barang / Produk" name="jumlahProduk">
+                    </div>
+                    <div class="form-group">
+                        <label for="keterangan">Keterangan Spesfikasi <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="keterangan" rows="5" placeholder="Keterangan" name="keterangan"></textarea>
                     </div>
               </div>
@@ -98,11 +113,11 @@
                 <div class="card-body">
                     <div class="form-group">
                         {{-- Total Pembayaran --}}
-                        <label for="totalPembayaran">Total Harga</label>
-                        <input type="number" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
+                        <label for="totalPembayaran">Total Harga <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
                     </div>
                     <div class="form-group">
-                        <label for="jenisPembayaran">Jenis Pembayaran</label>
+                        <label for="jenisPembayaran">Jenis Pembayaran <span class="text-danger">*</span></label>
                         <select class="custom-select rounded-0" id="jenisPembayaran" name="jenisPembayaran">
                             <option value="Cash">Cash</option>
                             <option value="Transfer BCA">Transfer BCA</option>
@@ -115,25 +130,47 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="statusPembayaran">Status Pembayaran</label>
+                        <label for="statusPembayaran">Status Pembayaran <span class="text-danger">*</span></label>
                         <select class="custom-select rounded-0" id="statusPembayaran" name="statusPembayaran">
                             <option value="DP">DP</option>
                             <option value="Lunas">Lunas</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="jumlahPembayaran">Jumlah Pembayaran</label>
+                        {{-- Biaya Jasa Pengiriman --}}
+                        <label for="biayaPengiriman">Biaya Jasa Pengiriman <span class="text-sm text-muted font-italic">(Opsional)</span></label>
+                        <input type="text" class="form-control rupiah" id="biayaPengiriman" placeholder="Rp" name="biayaPengiriman">
+                    </div>
+                    <div class="form-group">
+                        {{-- Biaya Jasa Pemasangan --}}
+                        <label for="biayaPemasangan">Biaya Jasa Pemasangan <span class="text-sm text-muted font-italic">(Opsional)</span></label>
+                        <input type="text" class="form-control rupiah" id="biayaPemasangan" placeholder="Rp" name="biayaPemasangan">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hargaProduk">Harga Produk <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control rupiah" id="hargaProduk" placeholder="Rp" name="hargaProduk">
+                    </div>
+
+                    <div class="form-group">
+                        {{-- Alamat Pengiriman --}}
+                        <label for="alamatPengiriman">Alamat Pengiriman / Pemasangan <span class="text-sm text-muted font-italic">(Opsional)</span></label>
+                        <input type="text" class="form-control" id="alamatPengiriman" placeholder="Alamat Pengiriman / Pemasangan" name="alamatPengiriman">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jumlahPembayaran">Jumlah Pembayaran yang diterima <span class="text-danger">*</span></label>
                         <input type="text" class="form-control rupiah" id="jumlahPembayaran" placeholder="Rp" name="jumlahPembayaran">
                     </div>
                     {{-- Tampilkan sisa pembayaran jika status pembayaran = DP, tampilkan Lunas jika status pembayaran Lunas --}}
                     <div class="form-group">
                         <label for="sisaPembayaran">Sisa Pembayaran</label>
-                        <input type="number" class="form-control rupiah" id="sisaPembayaran" placeholder="Rp" name="sisaPembayaran" readonly>
+                        <input type="text" class="form-control rupiah" id="sisaPembayaran" placeholder="Rp" name="sisaPembayaran" readonly>
                     </div>
 
                     <div class="form-group">
                         {{-- Bukti Pembayaran / Transfer --}}
-                        <label for="buktiPembayaran">Bukti Pembayaran</label>
+                        <label for="buktiPembayaran">Bukti Pembayaran <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="buktiPembayaran" name="buktiPembayaran">
@@ -154,12 +191,12 @@
                 <div class="card-body">
                     <input type="hidden" name="idOrder" value="{{ $order->id }}">
                     <div class="form-group">
-                        <label for="namaDesain">Nama Desain</label>
+                        <label for="namaDesain">Nama Desain <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="namaDesain" placeholder="Nama Desain" name="namaDesain" value="{{ $order->title }}" readonly>
                     </div>
                     <div class="form-group">
                         {{-- Desainer --}}
-                        <label for="desainer">Desainer</label>
+                        <label for="desainer">Desainer <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="desainer" placeholder="Nama Desainer" name="desainer" value="{{ $order->user->name }}" readonly>
                     </div>
                     <div class="form-group">
@@ -174,7 +211,7 @@
                     </div>
                     <div class="form-group">
                         {{-- File Desain --}}
-                        <h6><strong>Preview File ACC</strong></h6>
+                        <h6><strong>Upload Gambar ACC <span class="text-danger">*</span></strong></h6>
                         <div class="input-group">
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="accDesain" name="accDesain">
@@ -213,11 +250,11 @@
                     <form id="pelanggan-form" method="post">
                     @csrf
                     <div class="form-group">
-                        <label for="noHp">No. HP</label>
+                        <label for="noHp">No. HP / WA <span class="text-danger">*</span></label>
                         <input type="tel" class="form-control" id="modalTelepon" placeholder="Nomor Telepon" name="modalTelepon">
                     </div>
                     <div class="form-group">
-                        <label for="nama">Nama Pelanggan</label>
+                        <label for="nama">Nama Pelanggan <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="modalNama" placeholder="Nama Pelanggan" name="modalNama">
                     </div>
                     <div class="form-group">

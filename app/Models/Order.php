@@ -44,4 +44,8 @@ class Order extends Model
     public function antrian(){
         return $this->hasOne(Antrian::class);
     }
+
+    public function payments(){
+        return $this->hasOne(Payment::class, 'ticket_order');
+    }
 }

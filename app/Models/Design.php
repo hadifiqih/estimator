@@ -21,7 +21,7 @@ class Design extends Model
 
     public function antrian()
     {
-        return $this->belongsTo(Antrian::class);
+        return $this->hasMany(Antrian::class);
     }
 
     // Fungsi untuk menyimpan file desain

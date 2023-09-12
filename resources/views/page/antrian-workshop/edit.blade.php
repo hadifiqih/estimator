@@ -21,18 +21,22 @@
     @method('PUT')
     <div class="row ml-1">
       <h6>Pilih Operator :</h6>
-      @if($employees != null)
-      @foreach($employees as $employee)
+      @if($operators != null)
+      @foreach($operators as $operator)
       <div class="col-sm">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="operator{{ $employee->id }}" name="operator" value="{{ $employee->id }}" {{ $employee->id == $antrian->operator_id ? 'checked' : '' }}>
-            <label for="operator{{ $employee->id }}" class="form-check-label">{{ $employee->name }}</label>
+            @php
+                $isCheckedO = is_array($operatorId) && in_array($operator->employee->id, $operatorId);
+                $rekananO = is_array($operatorId) && in_array('rekanan', $operatorId);
+            @endphp
+            <input class="form-check-input" type="checkbox" id="operator{{ $operator->employee->id }}" name="operator[]" value="{{ $operator->employee->id }}" {{ $isCheckedO ? 'checked' : '' }}>
+            <label for="operator{{ $operator->employee->id }}" class="form-check-label">{{ $operator->employee->name }}</label>
         </div>
       </div>
       @endforeach
       <div class="col-sm">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="operatorRekanan" name="operator" value="rekanan" {{ $antrian->operator_id == 'rekanan' ? 'checked' : '' }}>
+          <input class="form-check-input" type="checkbox" id="operatorRekanan" name="operator[]" value="rekanan" {{ $rekananO ? 'checked' : '' }}>
           <label for="operatorRekanan" class="form-check-label">Rekanan</label>
         </div>
       </div>
@@ -45,18 +49,22 @@
 
     <div class="row ml-1">
       <h6>Pilih Finishing :</h6>
-      @if($employees != null)
-      @foreach($employees as $employee)
+      @if($operators != null)
+      @foreach($operators as $finishing)
       <div class="col-sm">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="finishing{{ $employee->id }}" name="finisher" value="{{ $employee->id }}" {{ $employee->id == $antrian->finisher_id ? 'checked' : '' }}>
-            <label for="finishing{{ $employee->id }}" class="form-check-label">{{ $employee->name }}</label>
+            @php
+                $isCheckedF = is_array($finisherId) && in_array($finishing->employee->id, $finisherId);
+                $rekananF = is_array($finisherId) && in_array('rekanan', $finisherId);
+            @endphp
+            <input class="form-check-input" type="checkbox" id="finishing{{ $finishing->employee->id }}" name="finisher[]" value="{{ $finishing->employee->id }}" {{ $isCheckedF ? 'checked' : '' }}>
+            <label for="finishing{{ $finishing->employee->id }}" class="form-check-label">{{ $finishing->employee->name }}</label>
         </div>
       </div>
       @endforeach
       <div class="col-sm">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="finishingRekanan" name="finisher" value="rekanan" {{ $antrian->finisher_id == 'rekanan' ? 'checked' : '' }}>
+          <input class="form-check-input" type="checkbox" id="finishingRekanan" name="finisher[]" value="rekanan" {{ $rekananF ? 'checked' : '' }}>
           <label for="finishingRekanan" class="form-check-label">Rekanan</label>
         </div>
       </div>
@@ -72,7 +80,10 @@
       @foreach($qualitys as $quality)
       <div class="col-sm">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="quality{{ $quality->id }}" name="quality" value="{{ $quality->id }}" {{ $quality->id == $antrian->qc_id ? 'checked' : '' }}>
+            @php
+                $isCheckedQ = is_array($qualityId) && in_array($quality->id, $qualityId);
+            @endphp
+          <input class="form-check-input" type="checkbox" id="quality{{ $quality->id }}" name="quality[]" value="{{ $quality->id }}" {{ $isCheckedQ ? 'checked' : '' }}>
           <label for="quality{{ $quality->id }}" class="form-check-label">{{ $quality->name }}</label>
       </div>
       </div>
@@ -85,14 +96,49 @@
 
     {{-- Memilih tempat pengerjaan di Surabaya, Kediri, Malang --}}
     <div class="mb-3">
-        <label for="tempat" class="form-label">Tempat : </label>
-        <select class="custom-select rounded-2" id="tempat" name="tempat">
-            <option value="Surabaya" {{ $antrian->working_at == 'Surabaya' ? 'selected' : ''}}>Surabaya</option>
-            <option value="Kediri" {{ $antrian->working_at == 'Kediri' ? 'selected' : ''}}>Kediri</option>
-            <option value="Malang" {{ $antrian->working_at == 'Malang' ? 'selected' : ''}}>Malang</option>
-        </select>
+        {{-- Pilih Tempat Pengerjaan Menggunakan Checkbox --}}
+        <h6>Tempat Pengerjaan :</h6>
+        @php
+            $isCheckedS = is_array($tempat) && in_array('Surabaya', $tempat);
+            $isCheckedK = is_array($tempat) && in_array('Kediri', $tempat);
+            $isCheckedM = is_array($tempat) && in_array('Malang', $tempat);
+        @endphp
+        <div class="col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="surabaya" name="tempat[]" value="Surabaya" {{ $isCheckedS ? 'checked' : '' }}>
+                <label for="surabaya" class="form-check-label">Surabaya</label>
+            </div>
+        </div>
+        <div class="col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="kediri" name="tempat[]" value="Kediri" {{ $isCheckedK ? 'checked' : '' }}>
+                <label for="kediri" class="form-check-label">Kediri</label>
+            </div>
+        </div>
+        <div class="col-sm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="malang" name="tempat[]" value="Malang" {{ $isCheckedM ? 'checked' : '' }}>
+                <label for="malang" class="form-check-label">Malang</label>
+            </div>
+        </div>
+
     </div>
 
+    {{-- Memilih jenis mesin berdasarkan tempat --}}
+    <div class="mb-3">
+        <div class="form-group">
+            <label>Jenis Mesin :</label>
+            <select class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
+
+            </select>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        {{-- Masukkan start job --}}
+        <label for="start_job" class="form-label">Start Job</label>
+        <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $antrian->start_job }}">
+    </div>
     <div class="mb-3">
         {{-- Masukkan Deadline --}}
         <label for="deadline" class="form-label">Deadline</label>
@@ -105,4 +151,31 @@
 </div>
 </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Pilih Mesin",
+            allowClear: true,
+            ajax: {
+                url: "{{ route('antrian.getMachine') }}",
+                dataType: 'json',
+                delay: 250,
+                processResults: function (data) {
+                    return {
+                        results:  $.map(data, function (item) {
+                        return {
+                            text: item.machine_name,
+                            id: item.machine_code
+                        }
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+</script>
 @endsection

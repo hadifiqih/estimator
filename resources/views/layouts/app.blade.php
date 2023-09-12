@@ -134,24 +134,57 @@
           <li class="nav-item menu-open">
             <a href="{{ url('/dashboard') }}" class="nav-link active">
               <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Antrian
-                <i class="right fas fa-angle-left"></i>
-              </p>
+                <p>
+                    Antrian
+                    <i class="right fas fa-angle-left"></i>
+                </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') || request()->routeIs('order.edit') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Antrian Desain</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Antrian Workshop</p>
-                </a>
-              </li>
+                @if(auth()->user()->role == 'sales' || auth()->user()->employee->can_design == 1)
+                <li class="nav-item">
+                    <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') || request()->routeIs('order.edit') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Submit Project</p>
+                    </a>
+                </li>
+                @endif
+                @if(auth()->user()->role == 'sales')
+                <li class="nav-item">
+                    <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>List Order</p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'supervisor')
+                <li class="nav-item">
+                    <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>List Pekerjaan</p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->role == 'admin')
+                {{-- Memilih tanggal untuk Unduh Laporan Workshop --}}
+                <li class="nav-item">
+                    <a href="{{ route('laporan.workshop') }}" class="nav-link {{ request()->routeIs('laporan.workshop') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Laporan Workshop</p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->role == 'estimator')
+                <li class="nav-item">
+                    <a href="{{ route('estimator.index') }}" class="nav-link {{ request()->routeIs('estimator.index') || request()->routeIs('estimator.edit') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Estimator</p>
+                    </a>
+                </li>
+                @endif
+
             </ul>
           </li>
         </ul>
@@ -272,6 +305,23 @@
 
     };
 </script>
+
+@if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'admin')
+<script>
+    const beamsClient = new PusherPushNotifications.Client({
+      instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
+    });
+
+    beamsClient.start()
+    .then((beamsClient) => beamsClient.getDeviceId())
+    .then((deviceId) => console.log("Successfully registered with Beams. Device ID:", deviceId))
+
+    .then(() => beamsClient.addDeviceInterest("operator"))
+    .then(() => beamsClient.getDeviceInterests())
+    .then((interests) => console.log("Current interests:", interests))
+    .catch(console.error);
+</script>
+@endif
 
 @yield('script')
 

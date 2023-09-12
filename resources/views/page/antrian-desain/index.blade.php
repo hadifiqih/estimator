@@ -48,9 +48,11 @@
                 <li class="nav-item">
                   <a class="nav-link" id="custom-content-below-messages-tab" data-toggle="pill" href="#custom-content-below-messages" role="tab" aria-controls="custom-content-below-messages" aria-selected="false">Selesai Desain</a>
                 </li>
+                @if(auth()->user()->role == 'sales')
                 <li class="nav-item">
                     <a class="nav-link" id="proses-to-produksi-tab" data-toggle="pill" href="#proses-to-produksi" role="tab" aria-controls="proses-to-produksi" aria-selected="false">Input Produksi</a>
                 </li>
+                @endif
             </ul>
             <div class="tab-content" id="custom-content-below-tabContent">
 
@@ -65,7 +67,7 @@
                 </div>
                 <div class="card-body">
                 {{-- Menampilkan Antrian Desain --}}
-                <table id="tableAntrianDesain" class="table table-bordered table-hover table-responsive">
+                <table ble id="tableAntrianDesain" class="table table-bordered table-hover table-responsive">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -423,7 +425,7 @@
                   </div>
                 </div>
             </div>
-
+            @if(auth()->user()->role == 'sales')
             <div class="tab-pane fade" id="proses-to-produksi" role="tabpanel" aria-labelledby="proses-to-produksi-tab">
                 <div class="card">
                     <div class="card-header">
@@ -432,7 +434,7 @@
                         </h2>
                     </div>
                     <div class="card-body">
-                        <table id="tableAntrianSelesai" class="table table-bordered table-hover table-responsive">
+                        <table id="tableInputProduksi" class="table table-bordered table-hover table-responsive">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -490,6 +492,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             </div>
 
@@ -530,6 +533,11 @@
             "responsive": true,
             "autoWidth": false,
         });
+
+        $("#tableInputProduksi").DataTable({
+            "responsive": true,
+            "autoWidth": false,
+        });
     });
 </script>
 
@@ -552,19 +560,29 @@ $(function() {
 @endif
 
 @if(session('error-filecetak'))
-<script>
-$(function() {
-    var Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 5000
+    <script>
+    $(function() {
+        var Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 5000
+        });
+        Toast.fire({
+            icon: 'error',
+            title: '{{ session('error-filecetak') }}'
+        });
     });
-      Toast.fire({
-        icon: 'error',
-        title: '{{ session('error-filecetak') }}'
-      });
-});
-</script>
+    </script>
 @endif
+<script>
+    @if(session('error-take'))
+        Swal.fire(
+            'Gagal!',
+            '{{ session('error-take') }}',
+            'error'
+        )
+    @endif
+</script>
+
 @endsection

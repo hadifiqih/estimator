@@ -31,6 +31,14 @@
 </div>
 @endif
 
+@if(session('success-progress'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  {{ session('success-progress') }}
+</div>
+@endif
+
+{{-- Alert success-delete --}}
+
 {{-- Content Table --}}
     <div class="container-fluid">
         <div class="row">
@@ -54,45 +62,94 @@
                                 <table id="dataAntrian" class="table table-responsive table-bordered table-hover" style="width: 100%">
                                     <thead>
                                         <tr>
-                                            <th scope="col">#</th>
+                                            <th scope="col">Ticket Order</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Jenis Produk</th>
+                                            <th scope="col">Qty</th>
                                             <th scope="col">Deadline</th>
-                                            <th scope="col">Desain</th>
+                                            <th scope="col">File Desain</th>
+                                            @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                            <th scope="col">File Produksi</th>
+                                            @endif
+                                            <th scope="col">Desainer</th>
                                             <th scope="col">Operator</th>
                                             <th scope="col">Finishing</th>
                                             <th scope="col">QC</th>
                                             <th scope="col">Tempat</th>
-                                            @if(auth()->user()->role == 'admin' || auth()->user()->role == 'dokumentasi')
+                                            @if(auth()->user()->role == 'admin')
                                                 <th scope="col">Aksi</th>
+                                            @endif
+
+                                            @if(auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                            <th scope="col">Dokumentasi</th>
+                                            @endif
+
+                                            @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                            <th scope="col">Progress</th>
                                             @endif
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($antrians as $antrian)
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $antrian->ticket_order }}</td>
                                                 <td>{{ $antrian->sales->sales_name }}</td>
-                                                <td>{{ $antrian->job->job_name }}</td>
+                                                <td>{{ $antrian->job->job_name }} <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailAntrian{{ $antrian->id }}"><i class="fas fa-info-circle"></i></button></td>
+                                                <td>{{ $antrian->qty_produk }}</td>
 
-                                                <td id="waktu{{ $antrian->id }}" class="text-center">
+                                                <td id="waktu{{ $antrian->id }}" class="text-center"></td>
 
+                                                {{-- File dari Desainer --}}
+                                                <td>
+                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}" target="_blank">Download</a>
                                                 </td>
 
-                                                {{-- Jika file desain belum diupload, maka akan muncul tombol Upload Desain, jika sudah maka akan muncul unduh desain --}}
-                                                @if($antrian->design_id == null)
-                                                    <td><a class="btn btn-outline-dark"
-                                                            href="{{ url('design/edit/'.$antrian->id) }}">Upload</a>
-                                                    </td>
-                                                @else
-                                                    <td><a class="btn btn-dark btn-sm"
-                                                            href="{{ route('design.download', $antrian->id) }}" target="_blank"
-                                                            >Download</a></td>
+                                                {{-- File dari Produksi --}}
+                                                @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                                    @if($antrian->design_id != null && $antrian->is_aman == 1)
+                                                        <td>
+                                                            <a class="btn bg-indigo btn-sm" href="{{ route('antrian.downloadProduksi', $antrian->id) }}" target="_blank">Download</a>
+                                                        </td>
+                                                    @elseif($antrian->design_id == null && $antrian->is_aman == 1)
+                                                        <td>
+                                                            <a class="btn bg-success btn-sm disabled" href="#">File Desain Aman</a>
+                                                        </td>
+                                                    @elseif($antrian->design_id == null && $antrian->is_aman == 0)
+                                                        <td>
+                                                            <a class="text-danger" href="#">File Desain Dalam Pengecekan</a>
+                                                        </td>
+                                                    @endif
                                                 @endif
 
                                                 <td>
+                                                    {{-- Nama Desainer --}}
+                                                    @if($antrian->order->user_id)
+                                                        {{ $antrian->order->user->name }}
+                                                    @else
+                                                    -
+                                                    @endif
+                                                </td>
+
+                                                <td>
                                                     @if($antrian->operator_id)
-                                                    {{ $antrian->operator_id == 'rekanan' ? 'Rekanan' : $antrian->operator->name }}
+                                                    @php
+                                                        $operatorId = explode(',', $antrian->operator_id);
+                                                        foreach ($operatorId as $item) {
+                                                            if($item == 'rekanan'){
+                                                                echo '- Rekanan';
+                                                            }
+                                                            else{
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($operatorId)){
+                                                                    echo '- ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '- ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
                                                     @else
                                                     -
                                                     @endif
@@ -100,7 +157,24 @@
 
                                                 <td>
                                                     @if($antrian->finisher_id)
-                                                    {{ $antrian->finisher_id == 'rekanan' ? 'Rekanan' : $antrian->finishing->name }}
+                                                    @php
+                                                        $finisherId = explode(',', $antrian->finisher_id);
+                                                        foreach ($finisherId as $item) {
+                                                            if($item == 'rekanan'){
+                                                                echo '- Rekanan';
+                                                            }
+                                                            else{
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($finisherId)){
+                                                                    echo '- ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '- ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
                                                     @else
                                                     -
                                                     @endif
@@ -108,12 +182,52 @@
 
                                                 <td>
                                                     @if($antrian->qc_id)
-                                                        {{ $antrian->quality->name }}
+                                                    @php
+                                                        $qcId = explode(',', $antrian->qc_id);
+                                                        foreach ($qcId as $item) {
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($qcId)){
+                                                                    echo '- ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '- ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                    @endphp
                                                     @else
                                                         -
                                                     @endif
                                                 </td>
-                                                <td>{{ $antrian->working_at }}</td>
+                                                <td>
+                                                    @php
+                                                        $tempat = explode(',', $antrian->working_at);
+                                                        foreach ($tempat as $item) {
+                                                                if($item == 'Surabaya'){
+                                                                    if($item == end($tempat)){
+                                                                        echo '- Surabaya';
+                                                                    }
+                                                                    else{
+                                                                        echo '- Surabaya' . "<br>";
+                                                                    }
+                                                                }elseif ($item == 'Kediri') {
+                                                                    if($item == end($tempat)){
+                                                                        echo '- Kediri';
+                                                                    }
+                                                                    else{
+                                                                        echo '- Kediri' . "<br>";
+                                                                    }
+                                                                }elseif ($item == 'Malang') {
+                                                                    if($item == end($tempat)){
+                                                                        echo '- Malang';
+                                                                    }
+                                                                    else{
+                                                                        echo '- Malang' . "<br>";
+                                                                    }
+                                                                }
+                                                            }
+                                                    @endphp
+                                                </td>
 
                                                 @if(auth()->user()->role == 'admin')
                                                 <td>
@@ -138,22 +252,267 @@
                                                     </div>
                                                     </div>
                                                 </td>
-                                                @elseif(auth()->user()->role == 'dokumentasi')
-                                                    <td>
-                                                        {{-- Tombol Upload Dokumentasi --}}
-                                                        @if($antrian->timer_stop == null && $antrian->end_job != null)
-                                                            <a type="button" class="btn btn-outline-dark btn-sm"
-                                                                href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
-                                                        @else
-                                                        <a type="button" class="btn btn-outline-dark btn-sm disabled"
-                                                        href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
-                                                        @endif
-                                                    </td>
                                                 @endif
+
+                                                @if(auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                                <td>
+                                                    {{-- Tombol Upload Dokumentasi --}}
+                                                    @if($antrian->timer_stop == null && $antrian->end_job != null)
+                                                        <a type="button" class="btn btn-outline-dark btn-sm"
+                                                            href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
+                                                    @else
+                                                    <a type="button" class="btn btn-outline-dark btn-sm disabled"
+                                                    href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
+                                                    @endif
+                                                </td>
+                                                @endif
+
+                                                @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                                <td>
+                                                    @php
+                                                        $waktuSekarang = date('H:i');
+                                                        $waktuAktif = '16:30';
+                                                    @endphp
+                                                    @if( $waktuSekarang > $waktuAktif )
+                                                        @if($antrian->timer_stop == null && $antrian->end_job != null)
+                                                            <a type="button" class="btn btn-outline-danger btn-sm"
+                                                                href="{{ route('antrian.showProgress', $antrian->id) }}">Upload</a>
+                                                        @else
+                                                            <a href="" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Sip</a>
+                                                        @endif
+                                                    @elseif( $waktuSekarang < $waktuAktif )
+                                                        <a type="button" class="btn btn-outline-danger btn-sm disabled"
+                                                        href="#">Belum Aktif</a>
+                                                    @endif
+                                                </td>
+                                                @endif
+
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
+                                @foreach($antrians as $antrian)
+                                <div class="modal fade" id="detailAntrian{{ $antrian->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title">Detail #{{ $antrian->ticket_order }}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label class="form-label">Sales</label>
+                                                <input type="text" class="form-control" value="{{ $antrian->sales->sales_name }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form-label">Nama Pelanggan
+                                                    @if($antrian->customer->frekuensi_order == 0)
+                                                    <span class="badge badge-danger">New Leads</span>
+                                                    @elseif($antrian->customer->frekuensi_order == 1)
+                                                    <span class="badge badge-warning">New Customer</span>
+                                                    @elseif($antrian->customer->frekuensi_order >= 2)
+                                                    <span class="badge badge-success">Repeat Order</span>
+                                                    @endif
+                                                </label>
+                                                <input type="text" class="form-control" value="{{ $antrian->customer->nama }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form-label">Nama Produk</label>
+                                                <input type="text" class="form-control" value="{{ $antrian->job->job_name }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form-label">Jumlah Produk (Qty)</label>
+                                                <input type="text" class="form-control" value="{{ $antrian->qty_produk }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="">Keterangan / Spesifikasi Produk</label>
+                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->note }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form-label">Deadline</label>
+                                                <input type="text" class="form-control" value="{{ $antrian->end_job }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Desainer</label>
+                                                <input type="text" class="form-control" value="{{ $antrian->order->user->name }}" readonly>
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <label for="form-label">Tempat : </label>
+                                                    @php
+                                                        $tempat = explode(',', $antrian->working_at);
+                                                        foreach ($tempat as $item) {
+                                                                if($item == 'Surabaya'){
+                                                                    if($item == end($tempat)){
+                                                                        echo '<a class="btn btn-sm btn-danger ml-2 mr-2">Surabaya</a>';
+                                                                    }
+                                                                    else{
+                                                                        echo '<a class="btn btn-sm btn-danger ml-2 mr-2">Surabaya</a>';
+                                                                    }
+                                                                }elseif ($item == 'Kediri') {
+                                                                    if($item == end($tempat)){
+                                                                        echo '<a class="btn btn-sm btn-warning ml-2 mr-2">Kediri</a>';
+                                                                    }
+                                                                    else{
+                                                                        echo '<a class="btn btn-sm btn-warning ml-2 mr-2">Kediri</a>';
+                                                                    }
+                                                                }elseif ($item == 'Malang') {
+                                                                    if($item == end($tempat)){
+                                                                        echo '<a class="btn btn-sm btn-success ml-2 mr-2">Malang</a>';
+                                                                    }
+                                                                    else{
+                                                                        echo '<a class="btn btn-sm btn-success ml-2 mr-2">Malang</a>';
+                                                                    }
+                                                                }
+                                                            }
+                                                    @endphp
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4 rounded-2">
+                                                <label>Operator</label>
+                                                <p>
+                                                @if($antrian->operator_id)
+                                                    @php
+                                                        $operatorId = explode(',', $antrian->operator_id);
+                                                        foreach ($operatorId as $item) {
+                                                            if($item == 'rekanan'){
+                                                                echo '<i class="fas fa-user-circle"></i> Rekanan';
+                                                            }
+                                                            else{
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($operatorId)){
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @else
+                                                    -
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            <div class="col-md-4 rounded-2">
+                                                <label>Finishing</label>
+                                                <p>
+                                                @if($antrian->finisher_id)
+                                                    @php
+                                                        $finisherId = explode(',', $antrian->finisher_id);
+                                                        foreach ($finisherId as $item) {
+                                                            if($item == 'rekanan'){
+                                                                echo '<i class="fas fa-user-circle"></i> Rekanan';
+                                                            }
+                                                            else{
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($finisherId)){
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @else
+                                                    -
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            <div class="col-md-4 rounded-2">
+                                                <label>Pengawas / QC</label>
+                                                <p>
+                                                @if($antrian->qc_id)
+                                                    @php
+                                                        $qcId = explode(',', $antrian->qc_id);
+                                                        foreach ($qcId as $item) {
+                                                                $antriann = App\Models\Employee::find($item);
+                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                                                if($antriann->id == end($qcId)){
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name;
+                                                                }
+                                                                else{
+                                                                    echo '<i class="fas fa-user-circle"></i>  ' . $antriann->name . "<br>";
+                                                                }
+                                                            }
+                                                    @endphp
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            </div>
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <label for="">Mesin : </label>
+                                                @if($antrian->machine_code)
+                                                        @php
+                                                            $machineCode = explode(',', $antrian->machine_code);
+
+                                                            foreach ($machineCode as $item) {
+                                                                    $antriann = App\Models\Machine::where('machine_code', $item)->first();
+                                                                    //tampilkan name dari tabel machines, jika nama terakhir tidak perlu koma
+                                                                    if($antriann->machine_code == end($machineCode)){
+                                                                        echo '<a class="btn btn-sm btn-dark ml-2 mr-2">' . $antriann->machine_name . '</a>';
+                                                                    }
+                                                                    else{
+                                                                        echo '<a class="btn btn-sm btn-dark ml-2 mr-2">' . $antriann->machine_name . '</a>';
+                                                                    }
+                                                                }
+                                                        @endphp
+                                                    @else
+                                                        -
+                                                    @endif
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <label>Nominal Omset</label>
+                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.'); }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Harga Produk</label>
+                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.'); }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Biaya Jasa Pasang</label>
+                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : $antrian->payment->installation_cost }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Biaya Jasa Pengiriman</label>
+                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : $antrian->payment->shipping_cost }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Alamat Pengiriman</label>
+                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->alamat_pengiriman == null ? '-' : $antrian->alamat_pengiriman }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label>Preview ACC Desain</label>
+                                                        <div class="text-muted font-italic">{{ strlen($antrian->order->acc_desain) > 25 ? substr($antrian->order->acc_desain, 0, 25) . '...' : $antrian->order->acc_desain }}<button type="button" class="btn btn-sm btn-primary ml-3" data-toggle="modal" data-target="#modal-accdesain{{ $antrian->id }}">Lihat</button></div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label>Preview Bukti Pembayaran</label>
+                                                        <div class="text-muted font-italic">{{ strlen($antrian->payment->payment_proof) > 25 ? substr($antrian->payment->payment_proof, 0, 25) . '...' : $antrian->payment->payment_proof }}<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-buktiPembayaran{{ $antrian->id }}">Lihat</button></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                @endforeach
                                 <!-- /.card -->
                             </div>
                             <!-- /.col -->
@@ -169,7 +528,7 @@
                                 <table id="dataAntrianSelesai" class="table table-responsive table-bordered table-hover" style="width: 100%">
                                     <thead>
                                         <tr>
-                                            <th scope="col">#</th>
+                                            <th scope="col">Ticket Order</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Jenis Produk</th>
                                             <th scope="col">Desain</th>
@@ -182,20 +541,11 @@
                                     <tbody>
                                         @foreach($antrianSelesai as $antrian)
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $antrian->ticket_order }}</td>
                                                 <td>{{ $antrian->sales->sales_name }}</td>
                                                 <td>{{ $antrian->job->job_name }}</td>
 
-                                                {{-- Jika file desain belum diupload, maka akan muncul tombol Upload Desain, jika sudah maka akan muncul unduh desain --}}
-                                                @if($antrian->design_id == null)
-                                                    <td><a class="btn btn-outline-dark"
-                                                            href="{{ url('design/edit/'.$antrian->id) }}">Upload</a>
-                                                    </td>
-                                                @else
-                                                    <td><a class="btn btn-dark btn-sm"
-                                                            href="{{ route('design.download', $antrian->id) }}"
-                                                            >Download</a></td>
-                                                @endif
+                                                <td><a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a></td>
 
                                                 <td>
                                                     @if($antrian->operator_id)
@@ -223,7 +573,40 @@
 
                                                 <td>
                                                     @if($antrian->timer_stop != null)
-                                                        <div class="text-center"><a class="btn btn-primary btn-sm" href="{{ route('documentation.preview', $antrian->id) }}">Lihat</a></div>
+                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#selesaiProgress{{ $antrian->id }}">Lihat</button>
+                                                        <div class="modal fade" id="selesaiProgress{{ $antrian->id }}">
+                                                            <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h4 class="modal-title">Dokumentasi Hasil Produksi</h4>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="mb-3">
+                                                                    <p><strong>Gambar</strong></p>
+                                                                        @if($antrian->timer_stop != null)
+                                                                        @php
+                                                                            $dokumentasi = App\Models\Documentation::where('antrian_id', $antrian->id)->orderBy('created_at', 'desc')->get();
+                                                                        @endphp
+                                                                        @foreach ($dokumentasi as $gambar)
+                                                                            <img src="{{ asset('storage/dokumentasi/'.$gambar->filename) }}" alt="" class="img-fluid p-3">
+                                                                        @endforeach
+                                                                        @else
+                                                                        <p class="text-danger">Tidak ada gambar</p>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer justify-content-between">
+                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                                                                </div>
+                                                            </div>
+                                                            <!-- /.modal-content -->
+                                                            </div>
+                                                            <!-- /.modal-dialog -->
+                                                        </div>
+                                                        <!-- /.modal -->
                                                     @else
                                                         -
                                                     @endif
@@ -240,6 +623,54 @@
                 </div>
     </div>
     <!-- /.container-fluid -->
+    @foreach ($antrians as $antrian)
+    <div class="modal fade" id="modal-accdesain{{ $antrian->id }}">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Preview File Acc Desain</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <img class="img-fluid" src="storage/acc-desain/{{ $antrian->order->acc_desain }}">
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+      @endforeach
+
+      @foreach ($antrians as $antrian)
+        <div class="modal fade" id="modal-buktiPembayaran{{ $antrian->id }}">
+            <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h4 class="modal-title">File Bukti Pembayaran</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    {{-- Menampilkan payment_proof dari tabel payments --}}
+                    <img class="img-fluid" src="storage/bukti-pembayaran/{{ $antrian->payment->payment_proof }}">
+                </div>
+                <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+      @endforeach
 @endsection
 
 @section('script')
@@ -248,13 +679,18 @@
         $(document).ready(function() {
             $("#dataAntrian").DataTable({
                 "responsive": true,
-                "lengthChange": false,
                 "autoWidth": false,
             });
             $("#dataAntrianSelesai").DataTable({
                 "responsive": true,
-                "lengthChange": false,
                 "autoWidth": false,
+            });
+
+            //Menutup modal saat modal lainnya dibuka
+            $('.modal').on('show.bs.modal', function (e) {
+                $('.modal').not($(this)).each(function () {
+                    $(this).modal('hide');
+                });
             });
         });
     </script>
@@ -268,7 +704,6 @@
     var endJob{{ $antrian->id }} = new Date("{{ $antrian->end_job }}");
     var deadline{{ $antrian->id }} = "{{ $antrian->deadline_status }}";
     var timerStop{{ $antrian->id }} = new Date("{{ $antrian->timer_stop }}");
-
 
     // Update the count down every 1 second
     var x{{ $antrian->id }} = setInterval(function() {
@@ -293,7 +728,7 @@
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        deadline_status: 2
+                        deadline_status: '2'
                     },
                     success: function(data) {
                         if(data.success) {

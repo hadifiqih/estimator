@@ -13,6 +13,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportController;
 
 use App\Models\Employee;
 
@@ -30,7 +31,7 @@ use App\Events\SendGlobalNotification;
 */
 
 Route::get('/', function () {
-    return view('auth.index');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
@@ -62,6 +63,16 @@ Route::controller(AuthController::class)->group(function(){
     Route::get('/logout', 'logout')->name('auth.logout');
 });
 
+Route::controller(ReportController::class)->group(function(){
+    Route::get('/report-workshop', 'pilihTanggal')->name('laporan.workshop');
+    Route::post('/report-workshop-pdf', 'exportLaporanWorkshopPDF')->name('laporan-workshop-pdf');
+});
+
+Route::controller(DesignController::class)->group(function(){
+    Route::post('/design/simpan-file-produksi', 'simpanFileProduksi')->name('simpanFileProduksi');
+    Route::get('/design/download-file-produksi/{id}', 'downloadFileProduksi')->name('downloadFileProduksi');
+});
+
 Route::controller(EmployeeController::class)->group(function(){
     Route::get('/profile/{id}', 'show')->middleware('auth')->name('employee.show');
     Route::put('/profile/{id}', 'update')->middleware(['auth'])->name('employee.update');
@@ -90,6 +101,12 @@ Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware('auth')->name('antrian.storeDokumentasi');
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
     Route::get('/antrian/submitDokumentasi/{id}', 'submitDokumentasi')->middleware('auth')->name('antrian.submitDokumentasi');
+    Route::get('/list-machines', 'getMachine')->name('antrian.getMachine');
+    Route::get('/estimator/index', 'estimatorIndex')->middleware('auth')->name('estimator.index');
+    Route::get('/antrian/showProgress/{id}', 'showProgress')->middleware('auth')->name('antrian.showProgress');
+    Route::post('/antrian/storeProgress', 'storeProgressProduksi')->middleware('auth')->name('store.progressProduksi');
+    Route::get('/antrian/mark-aman/{id}', 'markAman')->middleware('auth')->name('antrian.markAman');
+    Route::get('/antrian/download-produksi-file/{id}', 'downloadProduksiFile')->middleware('auth')->name('antrian.downloadProduksi');
 });
 
 Route::controller(ProductController::class)->group(function(){

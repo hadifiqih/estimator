@@ -143,6 +143,7 @@
                     <label for="divisi" class="form-label">Divisi/Jabatan</label>
                     <select id="divisi" class="form-select" name="divisi">
                         <option value="" selected disabled>-- Pilih Divisi --</option>
+                        <option value="manajemen">Manajemen</option>
                         <option value="produksi">Produksi</option>
                         <option value="sales">Pemasaran & Penjualan</option>
                         <option value="desain">Desain Grafis</option>
@@ -161,12 +162,22 @@
                   </select>
                 </div>
 
+                <div class="mb-3" id="inputRoleManajemen" style="display: none">
+                    <label for="roleManajemen">Jabatan</label>
+                    <select class="form-select" name="roleManajemen" id="roleManajemen">
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="ceo">CEO</option>
+                        <option value="direktur">Direktur</option>
+                        <option value="manager">Manager</option>
+                        <option value="hrd">HRD</option>
+                    </select>
+                </div>
+
                 <div class="mb-3" id="inputRoleProduksi" style="display: none">
                     <label for="roleProduksi" class="form-label">Jabatan</label>
                     <select id="roleProduksi" class="form-select" name="roleProduksi">
-                        <option value="" selected>-- Pilih --</option>
-                        <option value="manager">Manager</option>
-                        <option value="supervisor">Supervisor / Quality Control</option>
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="estimator">Estimator / Supervisor / Kepala Cabang</option>
                         <option value="stempel">Staff Stempel</option>
                         <option value="advertising">Staff Advertising</option>
                         <option value="admin">Admin Workshop</option>
@@ -176,34 +187,31 @@
                 <div class="mb-3" id="inputRoleSales" style="display: none">
                     <label for="roleSales" class="form-label">Jabatan</label>
                     <select id="roleSales" class="form-select" name="roleSales">
-                        <option value="" selected>-- Pilih --</option>
-                        <option value="manager">Manager</option>
-                        <option value="supervisor">Supervisor</option>
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="sales">Supervisor</option>
                         <option value="sales">Sales</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleDesain" style="display: none">
                     <label for="roleDesain" class="form-label">Jabatan</label>
                     <select id="roleDesain" class="form-select" name="roleDesain">
-                        <option value="" selected>-- Pilih --</option>
-                        <option value="supervisor">Supervisor</option>
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="desain">Supervisor</option>
                         <option value="desain">Staff Desain</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleKeuangan" style="display: none">
                     <label for="roleKeuangan" class="form-label">Jabatan</label>
                     <select id="roleKeuangan" class="form-select" name="roleKeuangan">
-                        <option value="" selected>-- Pilih --</option>
-                        <option value="manager">Kepala Keuangan</option>
-                        <option value="staff">Staff Admin</option>
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="staffAdmin">Staff Admin</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleLogistik" style="display: none">
                     <label for="roleLogistik" class="form-label">Jabatan</label>
                     <select id="roleLogistik" class="form-select" name="roleLogistik">
-                        <option value="" selected>-- Pilih --</option>
-                        <option value="kepala">Kepala Gudang</option>
-                        <option value="staff">Staff Gudang / Logistik</option>
+                        <option value="" selected disabled>-- Pilih --</option>
+                        <option value="staffGudang">Staff Gudang / Logistik</option>
                     </select>
                 </div>
 
@@ -271,6 +279,7 @@
                 $('#roleDesain').prop('selectedIndex',0);
                 $('#roleKeuangan').prop('selectedIndex',0);
                 $('#roleLogistik').prop('selectedIndex',0);
+                $('#roleManajemen').prop('selectedIndex',0);
 
               // Cek apakah pilihan yang dipilih adalah "Sales"
               if (selectedDivisi == "sales") {
@@ -281,6 +290,7 @@
                     $("#inputRoleKeuangan").hide();
                     $("#inputRoleLogistik").hide();
                     $("#inputRoleProduksi").hide();
+                    $("#inputRoleManajemen").hide();
 
               } else if (selectedDivisi == "desain") {
                     $("#inputSales").hide();
@@ -289,6 +299,7 @@
                     $("#inputRoleKeuangan").hide();
                     $("#inputRoleLogistik").hide();
                     $("#inputRoleProduksi").hide();
+                    $("#inputRoleManajemen").hide();
               } else if (selectedDivisi == "keuangan") {
                     $("#inputSales").hide();
                     $("#inputRoleSales").hide();
@@ -296,6 +307,7 @@
                     $("#inputRoleKeuangan").show();
                     $("#inputRoleLogistik").hide();
                     $("#inputRoleProduksi").hide();
+                    $("#inputRoleManajemen").hide();
 
               } else if (selectedDivisi == "logistik") {
                     $("#inputSales").hide();
@@ -304,6 +316,7 @@
                     $("#inputRoleKeuangan").hide();
                     $("#inputRoleLogistik").show();
                     $("#inputRoleProduksi").hide();
+                    $("#inputRoleManajemen").hide();
 
               } else if (selectedDivisi == "produksi") {
                     $("#inputSales").hide();
@@ -312,6 +325,17 @@
                     $("#inputRoleKeuangan").hide();
                     $("#inputRoleLogistik").hide();
                     $("#inputRoleProduksi").show();
+                    $("#inputRoleManajemen").hide();
+
+              } else if (selectedDivisi == "manajemen") {
+                    $("#inputSales").hide();
+                    $("#inputRoleSales").hide();
+                    $("#inputRoleDesain").hide();
+                    $("#inputRoleKeuangan").hide();
+                    $("#inputRoleLogistik").hide();
+                    $("#inputRoleProduksi").hide();
+                    $("#inputRoleManajemen").show();
+
               }
             });
 

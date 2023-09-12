@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
-use App\Models\Antrian;
-use App\Models\Design;
-use App\Models\AntrianDesain;
 use App\Models\Order;
-
+use App\Models\Design;
+use App\Models\Antrian;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class DesignController extends Controller
 {
@@ -56,6 +56,46 @@ class DesignController extends Controller
         $antrian->save();
 
         return redirect('/design')->with('success', 'Design berhasil diupload');
+    }
+
+    public function simpanFileProduksi(Request $request)
+    {
+        $rules = [
+            'fileCetak' => 'required|max:204800',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput($request->all);
+        }
+
+        $file = $request->file('fileCetak');
+        $nama_file = time()."_".$file->getClientOriginalName();
+        $path = 'file-jadi/' . $nama_file;
+        Storage::disk('public')->put($path, $file->get());
+
+        $design = new Design;
+        $design->ticket_order = $request->ticketOrder;
+        $design->title = $request->judulFile;
+        $design->filename = $nama_file;
+        $design->employee_id = $request->desainer;
+        $design->save();
+
+        $antrian = Antrian::where('ticket_order', $request->ticketOrder)->first();
+        $antrian->design_id = $design->id;
+        $antrian->is_aman = 1;
+        $antrian->save();
+
+        return redirect()->route('estimator.index')->with('success', 'File berhasil diupload');
+
+    }
+
+    public function downloadFileProduksi($id)
+    {
+        $design = Design::find($id);
+        $path = 'file-jadi/' . $design->filename;
+        return Storage::disk('public')->download($path);
     }
 
     //

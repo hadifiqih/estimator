@@ -86,6 +86,8 @@ class AuthController extends Controller
             $role = $request->roleKeuangan;
         }else if($request->roleLogistik){
             $role = $request->roleLogistik;
+        }else if($request->roleManajemen){
+            $role = $request->roleManajemen;
         }else{
             $role = null;
         }

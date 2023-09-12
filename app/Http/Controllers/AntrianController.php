@@ -8,9 +8,12 @@ use App\Models\Antrian;
 use App\Models\Design;
 use App\Models\Employee;
 use App\Models\Customer;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Documentation;
+use App\Models\Machine;
+use App\Models\Dokumproses;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,25 +35,53 @@ class AntrianController extends Controller
             $sales = Sales::where('user_id', auth()->user()->id)->first();
             $salesId = $sales->id;
 
-            $antrians = Antrian::with(['order' => function ($query) {
-                $query->orderByDesc('is_priority');
-            }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+            $antrians = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
             ->orderByDesc('created_at')
             ->where('status', '1')
-            ->where('sales_id', $salesId)->get();
+            ->where('sales_id', $salesId)
+            ->get();
+
+            $antrianSelesai = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order')
+                            ->orderByDesc('created_at')
+                            ->where('status', '2')
+                            ->where('sales_id', $salesId)
+                            ->get();
+
         }
 
-        $antrians = Antrian::with(['order' => function ($query) {
-                        $query->orderByDesc('is_priority');
-                    }, 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
-                    ->orderByDesc('created_at')
-                    ->where('status', '1')->get();
+        $antrians = Antrian::with('payment','sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order')
+            ->orderByDesc('created_at')
+            ->where('status', '1')
+            ->get();
         // Ambil data antrian dari database yang memiliki relasi dengan sales, customer, job, design, operator, dan finishing dan statusnya 1 (aktif)
 
         $antrianSelesai = Antrian::with('sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order')
                             ->orderByDesc('created_at')
-                            ->where('status', '2')->get();
+                            ->where('status', '2')
+                            ->get();
+
         return view('page.antrian-workshop.index', compact('antrians', 'antrianSelesai'));
+    }
+
+    public function estimatorIndex(){
+        $fileBaruMasuk = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
+        ->where('status', '1')
+        ->where('is_aman', '0')
+        ->orderByDesc('created_at')
+        ->get();
+
+        $progressProduksi = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing', 'dokumproses')
+        ->where('status', '1')
+        ->where('is_aman', '1')
+        ->orderByDesc('created_at')
+        ->get();
+
+        $selesaiProduksi = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing', 'dokumproses')
+        ->where('status', '2')
+        ->orderByDesc('created_at')
+        ->get();
+
+        return view('page.antrian-workshop.estimator-index', compact('fileBaruMasuk', 'progressProduksi', 'selesaiProduksi'));
     }
 
     public function downloadPrintFile($id){
@@ -58,22 +89,25 @@ class AntrianController extends Controller
         $file = $antrian->order->file_cetak;
         $path = storage_path('app/public/file-cetak/' . $file);
         return response()->download($path);
+    }
 
+    public function downloadProduksiFile($id){
+        $antrian = Antrian::where('id', $id)->first();
+        $file = $antrian->design->filename;
+        $path = storage_path('app/public/file-jadi/' . $file);
+        return response()->download($path);
     }
 
      public function store(Request $request)
      {
-
         $idCustomer = Customer::where('id', $request->input('nama'))->first();
-        $countRepeat = $idCustomer->repeat_order;
-        if ($countRepeat == null) {
-            $countRepeat = 0;
-        } else {
-            $countRepeat = $countRepeat + 1;
+        if($idCustomer){
+            $repeat = $idCustomer->frekuensi_order + 1;
+            $idCustomer->frekuensi_order = $repeat;
+            $idCustomer->save();
         }
 
         $order = Order::where('id', $request->input('idOrder'))->first();
-        $designerID = $order->user_id;
         $ticketOrder = $order->ticket_order;
 
         if($request->file('buktiPembayaran')){
@@ -88,8 +122,36 @@ class AntrianController extends Controller
 
         $payment = new Payment();
         $payment->ticket_order = $ticketOrder;
-        $payment->total_payment = $request->input('totalPembayaran');
-        $payment->payment_amount = $request->input('jumlahPembayaran');
+        $totalPembayaran = str_replace('.', '', $request->input('totalPembayaran'));
+        $payment->total_payment = $totalPembayaran;
+        $pembayaran = str_replace('.', '', $request->input('jumlahPembayaran'));
+        $payment->payment_amount = $pembayaran;
+        // menyimpan inputan biaya jasa pengiriman
+        if($request->input('biayaPengiriman') == null){
+            $biayaPengiriman = 0;
+        }else{
+            $biayaPengiriman = str_replace('.', '', $request->input('biayaPengiriman'));
+        }
+        $payment->shipping_cost = $biayaPengiriman;
+        // menyimpan inputan biaya jasa pemasangan
+        if($request->input('biayaPemasangan') == null){
+            $biayaPemasangan = 0;
+        }else{
+            $biayaPemasangan = str_replace('.', '', $request->input('biayaPemasangan'));
+        }
+        $payment->installation_cost = $biayaPemasangan;
+
+        // Menyimpan file purcase order
+        if($request->file('purchaseOrder')){
+            $purchaseOrder = $request->file('purchaseOrder');
+            $namaPurchaseOrder = $purchaseOrder->getClientOriginalName();
+            $namaPurchaseOrder = Carbon::now()->format('Ymd') . '_' . $namaPurchaseOrder;
+            $path = 'purchase-order/' . $namaPurchaseOrder;
+            Storage::disk('public')->put($path, $purchaseOrder->get());
+        }else{
+            $namaPurchaseOrder = null;
+        }
+        $payment->purchase_order = $namaPurchaseOrder;
         $payment->payment_method = $request->input('jenisPembayaran');
         $payment->payment_status = $request->input('statusPembayaran');
         $payment->payment_proof = $namaBuktiPembayaran;
@@ -101,10 +163,12 @@ class AntrianController extends Controller
         $path = 'acc-desain/' . $namaAccDesain;
         Storage::disk('public')->put($path, $accDesain->get());
 
-
         $order->acc_desain = $namaAccDesain;
         $order->toWorkshop = 1;
         $order->save();
+
+        $hargaProduk = str_replace('.', '', $request->input('hargaProduk'));
+        $omset = str_replace('.', '', $request->input('totalPembayaran'));
 
         $antrian = Antrian::create([
             'ticket_order' => $ticketOrder,
@@ -112,10 +176,27 @@ class AntrianController extends Controller
             'customer_id' => $request->input('nama'),
             'job_id' => $request->input('namaPekerjaan'),
             'note' => $request->input('keterangan'),
-            'design_id' => $designerID,
-            'omset' => $request->input('totalPembayaran'),
-            'order_id' => $request->input('idOrder')
+            'omset' => $omset,
+            'qty_produk' => $request->input('jumlahProduk'),
+            'order_id' => $request->input('idOrder'),
+            'alamat_pengiriman' => $request->input('alamatPengiriman'),
+            'harga_produk' => $hargaProduk,
         ]);
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("hello"),
+            array("web" => array("notification" => array(
+              "title" => "Antree",
+              "body" => "Ada Antrian Pekerjaan Baru, cek sekarang yuk !",
+              "deep_link" => "https://interatama.my.id/",
+            )),
+        ));
 
         $url = route('antrian.index');
         return view('loader.index', compact('url'));
@@ -127,13 +208,26 @@ class AntrianController extends Controller
 
         $antrian = Antrian::where('id', $id)->first();
 
-        $jenis = $antrian->job->job_type;
+        $jenis = strtolower($antrian->job->job_type);
 
-        $employees = Employee::where('division', $jenis)->get();
+        if($jenis == 'non stempel'){
+            $operators = User::where('role', 'stempel')->orWhere('role', 'advertising')->with('employee')->get();
+        }else{
+            $operators = User::where('role', $jenis)->with('employee')->get();
+        }
+
+        //Melakukan explode pada operator_id, finisher_id, dan qc_id
+        $operatorId = explode(',', $antrian->operator_id);
+        $finisherId = explode(',', $antrian->finisher_id);
+        $qualityId = explode(',', $antrian->qc_id);
+
+        $machines = Machine::get();
 
         $qualitys = Employee::where('can_qc', 1)->get();
 
-        return view('page.antrian-workshop.edit', compact('antrian', 'employees', 'qualitys'));
+        $tempat = explode(',', $antrian->working_at);
+
+        return view('page.antrian-workshop.edit', compact('antrian', 'operatorId', 'finisherId', 'qualityId', 'operators', 'qualitys', 'machines', 'tempat'));
     }
 
     public function update(Request $request, $id)
@@ -141,11 +235,31 @@ class AntrianController extends Controller
 
         $antrian = Antrian::find($id);
 
-        $antrian->operator_id = $request->input('operator');
-        $antrian->finisher_id = $request->input('finisher');
-        $antrian->working_at = $request->input('tempat');
+        //Jika input operator adalah array, lakukan implode lalu simpan ke database
+        $operator = implode(',', $request->input('operator'));
+        $antrian->operator_id = $operator;
+
+        //Jika input finisher adalah array, lakukan implode lalu simpan ke database
+        $finisher = implode(',', $request->input('finisher'));
+        $antrian->finisher_id = $finisher;
+
+        //Jika input quality adalah array, lakukan implode lalu simpan ke database
+        $quality = implode(',', $request->input('quality'));
+        $antrian->qc_id = $quality;
+
+        //Jika input tempat adalah array, lakukan implode lalu simpan ke database
+        $tempat = implode(',', $request->input('tempat'));
+        $antrian->working_at = $tempat;
+
+        //start_job diisi dengan waktu sekarang
+        $antrian->start_job = $request->input('start_job');
         $antrian->end_job = $request->input('deadline');
-        $antrian->qc_id = $request->input('quality');
+
+        //Jika input mesin adalah array, lakukan implode lalu simpan ke database
+        if($request->input('jenisMesin')){
+        $mesin = implode(',', $request->input('jenisMesin'));
+        $antrian->machine_code = $mesin;
+        }
 
         $antrian->save();
 
@@ -231,8 +345,7 @@ class AntrianController extends Controller
     {
         //cek apakah waktu sekarang sudah melebihi waktu deadline
 
-
-        $antrian = Antrian::find($id);
+        $antrian = Antrian::where('id', $id)->with('job', 'sales', 'order')->first();
         $antrian->timer_stop = Carbon::now();
 
         if($antrian->deadline_status = 1){
@@ -244,30 +357,75 @@ class AntrianController extends Controller
         $antrian->status = 2;
         $antrian->save();
 
+         // Menampilkan push notifikasi saat selesai
+         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("hello"),
+            array("web" => array("notification" => array(
+              "title" => "Antree",
+              "body" => "Yuhuu! Pekerjaan " . $antrian->job->job_name . " dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ." ), dari sales ". $antrian->sales->sales_name ." udah selesai !",
+              "deep_link" => "https://interatama.my.id/",
+            )),
+        ));
+
         return redirect()->route('antrian.index')->with('success-dokumentasi', 'Dokumentasi berhasil diunggah!');
     }
 
+    public function getMachine(Request $request){
+        //Menampilkan data mesin pada tabel Machines
+        $machines = Machine::get();
+        return response()->json($machines);
     }
 
-// $files = $request->file('files');
-        // $id = $request->input('idAntrian');
+    public function showProgress($id){
+        $antrian = Antrian::where('id', $id)->with('job', 'sales', 'order')
+        ->first();
 
-        // foreach ($files as $file) {
-        //     //Rename nama file
-        //     $uploadedFile = [];
-        //     $nama_file = $file->getClientOriginalName();
-        //     $nama_file = time()."_".$nama_file;
-        //     $path = $file->storeAs('storage/dokumentasi', $nama_file);// Simpan gambar yang diupload ke folder public/dokumentasi
-        //     $uploadedFile[] = $path;
+        return view('page.antrian-workshop.progress', compact('antrian'));
+    }
 
-        //     $dokumentasi = new Dokumentasi();
-        //     $dokumentasi->antrian_id = $id;
-        //     $dokumentasi->filename = $nama_file;
-        //     $dokumentasi->path_file = $path;
-        //     $dokumentasi->type_file = $file->getClientOriginalExtension();
-        //     $dokumentasi->job_id = $request->input('type_job');
-        //     $dokumentasi->save();
+    public function storeProgressProduksi(Request $request){
+        $antrian = Antrian::where('id', $request->input('idAntrian'))->first();
 
-        // }
+        if($request->file('fileGambar')){
+        $gambar = $request->file('fileGambar');
+        $namaGambar = time()."_".$gambar->getClientOriginalName();
+        $pathGambar = 'dokum-proses/'.$namaGambar;
+        Storage::disk('public')->put($pathGambar, $gambar->get());
+        }else{
+            $namaGambar = null;
+        }
 
-        // return response()->json(['success' => $uploadedFile]);
+        if($request->file('fileVideo')){
+        $video = $request->file('fileVideo');
+        $namaVideo = time()."_".$video->getClientOriginalName();
+        $pathVideo = 'dokum-proses/'.$namaVideo;
+        Storage::disk('public')->put($pathVideo, $video->get());
+        }else{
+            $namaVideo = null;
+        }
+
+        $dokumProses = new Dokumproses();
+        $dokumProses->note = $request->input('note');
+        $dokumProses->file_gambar = $namaGambar;
+        $dokumProses->file_video = $namaVideo;
+        $dokumProses->antrian_id = $request->input('idAntrian');
+        $dokumProses->save();
+
+        return redirect()->route('antrian.index');
+    }
+
+    public function markAman($id)
+    {
+        $design = Antrian::find($id);
+        $design->is_aman = 1;
+        $design->save();
+
+        return redirect()->back()->with('success', 'File berhasil di tandai aman');
+    }
+
+}

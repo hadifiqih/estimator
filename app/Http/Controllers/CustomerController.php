@@ -26,11 +26,24 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $customer = new Customer;
-        $customer->nama = $request->modalNama;
-        $customer->alamat = $request->modalAlamat;
-        $customer->instansi = $request->modalInstansi;
         $customer->telepon = $request->modalTelepon;
-        $customer->infoPelanggan = $request->modalInfoPelanggan;
+
+        if($request->modalNama){
+            $customer->nama = $request->modalNama;
+        }
+
+        if($request->modalAlamat){
+            $customer->alamat = $request->modalAlamat;
+        }
+
+        if($request->modalInstansi){
+            $customer->instansi = $request->modalInstansi;
+        }
+
+        if($request->modalInfoPelanggan){
+            $customer->infoPelanggan = $request->modalInfoPelanggan;
+        }
+
         $customer->save();
 
         return response()->json(['success' => 'true', 'message' => 'Data berhasil ditambahkan']);

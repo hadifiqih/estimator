@@ -51,12 +51,16 @@ class OrderController extends Controller
     //Ambil Desain
     public function ambilDesain(string $id){
         $antrian = Order::find($id);
+        if($antrian->status == 1 || $antrian->time_taken != null){
+            return redirect()->route('design.index')->with('error-take', 'Design sudah diambil');
+        }else{
         $antrian->status = 1;
         $antrian->user_id = auth()->user()->id;
         $antrian->time_taken = now();
         $antrian->save();
 
         return redirect('/design')->with('success-take', 'Design berhasil diambil');
+        }
     }
 
     public function create()
@@ -171,13 +175,27 @@ class OrderController extends Controller
         $order->title = $request->title;
         $order->sales_id = $request->sales;
         $order->job_id = $request->job;
-        $order->user_id = auth()->user()->id;
         $order->description = $request->description;
         $order->type_work = $request->jenisPekerjaan;
         $order->desain = $fileName;
         $order->status = '0';
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("hello"),
+            array("web" => array("notification" => array(
+              "title" => "Antree",
+              "body" => "Ada Desain Baru, cek sekarang yuk !",
+              "deep_link" => "https://interatama.my.id/",
+            )),
+        ));
 
         // $sales = Sales::where('id', $request->input('sales'))->first();
 
