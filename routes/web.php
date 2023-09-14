@@ -38,7 +38,7 @@ Route::get('/dashboard', function () {
     return view('page.dashboard');
 });
 
-Route::get('/test', [OrderController::class, 'cobaPush'])->name('testPush');
+Route::get('/test', [OrderController::class, 'cobaPush'])->name('cobaPush');
 
 Route::group(['middleware' => 'auth'], function () {
     //Menuju Antrian Controller (Admin)
@@ -61,6 +61,7 @@ Route::controller(AuthController::class)->group(function(){
     Route::post('/login', 'login')->name('auth.login');
     Route::post('/register', 'store')->name('auth.store');
     Route::get('/logout', 'logout')->name('auth.logout');
+    Route::get('/beams-generateToken', 'generateToken')->name('beams.auth');
 });
 
 Route::controller(ReportController::class)->group(function(){

@@ -25,6 +25,23 @@ class OrderController extends Controller
         $this->middleware('auth');
     }
 
+    public function cobaPush()
+    {
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("sales"),
+            array("web" => array("notification" => array(
+              "title" => "Ada desain baru menunggu !",
+              "body" => "📣 Cek brief sekarang, jangan sampai diambil orang lain !",
+            )),
+        ));
+    }
+
     public function notifTest(){
         $users = User::all();
         $notification = new AntrianNew();
@@ -58,6 +75,20 @@ class OrderController extends Controller
         $antrian->user_id = auth()->user()->id;
         $antrian->time_taken = now();
         $antrian->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToUsers(
+            array("user-". $antrian->sales->user->id),
+            array("web" => array("notification" => array(
+              "title" => "Yuhuu! Desainmu dalam proses !",
+              "body" => "📣 Cek sekarang, untuk mengetahui desainer !",
+            )),
+        ));
 
         return redirect('/design')->with('success-take', 'Design berhasil diambil');
         }
@@ -127,8 +158,7 @@ class OrderController extends Controller
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
 
-        $url = route('design.index');
-        return view('loader.index', compact('url'));
+        return redirect()->route('design.index')->with('success', 'Design berhasil diupdate');
     }
     /**
      * Store a newly created resource in storage.
@@ -189,26 +219,14 @@ class OrderController extends Controller
         ));
 
         $publishResponse = $beamsClient->publishToInterests(
-            array("hello"),
+            array("designer"),
             array("web" => array("notification" => array(
-              "title" => "Antree",
-              "body" => "Ada Desain Baru, cek sekarang yuk !",
-              "deep_link" => "https://interatama.my.id/",
+              "title" => "Ada desain baru menunggu !",
+              "body" => "&#128227; Cek brief sekarang, jangan sampai diambil orang lain !",
             )),
         ));
 
-        // $sales = Sales::where('id', $request->input('sales'))->first();
-
-        // $notification = [
-        //     'title' => 'Antrian Desain',
-        //     'body' => 'Desain baru dari ' . $sales->sales_name,
-        // ];
-
-        // //Mengirimkan notifikasi ke semua user ketika ada penambahan antrian
-        // event(new SendGlobalNotification($notification));
-
-        $url = route('design.index');
-        return view('loader.index', compact('url'));
+        return redirect()->route('design.index')->with('success', 'Design berhasil ditambahkan');
     }
 
     public function uploadPrintFile(Request $request)
@@ -223,6 +241,20 @@ class OrderController extends Controller
         $order = Order::where('id', $request->id)->first();
         $order->file_cetak = $fileName;
         $order->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToUsers(
+            array("user-". $order->sales->user->id),
+            array("web" => array("notification" => array(
+              "title" => "Kiw Kiw! Desainmu sudah selesai !",
+              "body" => "📣 Cek sekarang, untuk mengantrikan !",
+            )),
+        ));
 
         return response()->json(['success' => $fileName]);
     }

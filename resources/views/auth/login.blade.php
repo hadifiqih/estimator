@@ -106,6 +106,7 @@ window.location.href = "/dashboard";
                     id="email"
                     name="email"
                     placeholder="Masukkan Email"
+                    autocomplete="off"
                     autofocus
                   />
                 </div>

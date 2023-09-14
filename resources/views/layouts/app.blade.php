@@ -43,7 +43,6 @@
       notif(data);
     });
   </script>
-
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -140,11 +139,11 @@
                 </p>
             </a>
             <ul class="nav nav-treeview">
-                @if(auth()->user()->role == 'sales' || auth()->user()->employee->can_design == 1)
+                @if(auth()->user()->role == 'sales' || auth()->user()->employee->can_design == 1 || auth()->user()->role == 'desain')
                 <li class="nav-item">
                     <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') || request()->routeIs('order.edit') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>Submit Project</p>
+                    <p>{{ auth()->user()->role == 'sales' ? 'Submit Project' : 'List Desain' }}</p>
                     </a>
                 </li>
                 @endif
@@ -269,20 +268,6 @@
 <!-- AdminLTE -->
 <script src="{{ asset('adminlte') }}/dist/js/adminlte.js"></script>
 
-{{-- Pusher Beam --}}
-{{-- <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
-
-<script>
-    const beamsClient = new PusherPushNotifications.Client({
-      instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
-    });
-
-    beamsClient.start()
-      .then((beamsClient) => beamsClient.getDeviceId())
-      .then((deviceId) => console.log("Successfully registered with Beams. Device ID:", deviceId))
-      .catch(console.error);
-  </script> --}}
-
 <!-- OPTIONAL SCRIPTS -->
 <script>
 
@@ -305,23 +290,50 @@
 
     };
 </script>
-
-@if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'admin')
+<script>
+    $(function () {
+        bsCustomFileInput.init();
+    });
+</script>
+<script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 <script>
     const beamsClient = new PusherPushNotifications.Client({
       instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
     });
 
-    beamsClient.start()
-    .then((beamsClient) => beamsClient.getDeviceId())
-    .then((deviceId) => console.log("Successfully registered with Beams. Device ID:", deviceId))
+    const tokenProvider = new PusherPushNotifications.TokenProvider({
+      url: "{{ route('beams.auth') }}"
+    });
 
-    .then(() => beamsClient.addDeviceInterest("operator"))
+    beamsClient.start()
+    .then(() => beamsClient.clearAllState()) // clear state on start
+    .then(() => console.log('Successfully registered and subscribed!'))
+    .then(() => beamsClient.setUserId('user-'+ {{ Auth::user()->id }}, tokenProvider))
+    .then(() => beamsClient.getUserId())
+    .then(userId => console.log('Successfully registered and subscribed!', userId))
+    .then(() =>
+
+    @if(Auth::user()->role == 'sales')
+    beamsClient.setDeviceInterests(['hello' , 'sales'])
+    @elseif(Auth::user()->role == 'admin')
+    beamsClient.setDeviceInterests(['hello' , 'admin'])
+    @elseif(Auth::user()->role == 'stempel' || auth()->user()->role == 'advertising')
+    beamsClient.setDeviceInterests(['hello' , 'operator'])
+    @elseif(Auth::user()->role == 'supervisor')
+    beamsClient.setDeviceInterests(['hello' , 'supervisor'])
+    @elseif(Auth::user()->role == 'estimator')
+    beamsClient.setDeviceInterests(['hello', 'operator'])
+    @elseif(Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1)
+    beamsClient.setDeviceInterests(['hello' , 'desain'])
+    @else
+    beamsClient.setDeviceInterests(['hello'])
+    @endif
+    )
     .then(() => beamsClient.getDeviceInterests())
-    .then((interests) => console.log("Current interests:", interests))
+    .then(interests => console.log('Successfully registered and subscribed!', interests))
     .catch(console.error);
+
 </script>
-@endif
 
 @yield('script')
 

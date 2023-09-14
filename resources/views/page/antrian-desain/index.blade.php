@@ -130,7 +130,7 @@
                             {{-- Jika role = desain, maka tampilkan tombol aksi --}}
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
-                                    <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-hand-paper"></i></a>
+                                    <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success" {{ Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1 ? "" : "style=display:none" }}><i class="fas fa-hand-paper"></i></a>
                                     {{-- Tombol Modal Detail Keterangan Desain --}}
                                     <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
@@ -253,7 +253,7 @@
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
                                     {{-- Button untuk menampilkan modal Upload --}}
-                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}" {{ Auth::user()->role != 'desain' ? "style=display:none" : '' }}><i class="fas fa-upload"></i></button>
+                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}" {{ Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1 ? '' : "style=display:none" }}><i class="fas fa-upload"></i></button>
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
                                     </button>

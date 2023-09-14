@@ -190,16 +190,14 @@ class AntrianController extends Controller
         ));
 
         $publishResponse = $beamsClient->publishToInterests(
-            array("hello"),
+            array(['operator', 'admin']),
             array("web" => array("notification" => array(
-              "title" => "Antree",
-              "body" => "Ada Antrian Pekerjaan Baru, cek sekarang yuk !",
-              "deep_link" => "https://interatama.my.id/",
+              "title" => "📣 Cek sekarang, ada antrian baru !",
+              "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
             )),
         ));
 
-        $url = route('antrian.index');
-        return view('loader.index', compact('url'));
+        return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
 
      }
 
@@ -262,6 +260,37 @@ class AntrianController extends Controller
         }
 
         $antrian->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $users = [];
+
+        foreach($request->input('operator') as $operator){
+            $user = 'user-' . $operator;
+            $users[] = $user;
+        }
+
+        foreach($request->input('finisher') as $finisher){
+            $user = 'user-' . $finisher;
+            $users[] = $user;
+        }
+
+        foreach($request->input('quality') as $quality){
+            $user = 'user-' . $quality;
+            $users[] = $user;
+        }
+
+        $publishResponse = $beamsClient->publishToUsers(
+            array($users),
+            array("web" => array("notification" => array(
+              "title" => "📣 Cek sekarang, ada antrian baru !",
+              "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
+            )),
+        ));
 
         return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
     }

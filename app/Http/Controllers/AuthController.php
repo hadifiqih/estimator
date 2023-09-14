@@ -148,4 +148,23 @@ class AuthController extends Controller
         //jika user berhasil dibuat
         return redirect()->route('auth.login')->with('success-register', 'Registrasi berhasil, silahkan login');
     }
+
+    public function generateToken()
+    {
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $userId = "user-" . Auth::user()->id;
+        $token = $beamsClient->generateToken($userId);
+
+        $user = User::find(Auth::user()->id);
+        $user->beams_token = $token;
+        $user->save();
+
+        //Return the token to the client
+        return response()->json($token);
+    }
+
 }
