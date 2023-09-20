@@ -43,20 +43,6 @@
                         <label for="instansi">Instansi <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="instansi" placeholder="Instansi Pelanggan">
                     </div>
-                    <div class="form-group">
-                        <label for="infoPelanggan">Sumber Pelanggan </label>
-                        <select class="custom-select rounded-0" id="infoPelanggan" name="infoPelanggan">
-                            <option value="default" selected>Pilih Sumber Pelanggan</option>
-                            <option value="Google">Google</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Tokopedia">Tokopedia</option>
-                            <option value="Shopee">Shopee</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Tiktok">Tiktok</option>
-                            <option value="Teman/Keluarga/Kerabat">Teman/Keluarga/Kerabat</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
               </div>
             </div>
         </div>
@@ -93,8 +79,8 @@
                     </div>
                     <div class="form-group">
                         {{-- Input Qty Barang / Produk --}}
-                        <label for="qtyProduk">Qty Barang / Produk<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="qtyProduk" placeholder="Qty Barang / Produk" name="jumlahProduk">
+                        <label for="qty">Qty Barang / Produk<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="qty" placeholder="Masukkan jumlah / qty barang" name="qty">
                     </div>
                     <div class="form-group">
                         <label for="keterangan">Keterangan Spesfikasi <span class="text-danger">*</span></label>
@@ -113,7 +99,7 @@
                 <div class="card-body">
                     <div class="form-group">
                         {{-- Total Pembayaran --}}
-                        <label for="totalPembayaran">Total Harga <span class="text-danger">*</span></label>
+                        <label for="totalPembayaran">Total Nominal Order <span class="text-danger">*</span></label>
                         <input type="text" class="form-control rupiah" id="totalPembayaran" placeholder="Rp" name="totalPembayaran">
                     </div>
                     <div class="form-group">
@@ -197,7 +183,7 @@
                     <div class="form-group">
                         {{-- Desainer --}}
                         <label for="desainer">Desainer <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="desainer" placeholder="Nama Desainer" name="desainer" value="{{ $order->user->name }}" readonly>
+                        <input type="text" class="form-control" id="desainer" placeholder="Nama Desainer" name="desainer" value="{{ $order->employee->name }}" readonly>
                     </div>
                     <div class="form-group">
                         {{-- File Desain --}}
@@ -430,6 +416,17 @@
 
             }
         });
+    });
+    //Jika status pembayaran lunas, maka jumlah diterima = total pembayaran
+    $('#statusPembayaran').change(function(){
+        var status = $(this).val();
+        if(status == 'Lunas'){
+            $('#jumlahPembayaran').val($('#totalPembayaran').val());
+            $('#jumlahPembayaran').attr('readonly', true);
+        }else{
+            $('#jumlahPembayaran').val('');
+            $('#jumlahPembayaran').attr('readonly', false);
+        }
     });
 });
 </script>

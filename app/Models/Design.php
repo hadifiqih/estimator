@@ -13,12 +13,6 @@ class Design extends Model
 
     protected $table = 'designs';
 
-    protected $fillable = [
-        'title',
-        'description',
-        'filename'
-    ];
-
     public function antrian()
     {
         return $this->hasMany(Antrian::class);

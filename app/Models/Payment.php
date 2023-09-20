@@ -11,15 +11,6 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable=[
-        'ticket_order',
-        'omset',
-        'payment_amount',
-        'payment_method',
-        'payment_status',
-        'payment_proof'
-    ];
-
     //relasi dengan tabel antrian dengan foreign key ticket_order
     public function antrian()
     {

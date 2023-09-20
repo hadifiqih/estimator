@@ -56,7 +56,6 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
-
         //Membuat rules validasi
         $rules = [
             'nama' => 'required|min:5|max:50',
@@ -135,14 +134,10 @@ class AuthController extends Controller
         $employee->save();
 
         //mengubah user_id pada tabel sales dengan id user yang baru dibuat
-        if(!empty($request->salesApa)){
+        if($request->roleSales){
             $sales = Sales::where('id', $request->salesApa)->first();
-            if($sales){
-                $sales->user_id = $user->id;
-                $sales->save();
-            }else{
-                return redirect()->route('auth.register')->with('error', 'Sales tidak ditemukan!');
-            }
+            $sales->user_id = $user->id;
+            $sales->save();
         }
     }
         //jika user berhasil dibuat

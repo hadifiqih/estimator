@@ -80,10 +80,6 @@
                                                 <th scope="col">Aksi</th>
                                             @endif
 
-                                            @if(auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
-                                            <th scope="col">Dokumentasi</th>
-                                            @endif
-
                                             @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
                                             <th scope="col">Progress</th>
                                             @endif
@@ -95,7 +91,7 @@
                                                 <td>{{ $antrian->ticket_order }}</td>
                                                 <td>{{ $antrian->sales->sales_name }}</td>
                                                 <td>{{ $antrian->job->job_name }} <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailAntrian{{ $antrian->id }}"><i class="fas fa-info-circle"></i></button></td>
-                                                <td>{{ $antrian->qty_produk }}</td>
+                                                <td>{{ $antrian->qty }}</td>
 
                                                 <td id="waktu{{ $antrian->id }}" class="text-center"></td>
 
@@ -123,8 +119,8 @@
 
                                                 <td>
                                                     {{-- Nama Desainer --}}
-                                                    @if($antrian->order->user_id)
-                                                        {{ $antrian->order->user->name }}
+                                                    @if($antrian->order->employee_id)
+                                                        {{ $antrian->order->employee->name }}
                                                     @else
                                                     -
                                                     @endif
@@ -232,38 +228,27 @@
                                                 @if(auth()->user()->role == 'admin')
                                                 <td>
                                                     <div class="btn-group">
-                                                    <button type="button" class="btn btn-warning">Ubah</button>
-                                                    <button type="button" class="btn btn-warning dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
-                                                        <span class="sr-only">Toggle Dropdown</span>
-                                                    </button>
-                                                    <div class="dropdown-menu" role="menu">
-                                                        <a class="dropdown-item" href="{{ url('antrian/'.$antrian->id. '/edit') }}"><i class="fas fa-xs fa-pen"></i> Edit</a>
-                                                    <form
-                                                        action="{{ route('antrian.destroy', $antrian->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus data antrian ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item"
-                                                            data-id="{{ $antrian->id }}">
-                                                            <i class="fas fa-xs fa-trash"></i> Hapus
+                                                        <button type="button" class="btn btn-warning">Ubah</button>
+                                                        <button type="button" class="btn btn-warning dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                                                            <span class="sr-only">Toggle Dropdown</span>
                                                         </button>
-                                                    </form>
+                                                            <div class="dropdown-menu" role="menu">
+                                                                <a class="dropdown-item" href="{{ url('antrian/'.$antrian->id. '/edit') }}"><i class="fas fa-xs fa-pen"></i> Edit</a>
+                                                                <a class="dropdown-item text-success" href="{{ route('antrian.markSelesai', $antrian->id) }}"><i class="fas fa-xs fa-check"></i> Tandai Selesai</a>
+                                                                {{-- <a class="dropdown-item text-danger disabled" href="{{ route('cetak-espk', $antrian->id) }}" target="_blank"><i class="fas fa-xs fa-print"></i> Cetak e-SPK</a> --}}
+                                                                <form
+                                                                    action="{{ route('antrian.destroy', $antrian->id) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data antrian ini?')">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="dropdown-item"
+                                                                        data-id="{{ $antrian->id }}">
+                                                                        <i class="fas fa-xs fa-trash"></i> Hapus
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                     </div>
-                                                    </div>
-                                                </td>
-                                                @endif
-
-                                                @if(auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
-                                                <td>
-                                                    {{-- Tombol Upload Dokumentasi --}}
-                                                    @if($antrian->timer_stop == null && $antrian->end_job != null)
-                                                        <a type="button" class="btn btn-outline-dark btn-sm"
-                                                            href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
-                                                    @else
-                                                    <a type="button" class="btn btn-outline-dark btn-sm disabled"
-                                                    href="{{ route('antrian.showDokumentasi', $antrian->id) }}">Upload</a>
-                                                    @endif
                                                 </td>
                                                 @endif
 
@@ -271,14 +256,13 @@
                                                 <td>
                                                     @php
                                                         $waktuSekarang = date('H:i');
-                                                        $waktuAktif = '16:30';
+                                                        $waktuAktif = '16:45';
                                                     @endphp
                                                     @if( $waktuSekarang > $waktuAktif )
-                                                        @if($antrian->timer_stop == null && $antrian->end_job != null)
-                                                            <a type="button" class="btn btn-outline-danger btn-sm"
-                                                                href="{{ route('antrian.showProgress', $antrian->id) }}">Upload</a>
-                                                        @else
+                                                        @if($antrian->timer_stop != null && $antrian->end_job != null)
                                                             <a href="" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Sip</a>
+                                                        @else
+                                                            <a type="button" class="btn btn-outline-danger btn-sm" href="{{ route('antrian.showProgress', $antrian->id) }}">Upload</a>
                                                         @endif
                                                     @elseif( $waktuSekarang < $waktuAktif )
                                                         <a type="button" class="btn btn-outline-danger btn-sm disabled"
@@ -324,7 +308,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="form-label">Jumlah Produk (Qty)</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->qty_produk }}" readonly>
+                                                <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label for="">Keterangan / Spesifikasi Produk</label>
@@ -336,7 +320,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Desainer</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->order->user->name }}" readonly>
+                                                <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                             </div>
                                             <hr>
                                             <div class="form-group">
@@ -670,7 +654,7 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-      @endforeach
+    @endforeach
 @endsection
 
 @section('script')

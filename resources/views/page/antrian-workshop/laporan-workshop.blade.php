@@ -74,7 +74,7 @@
 </head>
 <body>
     <h1 class="text-center">Laporan Produktifitas Workshop</h1>
-    <h6 class="text-center">Tanggal : {{ date('d-M-Y') }}</h6>
+    <h6 class="text-center">Tanggal : {{ $tanggal }}</h6>
     <hr>
     <table class="table table-bordered table-striped">
         <thead class="text-center">

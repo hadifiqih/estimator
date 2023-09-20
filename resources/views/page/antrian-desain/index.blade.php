@@ -130,7 +130,10 @@
                             {{-- Jika role = desain, maka tampilkan tombol aksi --}}
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
-                                    <a href="{{ url('order/'. $desain->id .'/take') }}" class="btn btn-sm btn-success" {{ Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1 ? "" : "style=display:none" }}><i class="fas fa-hand-paper"></i></a>
+                                    @if(Auth::user()->role == 'sales')
+                                    {{-- Tombol untuk membagi desain --}}
+                                    <button class="btn btn-sm bg-orange" data-toggle="modal" data-target="#modalBagiDesain"><i class="fas fa-user"></i></button>
+                                    @endif
                                     {{-- Tombol Modal Detail Keterangan Desain --}}
                                     <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
@@ -141,7 +144,56 @@
                     </tbody>
                 </table>
                 {{-- End Menampilkan Antrian Desain --}}
-                {{-- Modal Keterangan Desain --}}
+                @if(Auth::user()->role == 'sales')
+                @foreach($listDesain as $desain)
+                {{-- Modal Bagi Desain --}}
+                <div class="modal fade" id="modalBagiDesain">
+                    <div class="modal-dialog modal-sm">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Pilih Desainer</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered table-responsive" style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Desainer</th>
+                                        <th>Jumlah Antrian</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($listDesainer as $employee)
+                                    <tr>
+                                        <td>{{ $employee->name }}</td>
+                                        <td>{{ $employee->design_load }}</td>
+                                        <td>
+                                            <form action="{{ route('order.bagiDesain') }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <input type="hidden" name="desainer_id" value="{{ $employee->id }}">
+                                                <input type="hidden" name="order_id" value="{{ $desain->id }}">
+
+                                                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+                  @endforeach
+                @endif
+
                 @foreach ($listDesain as $desain)
                 <div class="modal fade" id="detailWorking{{ $desain->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
@@ -187,6 +239,7 @@
                                 <h6><strong>Referensi Desain</strong></h6><br>
                                 <img src="{{ asset('storage/ref-desain/'. $desain->desain) }}" class="img-fluid" alt="Preview Image">
                             </div>
+                            <p class="text-muted font-italic">*Jika ada yang kurang jelas, bisa menghubungi sales yang bersangkutan</p>
                         </div>
                         <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -238,7 +291,7 @@
 
                                 <td>{{ $desain->title }}</td>
 
-                                <td>{{ $desain->user->name }}</td>
+                                <td>{{ $desain->employee->name }}</td>
 
                                 @if($desain->status == '0')
                                     <td><span class="badge badge-warning">Menunggu</span></td>
@@ -252,8 +305,15 @@
 
                                 <td>
                                     <a href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary" {{ Auth::user()->role != 'sales' ? "style=display:none" : '' }}><i class="fas fa-edit"></i></a>
+
+                                    @if(Auth::user()->employee->id == $desain->employee_id)
                                     {{-- Button untuk menampilkan modal Upload --}}
                                     <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}" {{ Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1 ? '' : "style=display:none" }}><i class="fas fa-upload"></i></button>
+                                    @else
+                                    <button type="button" class="btn btn-sm btn-success" disabled><i class="fas fa-upload"></i></button>
+                                    @endif
+
+                                    {{-- Tombol Modal Detail Keterangan Desain --}}
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailWorking{{ $desain->id }}">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
@@ -302,6 +362,7 @@
                                                     <h6><strong>Referensi Desain</strong></h6><br>
                                                     <img src="/storage/ref-desain/{{ $desain->desain }}" class="img-fluid" alt="Responsive image">
                                                 </div>
+                                                <p class="text-muted font-italic">*Jika ada yang kurang jelas, bisa menghubungi sales yang bersangkutan</p>
                                             </div>
                                             <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -405,7 +466,7 @@
 
                                 <td>{{ $desain->job->job_name }}</td>
 
-                                <td>{{ $desain->user->name }}</td>
+                                <td>{{ $desain->employee->name }}</td>
 
                                 @if($desain->status == '0')
                                     <td><span class="badge badge-warning">Menunggu</span></td>
@@ -465,7 +526,7 @@
 
                                     <td>{{ $desain->job->job_name }}</td>
 
-                                    <td>{{ $desain->user->name }}</td>
+                                    <td>{{ $desain->employee->name }}</td>
 
                                     @if($desain->status == '0')
                                         <td><span class="badge badge-warning">Menunggu</span></td>

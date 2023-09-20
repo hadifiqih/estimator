@@ -183,7 +183,6 @@
                     </a>
                 </li>
                 @endif
-
             </ul>
           </li>
         </ul>
@@ -305,10 +304,13 @@
       url: "{{ route('beams.auth') }}"
     });
 
+    //stop the SDK from automatically connecting to Beams
+    beamsClient.stop();
+
     beamsClient.start()
     .then(() => beamsClient.clearAllState()) // clear state on start
-    .then(() => console.log('Successfully registered and subscribed!'))
-    .then(() => beamsClient.setUserId('user-'+ {{ Auth::user()->id }}, tokenProvider))
+    .then(() => console.log('Successfully registered and subscribed to Beams!'))
+    .then(() => beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider))
     .then(() => beamsClient.getUserId())
     .then(userId => console.log('Successfully registered and subscribed!', userId))
     .then(() =>
@@ -336,6 +338,31 @@
 </script>
 
 @yield('script')
+<script>
+    function sendReminder() {
+            $.ajax({
+                type: "GET",
+                url: "{{ route('antrian.reminder') }}",
+                success: function (response) {
+                    console.log(response);
+                }
+            })
+        }
+    $(document).ready(function() {
+        var targetWaktu = '16:45'
+
+        var interval = 60000;
+
+        function checkTime(){
+            var waktuSekarang = dayjs().format('HH:mm');
+            if(waktuSekarang == targetWaktu){
+                sendReminder();
+            }
+        }
+
+        setInterval(checkTime, interval);
+    });
+</script>
 
 </body>
 </html>

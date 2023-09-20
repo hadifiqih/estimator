@@ -56,13 +56,15 @@ class OrderController extends Controller
             $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->where('sales_id', $salesId)->get();
             $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->where('sales_id', $salesId)->get();
             $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->where('sales_id', $salesId)->get();
+            $listDesainer = Employee::where('can_design', 1)->get();
         }else{
             $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
             $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->get();
             $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->get();
+            $listDesainer = Employee::where('can_design', 1)->get();
         }
 
-        return view('page.antrian-desain.index', compact('listDesain', 'listDikerjakan', 'listSelesai'));
+        return view('page.antrian-desain.index', compact('listDesain', 'listDikerjakan', 'listSelesai', 'listDesainer'));
     }
 
     //Ambil Desain
@@ -76,6 +78,22 @@ class OrderController extends Controller
         $antrian->time_taken = now();
         $antrian->save();
 
+        return redirect('/design')->with('success-take', 'Design berhasil diambil');
+        }
+    }
+
+    public function bagiDesain(Request $request){
+
+        $order = Order::find($request->order_id);
+        $order->status = 1;
+        $order->employee_id = $request->desainer_id;
+        $order->time_taken = now();
+        $order->save();
+
+        $employee = Employee::find($request->desainer_id);
+        $employee->design_load += 1;
+        $employee->save();
+
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
             "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
@@ -83,15 +101,14 @@ class OrderController extends Controller
         ));
 
         $publishResponse = $beamsClient->publishToUsers(
-            array("user-". $antrian->sales->user->id),
+            array("user-". $order->employee->user->id),
             array("web" => array("notification" => array(
-              "title" => "Yuhuu! Desainmu dalam proses !",
-              "body" => "📣 Cek sekarang, untuk mengetahui desainer !",
+              "title" => "Kiw Kiw! Ada desain baru menunggu !",
+              "body" => "📣 Sat set ! Semangattt, pastikan ga ada revisi yaa !",
             )),
         ));
 
-        return redirect('/design')->with('success-take', 'Design berhasil diambil');
-        }
+        return redirect()->route('design.index')->with('success', 'Berhasil memilih desainer');
     }
 
     public function create()
@@ -242,6 +259,26 @@ class OrderController extends Controller
         $order->file_cetak = $fileName;
         $order->save();
 
+        return response()->json(['success' => $fileName]);
+    }
+
+    public function submitFileCetak($id){
+
+        $order = Order::find($id);
+
+        if(!$order->file_cetak){
+            return redirect()->back()->with('error-filecetak', 'File cetak belum diupload, silahkan ulangi proses upload file cetak');
+        }
+
+        $order->status = 2;
+        $order->time_end = now();
+        $order->save();
+        //designer load -1
+        $employee = Employee::find($order->employee_id);
+        $employee->design_load -= 1;
+        $employee->save();
+
+
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
             "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
@@ -255,21 +292,6 @@ class OrderController extends Controller
               "body" => "📣 Cek sekarang, untuk mengantrikan !",
             )),
         ));
-
-        return response()->json(['success' => $fileName]);
-    }
-
-    public function submitFileCetak(Request $request, $id){
-
-        $order = Order::find($id);
-
-        if(!$order->file_cetak){
-            return redirect()->back()->with('error-filecetak', 'File cetak belum diupload, silahkan ulangi proses upload file cetak');
-        }
-
-        $order->status = 2;
-        $order->time_end = now();
-        $order->save();
 
         return redirect()->route('design.index')->with('success-submit', 'File berhasil diupload');
     }

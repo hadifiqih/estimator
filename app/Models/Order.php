@@ -10,16 +10,6 @@ class Order extends Model
     use HasFactory;
 
     protected $table ='orders';
-    protected $fillable = [
-        'sales_id',
-        'job_id',
-        'description',
-        'is_priority',
-        'desain',
-        'status',
-        'created_at',
-        'updated_at',
-    ];
 
     public function employee(){
         return $this->belongsTo(Employee::class);

@@ -121,7 +121,6 @@
                 <label for="malang" class="form-check-label">Malang</label>
             </div>
         </div>
-
     </div>
 
     {{-- Memilih jenis mesin berdasarkan tempat --}}
@@ -131,12 +130,16 @@
             <select class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
 
             </select>
+            @if($tempat != null)
+            <p class="text-sm text-danger font-italic mt-1">*Jika tidak ada perubahan, <strong>biarkan kosong.</strong></p>
+            @endif
+
         </div>
     </div>
 
     <div class="mb-3">
         {{-- Masukkan start job --}}
-        <label for="start_job" class="form-label">Start Job</label>
+        <label for="start_job" class="form-label">Mulai</label>
         <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $antrian->start_job }}">
     </div>
     <div class="mb-3">

@@ -95,7 +95,7 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="form-label">Jumlah Produk (Qty)</label>
-                                                                <input type="text" class="form-control" value="{{ $antrian->qty_produk }}" readonly>
+                                                                <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="">Keterangan / Spesifikasi Produk</label>
@@ -107,7 +107,7 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Desainer</label>
-                                                                <input type="text" class="form-control" value="{{ $antrian->order->user->name }}" readonly>
+                                                                <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                                             </div>
                                                             <hr>
                                                             <div class="form-group">
@@ -284,8 +284,8 @@
                                                     </div>
                                                 </div>
 
-                                                <td>{{ $antrian->qty_produk }}</td>
-                                                <td>{{ $antrian->order->user->name }}</td>
+                                                <td>{{ $antrian->qty }}</td>
+                                                <td>{{ $antrian->order->employee->name }}</td>
                                                 <td class="text-center">
                                                     <a href="#" target="_blank" class="btn btn-primary btn-sm">Download</a>
                                                 </td>
@@ -403,7 +403,7 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="form-label">Jumlah Produk (Qty)</label>
-                                                                <input type="text" class="form-control" value="{{ $antrian->qty_produk }}" readonly>
+                                                                <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="">Keterangan / Spesifikasi Produk</label>
@@ -415,7 +415,7 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Desainer</label>
-                                                                <input type="text" class="form-control" value="{{ $antrian->order->user->name }}" readonly>
+                                                                <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                                             </div>
                                                             <hr>
                                                             <div class="form-group">
@@ -592,8 +592,8 @@
                                                     </div>
                                                 </div>
 
-                                                <td>{{ $antrian->qty_produk }}</td>
-                                                <td>{{ $antrian->order->user->name }}</td>
+                                                <td>{{ $antrian->qty }}</td>
+                                                <td>{{ $antrian->order->employee->name }}</td>
                                                 <td class="text-center">
                                                     <a href="{{ route('design.download', $antrian->id) }}" target="_blank" class="btn btn-primary btn-sm">Download</a>
                                                 </td>
@@ -723,7 +723,7 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="form-label">Jumlah Produk (Qty)</label>
-                                                                    <input type="text" class="form-control" value="{{ $antrian->qty_produk }}" readonly>
+                                                                    <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="">Keterangan / Spesifikasi Produk</label>
@@ -735,7 +735,7 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label>Desainer</label>
-                                                                    <input type="text" class="form-control" value="{{ $antrian->order->user->name }}" readonly>
+                                                                    <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                                                 </div>
                                                                 <hr>
                                                                 <div class="form-group">
@@ -912,8 +912,8 @@
                                                         </div>
                                                     </div>
 
-                                                <td>{{ $antrian->qty_produk }}</td>
-                                                <td>{{ $antrian->order->user->name }}</td>
+                                                <td>{{ $antrian->qty }}</td>
+                                                <td>{{ $antrian->order->employee->name }}</td>
                                                 <td class="text-center">
                                                     <a href="{{ route('design.download', $antrian->id) }}" target="_blank" class="btn btn-primary btn-sm">Download</a>
                                                 </td>
@@ -936,7 +936,6 @@
                                                         {{-- Modal --}}
 
                                                 </td>
-
                                             </tr>
                                         @endforeach
                                     </tbody>

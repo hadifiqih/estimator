@@ -12,12 +12,6 @@ class Dokumproses extends Model
 
     protected $table = 'dokumproses';
 
-    protected $fillable = [
-        'note',
-        'file_gambar',
-        'file_video',
-    ];
-
     public function antrian()
     {
         return $this->belongsTo(Antrian::class);

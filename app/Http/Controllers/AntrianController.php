@@ -100,7 +100,8 @@ class AntrianController extends Controller
 
      public function store(Request $request)
      {
-        $idCustomer = Customer::where('id', $request->input('nama'))->first();
+
+        $idCustomer = Customer::where('telepon', $request->input('noHp'))->first();
         if($idCustomer){
             $repeat = $idCustomer->frekuensi_order + 1;
             $idCustomer->frekuensi_order = $repeat;
@@ -170,18 +171,18 @@ class AntrianController extends Controller
         $hargaProduk = str_replace('.', '', $request->input('hargaProduk'));
         $omset = str_replace('.', '', $request->input('totalPembayaran'));
 
-        $antrian = Antrian::create([
-            'ticket_order' => $ticketOrder,
-            'sales_id' => $request->input('sales'),
-            'customer_id' => $request->input('nama'),
-            'job_id' => $request->input('namaPekerjaan'),
-            'note' => $request->input('keterangan'),
-            'omset' => $omset,
-            'qty_produk' => $request->input('jumlahProduk'),
-            'order_id' => $request->input('idOrder'),
-            'alamat_pengiriman' => $request->input('alamatPengiriman'),
-            'harga_produk' => $hargaProduk,
-        ]);
+        $antrian = new Antrian();
+        $antrian->ticket_order = $ticketOrder;
+        $antrian->sales_id = $request->input('sales');
+        $antrian->customer_id = $idCustomer->id;
+        $antrian->job_id = $request->input('namaPekerjaan');
+        $antrian->note = $request->input('keterangan');
+        $antrian->omset = $omset;
+        $antrian->qty = $request->input('qty');
+        $antrian->order_id = $request->input('idOrder');
+        $antrian->alamat_pengiriman = $request->input('alamatPengiriman');
+        $antrian->harga_produk = $hargaProduk;
+        $antrian->save();
 
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
@@ -190,7 +191,7 @@ class AntrianController extends Controller
         ));
 
         $publishResponse = $beamsClient->publishToInterests(
-            array(['operator', 'admin']),
+            array('operator', 'admin'),
             array("web" => array("notification" => array(
               "title" => "📣 Cek sekarang, ada antrian baru !",
               "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
@@ -203,7 +204,6 @@ class AntrianController extends Controller
 
     public function edit($id)
     {
-
         $antrian = Antrian::where('id', $id)->first();
 
         $jenis = strtolower($antrian->job->job_type);
@@ -284,13 +284,16 @@ class AntrianController extends Controller
             $users[] = $user;
         }
 
-        $publishResponse = $beamsClient->publishToUsers(
-            array($users),
-            array("web" => array("notification" => array(
-              "title" => "📣 Cek sekarang, ada antrian baru !",
-              "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
-            )),
-        ));
+
+        foreach($users as $user){
+            $publishResponse = $beamsClient->publishToUsers(
+                array($user),
+                array("web" => array("notification" => array(
+                "title" => "📣 Cek sekarang, ada antrian baru !",
+                "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
+                )),
+            ));
+        }
 
         return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
     }
@@ -310,8 +313,6 @@ class AntrianController extends Controller
         }elseif($status == 2){
             return response()->json(['success' => false]);
         }
-
-
     }
     public function destroy($id)
     {
@@ -370,40 +371,6 @@ class AntrianController extends Controller
         return response()->json(['success'=>'You have successfully upload file.']);
     }
 
-    public function submitDokumentasi($id)
-    {
-        //cek apakah waktu sekarang sudah melebihi waktu deadline
-
-        $antrian = Antrian::where('id', $id)->with('job', 'sales', 'order')->first();
-        $antrian->timer_stop = Carbon::now();
-
-        if($antrian->deadline_status = 1){
-            $antrian->deadline_status = 1;
-        }
-        elseif($antrian->deadline_status = 0){
-            $antrian->deadline_status = 2;
-        }
-        $antrian->status = 2;
-        $antrian->save();
-
-         // Menampilkan push notifikasi saat selesai
-         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
-            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
-            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
-        ));
-
-        $publishResponse = $beamsClient->publishToInterests(
-            array("hello"),
-            array("web" => array("notification" => array(
-              "title" => "Antree",
-              "body" => "Yuhuu! Pekerjaan " . $antrian->job->job_name . " dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ." ), dari sales ". $antrian->sales->sales_name ." udah selesai !",
-              "deep_link" => "https://interatama.my.id/",
-            )),
-        ));
-
-        return redirect()->route('antrian.index')->with('success-dokumentasi', 'Dokumentasi berhasil diunggah!');
-    }
-
     public function getMachine(Request $request){
         //Menampilkan data mesin pada tabel Machines
         $machines = Machine::get();
@@ -457,4 +424,53 @@ class AntrianController extends Controller
         return redirect()->back()->with('success', 'File berhasil di tandai aman');
     }
 
+    public function markSelesai($id){
+        //cek apakah waktu sekarang sudah melebihi waktu deadline
+        $antrian = Antrian::where('id', $id)->with('job', 'sales', 'order')->first();
+        $antrian->timer_stop = Carbon::now();
+
+        if($antrian->deadline_status = 1){
+            $antrian->deadline_status = 1;
+        }
+        elseif($antrian->deadline_status = 0){
+            $antrian->deadline_status = 2;
+        }
+        $antrian->status = 2;
+        $antrian->save();
+
+         // Menampilkan push notifikasi saat selesai
+         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("sales"),
+            array("web" => array("notification" => array(
+              "title" => "Antree",
+              "body" => "Yuhuu! Pekerjaan " . $antrian->job->job_name . " dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ."), dari sales ". $antrian->sales->sales_name ." udah selesai !",
+              "deep_link" => "https://interatama.my.id/",
+            )),
+        ));
+
+        return redirect()->route('antrian.index')->with('success-dokumentasi', 'Berhasil ditandai selesai !');
+    }
+
+    public function reminderProgress(){
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("operator"),
+            array("web" => array("notification" => array(
+              "title" => "🔔 Kring.. Reminder!",
+              "body" => "Yuk cek progress pekerjaanmu sekarang, jangan lupa upload progressnya ya !",
+              "deep_link" => "https://interatama.my.id/",
+            )),
+        ));
+
+        return response()->json('success', 200);
+    }
 }
