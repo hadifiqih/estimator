@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  <link rel="icon" href="{{ asset('adminlte') }}/dist/img/antree-logo.png" type="image/png" sizes="16x16">
   <title>Software Antree | Kassab Syariah</title>
   @vite('resources/js/app.js')
   <!-- Google Font: Source Sans Pro -->
@@ -183,6 +184,15 @@
                     </a>
                 </li>
                 @endif
+
+                @if(auth()->user()->role == 'sales')
+                <li class="nav-item">
+                    <a href="{{ route('report.sales') }}" class="nav-link {{ request()->routeIs('report.sales') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Ringkasan Penjualan</p>
+                    </a>
+                </li>
+                @endif
             </ul>
           </li>
         </ul>
@@ -266,6 +276,9 @@
 
 <!-- AdminLTE -->
 <script src="{{ asset('adminlte') }}/dist/js/adminlte.js"></script>
+
+{{-- DayJS --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.7/dayjs.min.js"></script>
 
 <!-- OPTIONAL SCRIPTS -->
 <script>

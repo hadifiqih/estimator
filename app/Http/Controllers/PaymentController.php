@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -38,7 +43,7 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         $antrian = Antrian::where('ticket_order', $request->order_number)->first();
 
         $status = $request->payment_amount == $request->omset ? 1 : 0;
@@ -62,7 +67,7 @@ class PaymentController extends Controller
         $validated['payment_proof'] = $path; // Menyimpan path ke payment_proof dalam field yang sesuai
 
         Payment::create($validated);
-        
+
         return redirect()->route('payments.index')->with('success', 'Pembayaran dikonfirmasi !');
     }
 
@@ -99,7 +104,7 @@ class PaymentController extends Controller
      */
     public function update($id)
     {
-        
+
     }
 
     /**

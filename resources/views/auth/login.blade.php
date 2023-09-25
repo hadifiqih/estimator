@@ -27,7 +27,7 @@ window.location.href = "/dashboard";
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('adminlte') }}/dist/img/antree-150x150.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -82,6 +82,12 @@ window.location.href = "/dashboard";
             </div>
           @endif
 
+            @if (session('status'))
+                <div class="alert alert-success">
+                    {{ session('status') }}
+                </div>
+            @endif
+
           <!-- Register -->
           <div class="card">
             <div class="card-body">
@@ -113,7 +119,7 @@ window.location.href = "/dashboard";
                 <div class="mb-3 form-password-toggle">
                   <div class="d-flex justify-content-between">
                     <label class="form-label" for="password">Password</label>
-                    <a href="auth-forgot-password-basic.html">
+                    <a href="{{ route('password.request') }}">
                       <small>Lupa Password?</small>
                     </a>
                   </div>

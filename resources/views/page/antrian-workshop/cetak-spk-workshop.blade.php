@@ -12,11 +12,9 @@
 
         .header {
             text-align: center;
-            background: linear-gradient(to bottom, #ffff66 0%, #ff6666 100%);
+            background-color: #343a40;
             color: #fff;
             padding: 10px;
-            /* Background rounded */
-            border-radius: 10px;
         }
 
         .title {
@@ -37,7 +35,6 @@
             margin-top: 20px;
             border: 1px solid #ccc;
             padding: 10px;
-            border-radius: 10px;
         }
 
         .job-details h2 {
@@ -60,7 +57,7 @@
 
         .serial-number {
             margin-top: 6px;
-            font-size: 15px;
+            font-size: 18spx;
             font-weight: bold;
             color: #ffffff;
         }
@@ -74,12 +71,21 @@
             text-align: left;
         }
 
+        table, th, td {
+            border: 1px solid rgb(216, 216, 216);
+            border-collapse: collapse;
+        }
+
         .table {
             margin-top: 10px;
         }
 
         .table td {
             padding: 5px 10px;
+        }
+
+        .table th {
+            padding: 10px;
         }
 
         .table-warning {
@@ -109,25 +115,21 @@
         .bg-success {
             background-color: #28a745;
             color: #fff;
-            border-radius: 20px;
         }
 
         .bg-danger {
             background-color: #dc3545;
             color: #fff;
-            border-radius: 20px;
         }
 
         .bg-outline-success {
             background-color: #cefad0;
             color: #343a40;
-            border-radius: 20px;
         }
 
         .bg-outline-danger {
             background-color: #f8d7da;
             color: #343a40;
-            border-radius: 20px;
         }
 
         .table-header {
@@ -157,7 +159,7 @@
 <body>
     <div class="header">
         <div class="title">Surat Perintah Kerja (e-SPK)</div>
-        <div class="serial-number">Nomor SPK: {{ date('Ymd') . $antrian->id . rand(100,1000) }}</div>
+        <div class="serial-number">Nomor Tiket: {{ $antrian->ticket_order }}</div>
     </div>
 
     <table class="table table-responsive text-center">
@@ -166,50 +168,110 @@
             <td width="50%"><strong class="text-danger" style="font-size: 30px">Deadline</strong></td>
         </tr>
         <tr>
-            <td class="bg-outline-success px-3" style="font-size: 20px; font-weight:bold;">2023-12-12 17:00</td>
-            <td class="bg-outline-danger px-3" style="font-size: 20px; font-weight:bold;">2023-12-12 17:00</td>
+            <td class="bg-outline-success px-3" style="font-size: 20px; font-weight:bold;">{{ $antrian->start_job }}</td>
+            <td class="bg-outline-danger px-3" style="font-size: 20px; font-weight:bold;">{{ $antrian->end_job }}</td>
         </tr>
     </table>
 
     <div class="job-details">
         <h2>Spesifikasi Pekerjaan</h2>
         <hr>
-        <table class="table text-left">
+        <table class="table table-responsive text-left" style="">
             <tbody>
                 <tr>
                     <th class="table-header">Jenis Pekerjaan</th>
-                    <td>: Cetak Brosur</td>
-                    <td rowspan="9" class="text-center">
-                        <img src="{{ }}" alt="Gambar Pekerjaan" width="150px">
+                    <td>: {{ $antrian->job->job_name }}</td>
+                    <td rowspan="7" class="text-center">
+                        <img src="{{ public_path('storage/acc-desain/'. $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="100%">
                     </td>
                 </tr>
                 <tr>
                     <th class="table-header">Jumlah</th>
-                    <td>: 1000 buah</td>
+                    <td>: {{ $antrian->qty }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Deskripsi</th>
-                    <td>: Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea nisi quod assumenda dolorem nihil enim sequi hic, sed, explicabo, quidem officia quos nesciunt. Quisquam error fuga fugit consequuntur tempore aliquam.</td>
+                    <td>: {{ $antrian->note }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Lokasi Workshop</th>
-                    <td>: Malang</td>
+                    <td>: {{ $antrian->working_at }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Operator</th>
-                    <td>: Angga Ardian, M. Hadi Fiqih Pratama</td>
+                    <td>:
+                    @if($antrian->operator_id)
+                        @php
+                            $operatorId = explode(',', $antrian->operator_id);
+                            foreach ($operatorId as $item) {
+                                if($item == 'rekanan'){
+                                    echo '- Rekanan';
+                                }
+                                else{
+                                    $antriann = App\Models\Employee::find($item);
+                                    //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                    if($antriann->id == end($operatorId)){
+                                        echo '- ' . $antriann->name;
+                                    }
+                                    else{
+                                        echo '- ' . $antriann->name . "<br>";
+                                    }
+                                }
+                            }
+                        @endphp
+                        @else
+                        -
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <th class="table-header">Finishing</th>
-                    <td>: Indra Ravidsyah</td>
+                    <td>:
+                        @if($antrian->finisher_id)
+                            @php
+                                $finisherId = explode(',', $antrian->finisher_id);
+                                foreach ($finisherId as $item) {
+                                    if($item == 'rekanan'){
+                                        echo '- Rekanan';
+                                    }
+                                    else{
+                                        $antriann = App\Models\Employee::find($item);
+                                        //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                        if($antriann->id == end($finisherId)){
+                                            echo '- ' . $antriann->name;
+                                        }
+                                        else{
+                                            echo '- ' . $antriann->name . "<br>";
+                                        }
+                                    }
+                                }
+                            @endphp
+                            @else
+                            -
+                            @endif
+                    </td>
                 </tr>
                 <tr>
                     <th class="table-header">Pengawas / QC</th>
-                    <td>: Abdul Ghofar</td>
-                </tr>
-                <tr>
-                    <th class="table-header">Perkiraan Waktu</th>
-                    <td>: 1 jam</td>
+                    <td>:
+                        @if($antrian->qc_id)
+                            @php
+                                $qcId = explode(',', $antrian->qc_id);
+                                foreach ($qcId as $item) {
+                                        $antriann = App\Models\Employee::find($item);
+                                        //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
+                                        if($antriann->id == end($qcId)){
+                                            echo '- ' . $antriann->name;
+                                        }
+                                        else{
+                                            echo '- ' . $antriann->name . "<br>";
+                                        }
+                                    }
+                            @endphp
+                            @else
+                                -
+                            @endif
+                    </td>
                 </tr>
             </tbody>
 

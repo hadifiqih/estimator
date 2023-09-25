@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        if(Auth::viaRemember()){
+            return view('page.dashboard');
+        }
+    }
     //Menampilkan halaman login
     public function index() {
         return view('auth.login');

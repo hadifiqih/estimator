@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Sales;
 use App\Models\Antrian;
 
+use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function pilihTanggal()
     {
         return view('page.antrian-workshop.pilih-tanggal');
@@ -68,5 +74,57 @@ class ReportController extends Controller
 
         $pdf = PDF::loadview('page.antrian-workshop.cetak-spk-workshop', compact('antrian'));
         return $pdf->stream($antrian->ticket_order . '-espk.pdf');
+
+        // return view('page.antrian-workshop.cetak-spk-workshop', compact('antrian'));
     }
+
+    public function reportSales()
+    {
+        $sales = Sales::where('user_id', auth()->user()->id)->first();
+        $salesId = $sales->id;
+
+        $totalOmset = 0;
+
+        $date = date('Y-m-d'). ' 00:00:00';
+
+        $antrians = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
+            ->orderByDesc('created_at')
+            ->where('status', '1')
+            ->where('sales_id', $salesId)
+            ->where('created_at', '>=', $date)
+            ->get();
+
+        foreach ($antrians as $antrian) {
+            $totalOmset += $antrian->omset;
+        }
+
+        return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'date'));
+    }
+
+    public function reportSalesByDate()
+    {
+        if(request()->has('tanggal')) {
+            $date = request('tanggal');
+        } else {
+            $date = date('Y-m-d'). ' 00:00:00';
+        }
+
+        $sales = Sales::where('user_id', auth()->user()->id)->first();
+        $salesId = $sales->id;
+
+        $antrians = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
+            ->orderByDesc('created_at')
+            ->where('status', '1')
+            ->where('sales_id', $salesId)
+            ->where('created_at', '>=', $date)
+            ->get();
+
+        $totalOmset = 0;
+        foreach ($antrians as $antrian) {
+            $totalOmset += $antrian->omset;
+        }
+
+        return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'date'));
+    }
+
 }

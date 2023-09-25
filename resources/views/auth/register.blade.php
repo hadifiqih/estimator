@@ -21,7 +21,7 @@
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('sneat') }}/assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('adminlte') }}/dist/img/antree-150x150.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -94,11 +94,12 @@
                     name="nama"
                     placeholder="Masukkan nama lengkap"
                     autofocus
+                    required
                   />
                 </div>
                 <div class="mb-3">
                   <label for="email" class="form-label">Email</label>
-                  <input type="text" class="form-control" id="email" name="email" placeholder="Masukkan email" autocomplete="off" />
+                  <input type="text" class="form-control" id="email" name="email" placeholder="Masukkan email" autocomplete="off" required/>
                 </div>
                 {{-- Input Nomor Telepon --}}
                 <div class="mb-3">
@@ -110,23 +111,17 @@
                       name="telepon"
                       placeholder="Masukkan nomor telepon"
                       autofocus
+                      required
                     />
                   </div>
                 {{-- Input Alamat --}}
                 <div class="mb-3 form-password-toggle">
                   <label class="form-label" for="password">Password</label>
                   <div class="input-group input-group-merge">
-                    <input
-                      type="password"
-                      id="password"
-                      class="form-control"
-                      name="password"
-                      placeholder="Masukkan password"
-                      aria-describedby="password"
-                    />
+                    <input type="password" id="password" class="form-control" name="password" placeholder="Masukkan password" aria-describedby="password" required/>
                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                   </div>
-                  <div class="invalid-feedback" id="passwordError"></div>
+                  <div class="invalid-feedback" id="passwordError">Password minimal 8 karakter</div>
                 </div>
 
                 <div class="mb-3">
@@ -136,12 +131,13 @@
                       class="form-control"
                       id="tahun"
                       name="tahunMasuk"
-                      placeholder="Tahun Masuk Kerja"/>
+                      placeholder="Tahun Masuk Kerja"
+                      required/>
                   </div>
 
                 <div class="mb-3">
                     <label for="divisi" class="form-label">Divisi/Jabatan</label>
-                    <select id="divisi" class="form-select" name="divisi">
+                    <select id="divisi" class="form-select" name="divisi" required>
                         <option value="" selected disabled>-- Pilih Divisi --</option>
                         <option value="manajemen">Manajemen</option>
                         <option value="produksi">Produksi</option>
@@ -217,7 +213,7 @@
 
                 <div class="mb-3">
                     <label for="lokasi" class="form-label">Tempat Kerja</label>
-                    <select id="lokasi" class="form-select" name="lokasi">
+                    <select id="lokasi" class="form-select" name="lokasi" required>
                         <option selected disabled>-- Pilih Tempat Kerja --</option>
                         <option value="Malang">Malang</option>
                         <option value="Surabaya">Surabaya</option>
@@ -227,7 +223,7 @@
 
                 <div class="mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" value="1"/>
+                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" value="1" required/>
                     <label class="form-check-label" for="terms-conditions">
                       Saya mematuhi
                       <a href="javascript:void(0);">syarat & ketentuan</a>

@@ -26,17 +26,17 @@
       <div class="col-sm">
         <div class="form-check">
             @php
-                $isCheckedO = is_array($operatorId) && in_array($operator->employee->id, $operatorId);
-                $rekananO = is_array($operatorId) && in_array('rekanan', $operatorId);
+                $isCheckedOperator = is_array($operatorId) && in_array($operator->employee->id, $operatorId);
+                $rekananOperator = is_array($operatorId) && in_array('rekanan', $operatorId);
             @endphp
-            <input class="form-check-input" type="checkbox" id="operator{{ $operator->employee->id }}" name="operator[]" value="{{ $operator->employee->id }}" {{ $isCheckedO ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="operator{{ $operator->employee->id }}" name="operator[]" value="{{ $operator->employee->id }}" {{ $isCheckedOperator ? 'checked' : '' }}>
             <label for="operator{{ $operator->employee->id }}" class="form-check-label">{{ $operator->employee->name }}</label>
         </div>
       </div>
       @endforeach
       <div class="col-sm">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="operatorRekanan" name="operator[]" value="rekanan" {{ $rekananO ? 'checked' : '' }}>
+          <input class="form-check-input" type="checkbox" id="operatorRekanan" name="operator[]" value="rekanan" {{ $rekananOperator ? 'checked' : '' }}>
           <label for="operatorRekanan" class="form-check-label">Rekanan</label>
         </div>
       </div>
@@ -54,17 +54,17 @@
       <div class="col-sm">
         <div class="form-check">
             @php
-                $isCheckedF = is_array($finisherId) && in_array($finishing->employee->id, $finisherId);
-                $rekananF = is_array($finisherId) && in_array('rekanan', $finisherId);
+                $isCheckedFinishing = is_array($finisherId) && in_array($finishing->employee->id, $finisherId);
+                $rekananFinishing = is_array($finisherId) && in_array('rekanan', $finisherId);
             @endphp
-            <input class="form-check-input" type="checkbox" id="finishing{{ $finishing->employee->id }}" name="finisher[]" value="{{ $finishing->employee->id }}" {{ $isCheckedF ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="finishing{{ $finishing->employee->id }}" name="finisher[]" value="{{ $finishing->employee->id }}" {{ $isCheckedFinishing ? 'checked' : '' }}>
             <label for="finishing{{ $finishing->employee->id }}" class="form-check-label">{{ $finishing->employee->name }}</label>
         </div>
       </div>
       @endforeach
       <div class="col-sm">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="finishingRekanan" name="finisher[]" value="rekanan" {{ $rekananF ? 'checked' : '' }}>
+          <input class="form-check-input" type="checkbox" id="finishingRekanan" name="finisher[]" value="rekanan" {{ $rekananFinishing ? 'checked' : '' }}>
           <label for="finishingRekanan" class="form-check-label">Rekanan</label>
         </div>
       </div>

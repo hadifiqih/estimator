@@ -1,23 +1,27 @@
 <?php
 
+use App\Models\User;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Events\SendGlobalNotification;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AntrianController;
-use App\Http\Controllers\DesignController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\OrderController;
+use Illuminate\Auth\Events\PasswordReset;
+use App\Http\Controllers\DesignController;
+use App\Http\Controllers\ReportController;
+
+use App\Http\Controllers\AntrianController;
+
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DocumentationController;
-use App\Http\Controllers\JobController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ReportController;
-
-use App\Models\Employee;
-
-use App\Events\SendGlobalNotification;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,7 +42,57 @@ Route::get('/dashboard', function () {
     return view('page.dashboard');
 });
 
-Route::get('/test', [OrderController::class, 'cobaPush'])->name('cobaPush');
+// Route::get('/espk', [ReportController::class, 'cetakEspk'])->name('cetak-espk');
+
+// Reset Password ---------------------
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')->name('password.request');
+
+Route::post('/forgot-password', function (Request $request) {
+    $request->validate(['email' => 'required|email']);
+
+    $status = Password::sendResetLink(
+        $request->only('email')
+    );
+
+    return $status === Password::RESET_LINK_SENT
+                ? back()->with(['status' => __($status)])
+                : back()->withErrors(['email' => __($status)]);
+
+})->middleware('guest')->name('password.email');
+
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token, 'email' => request()->query('email')]);
+})->middleware('guest')->name('password.reset');
+
+Route::post('/reset-password', function (Request $request) {
+    $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    $status = Password::reset(
+        $request->only('email', 'password', 'password_confirmation', 'token'),
+        function (User $user, string $password) {
+            $user->forceFill([
+                'password' => Hash::make($password)
+            ])->setRememberToken(Str::random(60));
+
+            $user->save();
+
+            event(new PasswordReset($user));
+        }
+    );
+
+    return $status === Password::PASSWORD_RESET
+                ? redirect()->route('auth.login')->with('status', __($status))
+                : back()->withErrors(['email' => [__($status)]]);
+})->middleware('guest')->name('password.update');
+
+// End Reset Password ---------------------
 
 Route::group(['middleware' => 'auth'], function () {
     //Menuju Antrian Controller (Admin)
@@ -66,7 +120,10 @@ Route::controller(AuthController::class)->group(function(){
 
 Route::controller(ReportController::class)->group(function(){
     Route::get('/report-workshop', 'pilihTanggal')->name('laporan.workshop');
-    Route::post('/report-workshop-pdf', 'exportLaporanWorkshopPDF')->name('laporan-workshop-pdf');    Route::get('/cetak-espk/{id}', 'cetakEspk')->name('cetak-espk');
+    Route::post('/report-workshop-pdf', 'exportLaporanWorkshopPDF')->name('laporan-workshop-pdf');
+    Route::get('/cetak-espk/{id}', 'cetakEspk')->name('cetak-espk');
+    Route::get('/sales/report', 'reportSales')->name('report.sales');
+    Route::post('/sales/report', 'reportSalesByDate')->name('report.salesByDate');
 });
 
 Route::controller(DesignController::class)->group(function(){

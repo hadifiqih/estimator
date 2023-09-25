@@ -13,6 +13,11 @@ use function PHPUnit\Framework\returnSelf;
 
 class SalesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $antrians = Antrian::with('sales', 'customer', 'job')->where('status', '1')->get();
@@ -47,7 +52,7 @@ class SalesController extends Controller
     {
         $sales = Sales::all();
         $jobs = Job::all();
-        
+
 
         if (request()->get('customer')) {
             $customer = Customer::where('customer_phone', request()->get('customer'))->first();
@@ -132,12 +137,12 @@ class SalesController extends Controller
         return redirect()->route('category.index')->with('success', 'Data Berhasil Ditambahkan !');
     }
 
-    
 
 
 
 
-    
+
+
 
 
 }
