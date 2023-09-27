@@ -102,7 +102,7 @@
                 <td class="text-center">{{ $antrian->qty_produk }}</td>
                 <td>{{ $antrian->start_job }}</td>
                 <td>{{ $antrian->timer_stop ? $antrian->timer_stop : 'Dalam Proses' }}</td>
-                <td>{{ $antrian->order->user->name }}</td>
+                <td>{{ $antrian->order->employee->name }}</td>
                 <td>
                     @php
                         $operatorId = explode(',', $antrian->operator_id);

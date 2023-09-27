@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
-
-use App\Models\Sales;
 use App\Models\Job;
-use App\Models\Order;
-use App\Models\Employee;
-use App\Models\Customer;
-use App\Models\Design;
 use App\Models\User;
+use App\Models\Order;
+use App\Models\Sales;
+use App\Models\Design;
 
+use App\Models\Customer;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Events\SendGlobalNotification;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Notification;
+use Intervention\Image\Facades\Image;
 
 class OrderController extends Controller
 {
@@ -305,7 +306,7 @@ class OrderController extends Controller
     public function tambahProdukByModal(Request $request){
 
         $job = new Job;
-        $job->job_name = $request->namaProduk;
+        $job->job_name = ucwords($request->namaProduk);
         $job->job_type = $request->jenisProduk;
         $job->save();
 

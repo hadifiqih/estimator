@@ -42,9 +42,7 @@ Route::get('/dashboard', function () {
     return view('page.dashboard');
 });
 
-// Route::get('/espk', [ReportController::class, 'cetakEspk'])->name('cetak-espk');
-
-// Reset Password ---------------------
+// Reset Password ------------------------------
 
 Route::get('/forgot-password', function () {
     return view('auth.forgot-password');

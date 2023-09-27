@@ -86,8 +86,8 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ route('auth.logout') }}" role="button">
-          <i class="fas fa-door-open" style="color: #ff0000;"></i>
+        <a class="nav-link" href="javascript:void(0);" role="button" onclick="confirmLogout()">
+            <i class="fas fa-door-open" style="color: #ff0000;"></i>
         </a>
       </li>
     </ul>
@@ -306,6 +306,14 @@
     $(function () {
         bsCustomFileInput.init();
     });
+
+    function confirmLogout(){
+        const confirmation = confirm('Apakah Anda yakin ingin keluar?');
+        if (confirmation) {
+          // Redirect to the logout URL if the user clicks "OK"
+          window.location.href = "{{ route('auth.logout') }}";
+        }
+    }
 </script>
 <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 <script>
