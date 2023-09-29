@@ -113,7 +113,7 @@ class OrderController extends Controller
             array("user-". $order->employee->user->id),
             array("web" => array("notification" => array(
               "title" => "Kiw Kiw! Ada desain baru menunggu !",
-              "body" => "📣 Sat set ! Semangattt, pastikan ga ada revisi yaa !",
+              "body" => "📣 Cek brief dulu, pastikan ga ada revisi !✨",
             )),
         ));
 
@@ -237,20 +237,6 @@ class OrderController extends Controller
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
 
-        // Menampilkan push notifikasi saat selesai
-        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
-            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
-            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
-        ));
-
-        $publishResponse = $beamsClient->publishToInterests(
-            array("designer"),
-            array("web" => array("notification" => array(
-              "title" => "Ada desain baru menunggu !",
-              "body" => "&#128227; Cek brief sekarang, jangan sampai diambil orang lain !",
-            )),
-        ));
-
         return redirect()->route('design.index')->with('success', 'Design berhasil ditambahkan');
     }
 
@@ -310,6 +296,20 @@ class OrderController extends Controller
         $order->status = '1';
         $order->save();
 
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToUsers(
+            array("user-". $order->employee->user->id),
+            array("web" => array("notification" => array(
+              "title" => "Yah ! Ada revisi nih !",
+              "body" => "📣 Cek sekarang, untuk mengupload file desainnya !",
+            )),
+        ));
+
         return redirect()->route('design.index')->with('success', 'Design berhasil diupdate');
     }
 
@@ -353,7 +353,6 @@ class OrderController extends Controller
         $employee = Employee::find($order->employee_id);
         $employee->design_load -= 1;
         $employee->save();
-
 
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
@@ -402,6 +401,28 @@ class OrderController extends Controller
 
         $order->ada_revisi = 2;
         $order->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $publishResponse = $beamsClient->publishToUsers(
+            array("user-". $order->sales->user->id),
+            array("web" => array("notification" => array(
+              "title" => "Yuhuu.. Revisi Desainmu sudah diunggah !",
+              "body" => "📣 Lihat updatenya sekarang, pastikan tidak ada revisi lagi ya!",
+            )),
+        ));
+
+        $publishResponse = $beamsClient->publishToInterests(
+            array("operator"),
+            array("web" => array("notification" => array(
+              "title" => "Update Revisi Desain !",
+              "body" => "📣 Cek revisi desain dengan nomer tiket ". $order->ticket_order . ", sales ". $order->sales->sales_name,
+            )),
+        ));
 
         return redirect()->route('design.index')->with('success-submit', 'File revisi desain berhasil diupload');
     }

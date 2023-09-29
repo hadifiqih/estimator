@@ -155,6 +155,12 @@
                     <p>List Order</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('report.sales') }}" class="nav-link {{ request()->routeIs('report.sales') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Ringkasan Penjualan</p>
+                    </a>
+                </li>
                 @endif
 
                 @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'supervisor')
@@ -174,9 +180,7 @@
                     <p>Laporan Workshop</p>
                     </a>
                 </li>
-                @endif
-
-                @if(auth()->user()->role == 'estimator')
+                @elseif(auth()->user()->role == 'estimator')
                 <li class="nav-item">
                     <a href="{{ route('estimator.index') }}" class="nav-link {{ request()->routeIs('estimator.index') || request()->routeIs('estimator.edit') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
@@ -185,13 +189,13 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->role == 'sales')
-                <li class="nav-item">
-                    <a href="{{ route('report.sales') }}" class="nav-link {{ request()->routeIs('report.sales') ? 'active' : '' }}">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Ringkasan Penjualan</p>
-                    </a>
-                </li>
+                @if(auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'staffGudang' )
+                    <li class="nav-item">
+                        <a href="{{ route('antrian.index') }}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Antrian Workshop</p>
+                        </a>
+                    </li>
                 @endif
             </ul>
           </li>
