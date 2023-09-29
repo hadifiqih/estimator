@@ -258,7 +258,7 @@ class AntrianController extends Controller
         $mesin = implode(',', $request->input('jenisMesin'));
         $antrian->machine_code = $mesin;
         }
-
+        $antrian->admin_note = $request->input('catatan');
         $antrian->save();
 
         // Menampilkan push notifikasi saat selesai
@@ -320,7 +320,13 @@ class AntrianController extends Controller
         $this->authorize('delete', Antrian::class);
 
         $antrian = Antrian::find($id);
+
+        $order = Order::where('id', $antrian->order_id)->first();
+        $order->toWorkshop = 0;
+        $order->save();
+
         if ($antrian) {
+
             $antrian->delete();
             return redirect()->route('antrian.index')->with('success-delete', 'Data antrian berhasil dihapus!');
         } else {

@@ -26,7 +26,7 @@
   @endif
 
   <div class="card-body">
-    <form action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('order.updateRevisiDesain', $order->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 
@@ -78,12 +78,12 @@
       </div>
 
       {{-- Uplaoad File Referensi Desain --}}
-      <div class="mb-3" id="refDesain">
-        <h6><strong>File Ref. Desain </strong><span class="font-italic text-danger text-sm">*(Jika tidak ada perubahan, biarkan kosong)</span></h6>
+      <div class="mb-3" id="accDesain">
+        <h6><strong>File Acc Desain </strong><span class="font-italic text-danger text-sm">*Wajib mengunggah jika terdapat revisi</span></h6>
         <div class="input-group">
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="refDesain" name="refdesain">
-            <label class="custom-file-label" for="refDesain"><span class="text-secondary">Pilih File..</span></label>
+            <input type="file" class="custom-file-input" id="accDesain" name="accdesain">
+            <label class="custom-file-label" for="accDesain"><span class="text-secondary">Pilih File..</span></label>
           </div>
         </div>
       </div>
@@ -151,13 +151,6 @@
 <script>
   $(document).ready(function() {
     bsCustomFileInput.init();
-
-    //Jika radio button desain baru checked, maka tampilkan inputan refdesain
-    if ($('#inlineRadio1').is(':checked')) {
-      $('#refDesain').show();
-    }else{
-      $('#refDesain').hide();
-    }
 
     $('#produkForm').submit(function(e) {
       e.preventDefault();
@@ -230,19 +223,6 @@
                 }
             });
         }
-    });
-</script>
-
-<script>
-    //menampilkan input refdesain jika memilih desain baru & menghilangkan input refdesain jika memilih edit desain
-    $(document).ready(function() {
-        $('input[type="radio"]').click(function() {
-            if ($(this).attr('id') == 'inlineRadio1') {
-                $('#refDesain').show();
-            } else {
-                $('#refDesain').hide();
-            }
-        });
     });
 </script>
 

@@ -76,6 +76,7 @@
                                             <th scope="col">Finishing</th>
                                             <th scope="col">QC</th>
                                             <th scope="col">Tempat</th>
+                                            <th scope="col">Catatan Admin</th>
                                             @if(auth()->user()->role == 'admin')
                                                 <th scope="col">Aksi</th>
                                             @endif
@@ -96,8 +97,14 @@
                                                 <td id="waktu{{ $antrian->id }}" class="text-center"></td>
 
                                                 {{-- File dari Desainer --}}
-                                                <td>
-                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}" target="_blank">Download</a>
+                                                <td class="text-center">
+                                                    @if($antrian->order->ada_revisi == 0)
+                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
+                                                    @elseif($antrian->order->ada_revisi == 1)
+                                                    <a class="btn btn-secondary btn-sm disabled" href="#">Download</a><span class="text-danger text-sm">(Sedang Direvisi)</span>
+                                                    @elseif($antrian->order->ada_revisi == 2)
+                                                    <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a><span class="text-danger text-sm">(Sudah Direvisi)</span>
+                                                    @endif
                                                 </td>
 
                                                 {{-- File dari Produksi --}}
@@ -224,6 +231,7 @@
                                                             }
                                                     @endphp
                                                 </td>
+                                                <td>{{ $antrian->admin_note != null ? $antrian->admin_note : "-" }}</td>
 
                                                 @if(auth()->user()->role == 'admin')
                                                 <td>
@@ -530,7 +538,15 @@
                                                 <td>{{ $antrian->sales->sales_name }}</td>
                                                 <td>{{ $antrian->job->job_name }}</td>
 
-                                                <td><a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a></td>
+                                                <td class="text-center">
+                                                    @if($antrian->order->ada_revisi == 0)
+                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
+                                                    @elseif($antrian->order->ada_revisi == 1)
+                                                    <a class="btn btn-warning btn-sm disabled" href="#">Download</a><span class="text-danger">(Sedang Direvisi)</span>
+                                                    @elseif($antrian->order->ada_revisi == 2)
+                                                    <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a><span class="text-danger text-sm">(Sudah Direvisi)</span>
+                                                    @endif
+                                                </td>
 
                                                 <td>
                                                     @if($antrian->operator_id)

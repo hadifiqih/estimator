@@ -130,7 +130,7 @@
             <select class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
 
             </select>
-            @if($tempat != null)
+            @if($antrian->working_at != null)
             <p class="text-sm text-danger font-italic mt-1">*Jika tidak ada perubahan, <strong>biarkan kosong.</strong></p>
             @endif
 
@@ -139,13 +139,19 @@
 
     <div class="mb-3">
         {{-- Masukkan start job --}}
-        <label for="start_job" class="form-label">Mulai</label>
-        <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $antrian->start_job }}">
+        <label for="start_job" class="form-label">Mulai<span class="text-danger">*</span></label>
+        <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $antrian->start_job }}" required>
     </div>
     <div class="mb-3">
         {{-- Masukkan Deadline --}}
-        <label for="deadline" class="form-label">Deadline</label>
-        <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="deadline" value="{{ $antrian->end_job }}">
+        <label for="deadline" class="form-label">Deadline<span class="text-danger">*</span></label>
+        <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="deadline" value="{{ $antrian->end_job }}" required>
+    </div>
+
+    <div class="mb-3">
+        {{-- Masukkan Keterangan --}}
+        <label for="keterangan" class="form-label">Catatan Admin</label>
+        <textarea class="form-control" id="keterangan" rows="3" name="catatan">{{ $antrian->admin_note != null ? $antrian->admin_note : "" }}</textarea>
     </div>
 
     <button type="submit" class="btn btn-primary">Simpan</button>

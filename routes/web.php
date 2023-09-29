@@ -149,6 +149,10 @@ Route::controller(OrderController::class)->group(function(){
     Route::post('/order/tambahProdukByModal', 'tambahProdukByModal')->name('tambahProdukByModal');
     Route::get('/get-jobs-by-category/{category_id}', 'getJobsByCategory')->name('getJobsByCategory');
     Route::post('/order/set-desainer/', 'bagiDesain')->name('order.bagiDesain');
+    Route::get('/order/{id}/revisi-desain', 'revisiDesain')->name('order.revisiDesain');
+    Route::put('/order/{id}/revisi-desain', 'updateRevisiDesain')->name('order.updateRevisiDesain');
+    Route::post('/order/upload-revisi-desain', 'uploadRevisi')->name('order.uploadRevisi');
+    Route::get('/order/{id}/submit-revisi', 'submitRevisi')->middleware('auth')->name('order.submitRevisi');
 });
 
 Route::controller(AntrianController::class)->group(function(){

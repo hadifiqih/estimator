@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('title', '')
-
 @section('username', Auth::user()->name)
 
 @section('page', 'Dashboard')
