@@ -183,7 +183,7 @@
                                                 <input type="hidden" name="desainer_id" value="{{ $employee->id }}">
                                                 <input type="hidden" name="order_id" value="{{ $desain->id }}">
 
-                                                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></button>
+                                                <button type="submit" class="btn btn-sm btn-primary submitButton"><i class="fas fa-check"></i></button><span id="loader" class="loader" style="display: none;"></span>
                                             </form>
                                         </td>
                                     </tr>
@@ -408,7 +408,7 @@
                                 </div>
 
                                 <div class="modal-footer justify-content-between">
-                                    <a type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary">Upload</a>
+                                    <a type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><span id="loader" class="loader" style="display: none;"></span>
                                 </div>
 
                             </div>
@@ -657,7 +657,7 @@
                                         </div>
 
                                         <div class="modal-footer justify-content-between">
-                                            <a type="button" href="{{ route('order.submitRevisi', $desain->id) }}" class="btn btn-primary">Upload</a>
+                                            <a type="button" href="{{ route('order.submitRevisi', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><span id="loader" class="loader" style="display: none;"></span>
                                         </div>
 
                                     </div>
@@ -710,7 +710,6 @@
         $("#tableAntrianDesain").DataTable({
             "responsive": true,
             "autoWidth": false,
-
         });
         $("#tableAntrianDikerjakan").DataTable({
             "responsive": true,
@@ -733,6 +732,14 @@
     });
 </script>
 
+<script>
+    $(document).ready(function() {
+        $('.submitButton').click(function() {
+            $(this).attr('disabled', true);
+            $('#loader').show();
+        });
+    });
+</script>
 
 @if(session('success-submit'))
 <script>

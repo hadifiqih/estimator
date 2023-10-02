@@ -11,13 +11,14 @@ use App\Models\Design;
 use App\Models\Customer;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use App\Notifications\AntrianDesain;
 use Illuminate\Support\Facades\Auth;
-use App\Events\SendGlobalNotification;
 
+use Intervention\Image\Facades\Image;
+use App\Events\SendGlobalNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
-use Intervention\Image\Facades\Image;
 
 class OrderController extends Controller
 {
@@ -102,6 +103,10 @@ class OrderController extends Controller
         $employee = Employee::find($request->desainer_id);
         $employee->design_load += 1;
         $employee->save();
+
+        $user = User::find($employee->user_id);
+        $sales = Sales::find($order->sales_id);
+        $user->notify(new AntrianDesain($user, $sales, $order));
 
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(

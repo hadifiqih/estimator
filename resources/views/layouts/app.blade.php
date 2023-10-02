@@ -26,23 +26,30 @@
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   {{-- Dropzone --}}
   <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
   <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
+
+  <style>
+    .loader {
+        border: 3px solid #f3f3f3; /* Light grey */
+        border-top: 3px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 0.3s linear infinite;
+        }
+
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+  </style>
 
   @yield('style')
   {{-- Pusher --}}
   <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
   <script>
     navigator.serviceWorker.register('/service-worker.js');
-  </script>
-  <script>
-    var pusher = new Pusher('041462e3ef025d960fee', {
-      cluster: 'ap1'
-    });
-
-    var channel = pusher.subscribe('global');
-    channel.bind('global-notif', function(data) {
-      notif(data);
-    });
   </script>
 </head>
 
@@ -59,36 +66,60 @@
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-      <!-- Navbar Search -->
-      <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
+      <!-- Messages Dropdown Menu -->
+      <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="far fa-bell"></i>
+            @if(auth()->user()->unreadNotifications->count() > 0)
+                <span class="badge badge-danger navbar-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
+            @endif
         </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" id="searchTop" name="searchTop">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          @foreach (auth()->user()->unreadNotifications->take(6) as $notification)
+          <a href="{{ route('notification.markAsRead', $notification->id) }}" class="dropdown-item">
+            <!-- Message Start -->
+            <div class="media">
+              <img src="{{ asset('adminlte') }}/dist/img/antree-150x150.png" alt="User Avatar" class="img-size-50 mr-3 img-circle">
+              <div class="media-body">
+                <h3 class="dropdown-item-title">
+                    {{ $notification->data['title'] }}
+                    <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+                </h3>
+                <p class="text-sm">{{ $notification->data['message'] }}</p>
+                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i>
+                    {{ $notification->created_at->diffForHumans() }}
+                </p>
               </div>
             </div>
-          </form>
+            <!-- Message End -->
+          </a>
+          <div class="dropdown-divider"></div>
+          @endforeach
+          @foreach (auth()->user()->readNotifications->take(3) as $notification)
+            <a href="#" class="dropdown-item">
+                <!-- Message Start -->
+                <div class="media">
+                <img src="{{ asset('adminlte') }}/dist/img/antree-150x150.png" alt="User Avatar" class="img-size-50 mr-3 img-circle">
+                <div class="media-body">
+                    <h3 class="dropdown-item-title">
+                        {{ $notification->data['title'] }}
+                    </h3>
+                    <p class="text-sm">{{ $notification->data['message'] }}</p>
+                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i>
+                        {{ $notification->created_at->diffForHumans() }}
+                    </p>
+                </div>
+                </div>
+                <!-- Message End -->
+            </a>
+            <div class="dropdown-divider"></div>
+          @endforeach
+          @if(auth()->user()->notifications->count() == 0)
+            <a href="#" class="dropdown-item text-sm text-center"> Tidak ada notifikasi </a>
+            <div class="dropdown-divider"></div>
+          @endif
+          <a href="{{ route('notification.markAllAsRead') }}" class="dropdown-item dropdown-footer {{ auth()->user()->unreadNotifications->count() > 0 ? "" : "disabled" }}">Tandai sudah dibaca ({{ auth()->user()->unreadNotifications->count() }})</a>
         </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt"></i>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="javascript:void(0);" role="button" onclick="confirmLogout()">
-            <i class="fas fa-door-open" style="color: #ff0000;"></i>
-        </a>
       </li>
     </ul>
   </nav>
@@ -97,10 +128,11 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
+    <div class="brand-link">
       <img src="{{ asset('adminlte') }}/dist/img/antree-logo.png" alt="AdminLTE Logo" class="brand-image elevation-3" style="opacity: .8" width="30">
       <span class="brand-text font-weight-light">Antree</span>
-    </a>
+      <span class="float-right" onclick="confirmLogout()"><i class="fas fa-sign-out-alt text-danger"></i></span>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar">

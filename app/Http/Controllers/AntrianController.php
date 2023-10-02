@@ -14,6 +14,7 @@ use App\Models\Payment;
 use App\Models\Documentation;
 use App\Models\Machine;
 use App\Models\Dokumproses;
+use App\Notifications\AntrianWorkshop;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -100,8 +101,7 @@ class AntrianController extends Controller
 
      public function store(Request $request)
      {
-
-        $idCustomer = Customer::where('telepon', $request->input('noHp'))->first();
+        $idCustomer = Customer::where('id', $request->input('nama'))->first();
         if($idCustomer){
             $repeat = $idCustomer->frekuensi_order + 1;
             $idCustomer->frekuensi_order = $repeat;
@@ -123,28 +123,31 @@ class AntrianController extends Controller
 
         $payment = new Payment();
         $payment->ticket_order = $ticketOrder;
-        $totalPembayaran = str_replace('.', '', $request->input('totalPembayaran'));
+        $totalPembayaran = str_replace(['Rp ', '.'], '', $request->input('totalPembayaran'));
         $payment->total_payment = $totalPembayaran;
-        $pembayaran = str_replace('.', '', $request->input('jumlahPembayaran'));
+        $pembayaran = str_replace(['Rp ', '.'], '', $request->input('jumlahPembayaran'));
         $payment->payment_amount = $pembayaran;
         // menyimpan inputan biaya jasa pengiriman
         if($request->input('biayaPengiriman') == null){
             $biayaPengiriman = 0;
         }else{
-            $biayaPengiriman = str_replace('.', '', $request->input('biayaPengiriman'));
+            $biayaPengiriman = str_replace(['Rp ', '.'], '', $request->input('biayaPengiriman'));
         }
         $payment->shipping_cost = $biayaPengiriman;
         // menyimpan inputan biaya jasa pemasangan
         if($request->input('biayaPemasangan') == null){
             $biayaPemasangan = 0;
         }else{
-            $biayaPemasangan = str_replace('.', '', $request->input('biayaPemasangan'));
+            $biayaPemasangan = str_replace(['Rp ', '.'], '', $request->input('biayaPemasangan'));
         }
         $payment->installation_cost = $biayaPemasangan;
+        // menyimpan inputan sisa pembayaran
+        $sisaPembayaran = str_replace(['Rp ', '.'], '', $request->input('sisaPembayaran'));
+        $payment->remaining_payment = $sisaPembayaran;
 
         // Menyimpan file purcase order
-        if($request->file('purchaseOrder')){
-            $purchaseOrder = $request->file('purchaseOrder');
+        if($request->file('filePO')){
+            $purchaseOrder = $request->file('filePO');
             $namaPurchaseOrder = $purchaseOrder->getClientOriginalName();
             $namaPurchaseOrder = Carbon::now()->format('Ymd') . '_' . $namaPurchaseOrder;
             $path = 'purchase-order/' . $namaPurchaseOrder;
@@ -152,11 +155,10 @@ class AntrianController extends Controller
         }else{
             $namaPurchaseOrder = null;
         }
-        $payment->purchase_order = $namaPurchaseOrder;
         $payment->payment_method = $request->input('jenisPembayaran');
         $payment->payment_status = $request->input('statusPembayaran');
         $payment->payment_proof = $namaBuktiPembayaran;
-        $payment->save();
+
 
         $accDesain = $request->file('accDesain');
         $namaAccDesain = $accDesain->getClientOriginalName();
@@ -166,10 +168,9 @@ class AntrianController extends Controller
 
         $order->acc_desain = $namaAccDesain;
         $order->toWorkshop = 1;
-        $order->save();
 
-        $hargaProduk = str_replace('.', '', $request->input('hargaProduk'));
-        $omset = str_replace('.', '', $request->input('totalPembayaran'));
+        $hargaProduk = str_replace(['Rp ', '.'], '', $request->input('hargaProduk'));
+        $omset = str_replace(['Rp ', '.'], '', $request->input('totalPembayaran'));
 
         $antrian = new Antrian();
         $antrian->ticket_order = $ticketOrder;
@@ -180,10 +181,19 @@ class AntrianController extends Controller
         $antrian->omset = $omset;
         $antrian->qty = $request->input('qty');
         $antrian->order_id = $request->input('idOrder');
-        $antrian->alamat_pengiriman = $request->input('alamatPengiriman');
+        if($request->input('alamatPengiriman') != null){
+            $antrian->alamat_pengiriman = $request->input('alamatPengiriman');
+        }
+        if($request->input('filePO')){
+            $antrian->file_po = $namaPurchaseOrder;
+        }
         $antrian->harga_produk = $hargaProduk;
         $antrian->save();
+        $order->save();
+        $payment->save();
 
+        $user = User::where('role', 'admin')->first();
+        $user->notify(new AntrianWorkshop($antrian, $order, $payment));
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
             "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
@@ -191,7 +201,7 @@ class AntrianController extends Controller
         ));
 
         $publishResponse = $beamsClient->publishToInterests(
-            array('operator', 'admin'),
+            array('admin'),
             array("web" => array("notification" => array(
               "title" => "📣 Cek sekarang, ada antrian baru !",
               "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",

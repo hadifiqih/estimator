@@ -50,7 +50,7 @@ class Employee extends Model
     {
         return $this->hasOne(Order::class);
     }
-    
+
     public function isOperator()
     {
         return $this->role === 'operator';

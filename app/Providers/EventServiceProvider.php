@@ -30,8 +30,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Antrian::observe(AntrianObserver::class);
-        Order::observe(OrderObserver::class);
+        //
     }
 
     /**

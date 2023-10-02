@@ -79,9 +79,7 @@
                                             <th scope="col">Catatan Admin</th>
                                             @if(auth()->user()->role == 'admin')
                                                 <th scope="col">Aksi</th>
-                                            @endif
-
-                                            @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                            @elseif(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
                                             <th scope="col">Progress</th>
                                             @endif
                                         </tr>
@@ -265,18 +263,25 @@
                                                 <td>
                                                     @php
                                                         $waktuSekarang = date('H:i');
-                                                        $waktuAktif = '16:45';
+                                                        $waktuAktif = '15:00';
                                                     @endphp
-                                                    @if( $waktuSekarang > $waktuAktif )
-                                                        @if($antrian->timer_stop != null && $antrian->end_job != null)
-                                                            <a href="" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Sip</a>
-                                                        @else
-                                                            <a type="button" class="btn btn-outline-danger btn-sm" href="{{ route('antrian.showProgress', $antrian->id) }}">Upload</a>
+                                                    <div class="btn-group">
+                                                        @if( $waktuSekarang > $waktuAktif )
+                                                            @if($antrian->timer_stop != null && $antrian->end_job != null)
+                                                                <a href="" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Sip</a>
+                                                            @else
+                                                                <a type="button" class="btn btn-outline-danger btn-sm" href="{{ route('antrian.showProgress', $antrian->id) }}">Upload</a>
+                                                            @endif
+                                                        @elseif( $waktuSekarang < $waktuAktif )
+                                                            <a type="button" class="btn btn-outline-danger btn-sm disabled"
+                                                            href="#">Belum Aktif</a>
                                                         @endif
-                                                    @elseif( $waktuSekarang < $waktuAktif )
-                                                        <a type="button" class="btn btn-outline-danger btn-sm disabled"
-                                                        href="#">Belum Aktif</a>
-                                                    @endif
+                                                        @if($antrian->end_job != null)
+                                                            <a href="{{ route('antrian.showDokumentasi', $antrian->id) }}" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Tandai Selesai</a>
+                                                        @else
+                                                            <a href="" class="btn btn-outline-success btn-sm disabled"><i class="fas fa-check"></i> Tandai Selesai</a>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 @endif
 
@@ -468,19 +473,19 @@
                                             <hr>
                                             <div class="form-group">
                                                 <label>Nominal Omset</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.'); }}" readonly>
+                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Harga Produk</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.'); }}" readonly>
+                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Biaya Jasa Pasang</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : $antrian->payment->installation_cost }}" readonly>
+                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : number_format($antrian->payment->installation_cost, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Biaya Jasa Pengiriman</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : $antrian->payment->shipping_cost }}" readonly>
+                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : number_format($antrian->payment->shipping_cost, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Alamat Pengiriman</label>
@@ -507,6 +512,9 @@
                                 </div>
                                 @endforeach
                                 <!-- /.card -->
+                                @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                    <p class="text-muted font-italic mt-2 text-sm">*Tombol <span class="text-danger">"Upload Progress"</span> akan aktif diatas jam 15.00</p>
+                                @endif
                             </div>
                             <!-- /.col -->
                         </div>

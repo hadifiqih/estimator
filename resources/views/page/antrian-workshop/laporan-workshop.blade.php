@@ -99,7 +99,7 @@
                 <td class="text-center">{{ $antrian->ticket_order }}</td>
                 <td>{{ $antrian->sales->sales_name }}</td>
                 <td>{{ $antrian->job->job_name }}</td>
-                <td class="text-center">{{ $antrian->qty_produk }}</td>
+                <td class="text-center">{{ $antrian->qty }}</td>
                 <td>{{ $antrian->start_job }}</td>
                 <td>{{ $antrian->timer_stop ? $antrian->timer_stop : 'Dalam Proses' }}</td>
                 <td>{{ $antrian->order->employee->name }}</td>
@@ -113,11 +113,13 @@
                             else{
                                 $antriann = App\Models\Employee::find($item);
                                 //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                if($antriann->id == end($operatorId)){
-                                    echo '- ' . $antriann->name;
-                                }
-                                else{
-                                    echo '- ' . $antriann->name . "<br>";
+                                if($antriann != null){
+                                    if($antriann->id == end($operatorId)){
+                                        echo '- ' . $antriann->name;
+                                    }
+                                    else{
+                                        echo '- ' . $antriann->name . "<br>";
+                                    }
                                 }
                             }
                         }
@@ -133,11 +135,13 @@
                             else{
                                 $antriann = App\Models\Employee::find($item);
                                 //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                if($antriann->id == end($finisherId)){
-                                    echo '- ' . $antriann->name;
-                                }
-                                else{
-                                    echo '- ' . $antriann->name . "<br>";
+                                if($antriann != null){
+                                    if($antriann->id == end($finisherId)){
+                                        echo '- ' . $antriann->name;
+                                    }
+                                    else{
+                                        echo '- ' . $antriann->name . "<br>";
+                                    }
                                 }
                             }
                         }
@@ -149,11 +153,13 @@
                         foreach ($qcId as $item) {
                                 $antriann = App\Models\Employee::find($item);
                                 //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                if($antriann->id == end($qcId)){
-                                    echo '- ' . $antriann->name;
-                                }
-                                else{
-                                    echo '- ' . $antriann->name . "<br>";
+                                if($antriann != null){
+                                    if($antriann->id == end($qcId)){
+                                        echo '- ' . $antriann->name;
+                                    }
+                                    else{
+                                        echo '- ' . $antriann->name . "<br>";
+                                    }
                                 }
                             }
                     @endphp

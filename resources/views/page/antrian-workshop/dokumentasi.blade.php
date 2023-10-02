@@ -27,7 +27,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <a href="{{ route('antrian.index') }}" class="btn btn-secondary">Kembali</a>
-                            <a href="{{ route('antrian.submitDokumentasi', $antrian->id) }}" class="btn btn-primary float-right">Upload</a>
+                            <a href="{{ route('antrian.markSelesai', $antrian->id) }}" class="btn btn-primary float-right">Upload</a>
                         </div>
                     </div>
                 </div>

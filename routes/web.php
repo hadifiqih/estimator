@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Events\SendGlobalNotification;
+use App\Notifications\AntrianWorkshop;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\OrderController;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Http\Controllers\DesignController;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Notification;
+
 use App\Http\Controllers\ReportController;
 
 use App\Http\Controllers\AntrianController;
-
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
@@ -60,6 +63,28 @@ Route::post('/forgot-password', function (Request $request) {
                 : back()->withErrors(['email' => __($status)]);
 
 })->middleware('guest')->name('password.email');
+
+Route::get('/notification/mark-as-read/{id}', function ($id) {
+
+    $user = auth()->user()->id;
+    $notification = auth()->user()->unreadNotifications->where('id', $id)->first();
+    $notification->markAsRead();
+
+    if($notification->data['link'] == '/design'){
+        return redirect()->route('design.index');
+    }else{
+        return redirect()->route('antrian.index');
+    }
+})->middleware('auth')->name('notification.markAsRead');
+
+Route::get('/notification/mark-all-as-read', function () {
+
+    $user = auth()->user()->id;
+    $notifications = auth()->user()->unreadNotifications;
+    $notifications->markAsRead();
+
+    return redirect()->back();
+})->middleware('auth')->name('notification.markAllAsRead');
 
 Route::get('/reset-password/{token}', function (string $token) {
     return view('auth.reset-password', ['token' => $token, 'email' => request()->query('email')]);

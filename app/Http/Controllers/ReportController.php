@@ -57,9 +57,8 @@ class ReportController extends Controller
         $totalQty = 0;
         foreach ($antrians as $antrian) {
             $totalOmset += $antrian->omset;
-            $totalQty += $antrian->qty_produk;
+            $totalQty += $antrian->qty;
         }
-
         // return view('page.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty'));
         $pdf = PDF::loadview('page.antrian-workshop.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty', 'tanggal'));
         return $pdf->stream($tanggal . '-laporan-workshop.pdf');

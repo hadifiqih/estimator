@@ -11,6 +11,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
+    /**
+     * The Notifiable trait provides functionality to send notifications to users.
+     * It defines the `notify` method, which sends a notification to the user via a channel.
+     * The trait also defines the `routeNotificationFor` method, which specifies the routing information for notifications.
+     */
+    /**
+     * FILEPATH: d:\Laravel\darigit\antree-apps\app\Models\User.php
+     *
+     * The User model represents a user in the application.
+     * It uses the HasApiTokens, HasFactory, Notifiable, and CanResetPassword traits.
+     */
     use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
     protected $hidden = [

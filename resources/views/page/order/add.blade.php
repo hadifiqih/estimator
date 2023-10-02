@@ -102,7 +102,7 @@
       </div>
 
       {{-- Tombol Submit --}}
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary submitButton">Submit</button><span id="loader" class="loader" style="display: none;"></span>
     </form>
   </div>
   {{-- Modal Tambah Jenis Produk --}}
@@ -133,7 +133,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary">Tambah</button>
+            <button type="submit" class="btn btn-primary submitButton">Tambah</button><span id="loader" class="loader" style="display: none;"></span>
         </div>
         </form>
         </div>
@@ -152,6 +152,10 @@
       e.preventDefault();
       var modalNamaProduk = $('#modalNamaProduk').val();
       var modalJenisProduk = $('#modalJenisProduk').val();
+
+      $('.loader').show();
+      $('.submitButton').attr('disabled', true);
+
       $.ajax({
         url: "{{ route('tambahProdukByModal') }}",
         type: "POST",
