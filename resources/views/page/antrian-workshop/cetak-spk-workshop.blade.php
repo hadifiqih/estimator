@@ -176,13 +176,13 @@
     <div class="job-details">
         <h2>Spesifikasi Pekerjaan</h2>
         <hr>
-        <table class="table table-responsive text-left" style="">
+        <table class="table table-responsive text-left">
             <tbody>
                 <tr>
                     <th class="table-header">Jenis Pekerjaan</th>
                     <td>: {{ $antrian->job->job_name }}</td>
                     <td rowspan="7" class="text-center">
-                        <img src="{{ asset('storage/acc-desain/'. $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="100%">
+                        <img src="{{ asset('storage/acc-desain/' . $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="50%">
                     </td>
                 </tr>
                 <tr>

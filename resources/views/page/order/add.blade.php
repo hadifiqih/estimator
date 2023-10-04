@@ -26,21 +26,21 @@
   @endif
 
   <div class="card-body">
-    <form action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
+    <form id="formOrder" action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
       @csrf
 
       {{-- Inputan untuk judul desain --}}
       <div class="mb-3">
-        <label for="title" class="form-label">Judul Gambar (Keyword)<span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="title" name="title" placeholder="Judul Desain">
+        <label for="title" class="form-label">Judul Project (Keyword)<span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="Contoh : Es Teh Indonesia" required>
       </div>
 
       {{-- Input Sales bertipe Hidden --}}
       <input type="hidden" name="sales" value="{{ $sales->id }}">
 
       <div class="mb-3">
-        <label for="kategori" class="form-label">Kategori</label>
-        <select class="custom-select rounded-2" name="kategori" id="kategori">
+        <label for="kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
+        <select class="custom-select rounded-2" name="kategori" id="kategori" required>
             <option selected disabled>--Pilih Kategori--</option>
             <option value="Stempel">Stempel</option>
             <option value="Non Stempel">Non Stempel</option>
@@ -49,8 +49,8 @@
       </div>
 
       <div class="mb-3">
-        <label for="job" class="form-label">Jenis Produk</label>
-        <select class="custom-select rounded-2" name="job" id="job">
+        <label for="job" class="form-label">Jenis Produk <span class="text-danger">*</span></label>
+        <select class="custom-select rounded-2" name="job" id="job" required>
 
         </select>
       </div>
@@ -60,16 +60,16 @@
 
       <div class="mb-3">
         <label for="description" class="form-label">Keterangan</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Contoh : Ukuran 6x6cm, ditambah No. Telp : 08xxxxxxxx"></textarea>
       </div>
 
       <h6 class="font-weight-bold">Jenis Pekerjaan<span class="text-danger">*</span></h6>
       <div class="form-check form-check-inline mb-3">
-        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio1" value="baru">
+        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio1" value="baru" required>
         <label class="form-check-label" for="inlineRadio1">Desain Baru</label>
       </div>
       <div class="form-check form-check-inline mb-3">
-        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio2" value="edit">
+        <input class="form-check-input" type="radio" name="jenisPekerjaan" id="inlineRadio2" value="edit" required>
         <label class="form-check-label" for="inlineRadio2">Edit Desain</label>
       </div>
 
@@ -102,7 +102,9 @@
       </div>
 
       {{-- Tombol Submit --}}
-      <button type="submit" class="btn btn-primary submitButton">Submit</button><span id="loader" class="loader" style="display: none;"></span>
+        <div class="d-flex align-items-center">
+            <input type="submit" class="btn btn-primary submitButton"><div id="loader" class="loader m-2" style="display: none;"></div>
+        </div>
     </form>
   </div>
   {{-- Modal Tambah Jenis Produk --}}
@@ -119,12 +121,13 @@
             <form id="produkForm" action="{{ route('tambahProdukByModal') }}" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
-                <label for="modalNamaProduk">Nama Produk</label>
-                <input type="text" class="form-control" id="modalNamaProduk" placeholder="Nama Pekerjaan" name="modalNamaProduk">
+                <label for="modalNamaProduk">Nama Produk <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="modalNamaProduk" placeholder="Contoh : Stempel Cup Plastik" name="modalNamaProduk" required>
             </div>
             <div class="form-group">
-                <label for="modalJenisProduk">Kategori Produk</label>
-                <select class="custom-select rounded-0" id="modalJenisProduk" name="modalJenisProduk">
+                <label for="modalJenisProduk">Kategori Produk <span class="text-danger">*</span></label>
+                <select class="custom-select rounded-0" id="modalJenisProduk" name="modalJenisProduk" required>
+                    <option selected disabled>--Pilih Kategori--</option>
                     <option value="Stempel">Stempel</option>
                     <option value="Advertising">Advertising</option>
                     <option value="Non Stempel">Non Stempel</option>
@@ -133,7 +136,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary submitButton">Tambah</button><span id="loader" class="loader" style="display: none;"></span>
+            <input type="submit" class="btn btn-primary submitButton" value="Tambah Produk"><span id="loader" class="loader" style="display: none;"></span>
         </div>
         </form>
         </div>
@@ -148,13 +151,18 @@
   $(document).ready(function() {
     bsCustomFileInput.init();
 
+    $('#formOrder').on('submit', function() {
+      $(this).find('input[type="submit"]').prop('disabled', true);
+      $('#loader').show();
+    });
+
     $('#produkForm').submit(function(e) {
       e.preventDefault();
       var modalNamaProduk = $('#modalNamaProduk').val();
       var modalJenisProduk = $('#modalJenisProduk').val();
 
+      $('.submitButton').prop('disabled', true);
       $('.loader').show();
-      $('.submitButton').attr('disabled', true);
 
       $.ajax({
         url: "{{ route('tambahProdukByModal') }}",
@@ -200,8 +208,11 @@
     const kategoriSelect = $('#kategori');
     const jobSelect = $('#job');
 
+    jobSelect.prop('disabled', true);
+
     kategoriSelect.on('change', function() {
         const selectedCategoryId = kategoriSelect.val();
+        jobSelect.prop('disabled', false);
         jobSelect.empty().append('<option selected disabled>Pilih Jenis Produk</option>');
 
         if (selectedCategoryId) {

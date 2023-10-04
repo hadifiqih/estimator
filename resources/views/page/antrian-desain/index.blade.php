@@ -14,16 +14,10 @@
 
 @section('content')
 
-@if(session('success-take'))
+{{-- Jika ada sesi success --}}
+@if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success-take') }}
-    </div>
-@endif
-
-{{-- Jika ada sesi success-order --}}
-@if(session('success-design'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success-design') }}
+        {{ session('success') }}
     </div>
 @endif
 
@@ -178,12 +172,12 @@
                                         <td>{{ $employee->name }}</td>
                                         <td>{{ $employee->design_load }}</td>
                                         <td>
-                                            <form action="{{ route('order.bagiDesain') }}" method="POST" enctype="multipart/form-data">
+                                            <form class="bagiDesain" action="{{ route('order.bagiDesain') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="desainer_id" value="{{ $employee->id }}">
                                                 <input type="hidden" name="order_id" value="{{ $desain->id }}">
+                                                <input type="submit" class="btn btn-sm btn-primary submitButton" value="Pilih">
 
-                                                <button type="submit" class="btn btn-sm btn-primary submitButton"><i class="fas fa-check"></i></button><span id="loader" class="loader" style="display: none;"></span>
                                             </form>
                                         </td>
                                     </tr>
@@ -408,7 +402,7 @@
                                 </div>
 
                                 <div class="modal-footer justify-content-between">
-                                    <a type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><span id="loader" class="loader" style="display: none;"></span>
+                                    <a id="submitUploadDesain" type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
                                 </div>
 
                             </div>
@@ -555,6 +549,7 @@
                                             <a type="button" href="#" class="btn btn-sm btn-danger disabled">Revisi Desain</a>
                                             @else
                                             <a type="button" href="#" class="btn btn-sm btn-success disabled"><i class="fas fa-check"></i> Diantrikan</a>
+                                            <a type="button" href="{{ route('report.formOrder', $desain->ticket_order) }}" class="btn btn-sm btn-warning" target="_blank"><i class="fas fa-file"></i> Unduh Form Order</a>
                                             <a type="button" href="{{ route('order.revisiDesain', $desain->id) }}" class="btn btn-sm btn-danger">Revisi Desain</a>
                                             @endif
 
@@ -657,7 +652,7 @@
                                         </div>
 
                                         <div class="modal-footer justify-content-between">
-                                            <a type="button" href="{{ route('order.submitRevisi', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><span id="loader" class="loader" style="display: none;"></span>
+                                            <a id="submitRevisiDesain" type="button" href="{{ route('order.submitRevisi', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
                                         </div>
 
                                     </div>
@@ -734,10 +729,22 @@
 
 <script>
     $(document).ready(function() {
-        $('.submitButton').click(function() {
-            $(this).attr('disabled', true);
+        // saat form bagiDesain di submit, maka tampilkan loader dan disable button submitnya
+        $('.bagiDesain').submit(function() {
+            $('.submitButton').prop('disabled', true);
+        });
+
+        // saat form upload di submit, maka tampilkan loader dan disable button submitnya
+        $('#submitUploadDesain').click(function() {
+            $(this).addClass('disabled');
             $('#loader').show();
         });
+
+        $('#submitRevisiDesain').click(function() {
+            $(this).addClass('disabled');
+            $('#loader').show();
+        });
+
     });
 </script>
 

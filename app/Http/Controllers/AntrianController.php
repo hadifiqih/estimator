@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Job;
-use App\Models\Sales;
-use App\Models\Antrian;
-use App\Models\Design;
-use App\Models\Employee;
-use App\Models\Customer;
 use App\Models\User;
 use App\Models\Order;
-use App\Models\Payment;
-use App\Models\Documentation;
+use App\Models\Sales;
+use App\Models\Design;
+use App\Models\Antrian;
 use App\Models\Machine;
+use App\Models\Payment;
+use App\Models\Customer;
+use App\Models\Employee;
 use App\Models\Dokumproses;
-use App\Notifications\AntrianWorkshop;
-
 use Illuminate\Http\Request;
+
+use App\Models\Documentation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\AntrianWorkshop;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use App\Notifications\AntrianDiantrikan;
+use Illuminate\Support\Facades\Notification;
 
 
 class AntrianController extends Controller
@@ -235,7 +237,13 @@ class AntrianController extends Controller
 
         $tempat = explode(',', $antrian->working_at);
 
-        return view('page.antrian-workshop.edit', compact('antrian', 'operatorId', 'finisherId', 'qualityId', 'operators', 'qualitys', 'machines', 'tempat'));
+        if($antrian->end_job == null){
+            $isEdited = 0;
+        }else{
+            $isEdited = 1;
+        }
+
+        return view('page.antrian-workshop.edit', compact('antrian', 'operatorId', 'finisherId', 'qualityId', 'operators', 'qualitys', 'machines', 'tempat', 'isEdited'));
     }
 
     public function update(Request $request, $id)
@@ -293,16 +301,34 @@ class AntrianController extends Controller
             $user = 'user-' . $quality;
             $users[] = $user;
         }
+        if($request->isEdited == 0){
+            foreach($users as $user){
+                $publishResponse = $beamsClient->publishToUsers(
+                    array($user),
+                    array("web" => array("notification" => array(
+                    "title" => "📣 Cek sekarang, ada antrian baru !",
+                    "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
+                    )),
+                ));
 
+                $user = str_replace('user-', '', $user);
+                $user = User::find($user);
+                $user->notify(new AntrianDiantrikan($antrian));
+            }
+        }else{
+            foreach($users as $user){
+                $publishResponse = $beamsClient->publishToUsers(
+                    array($user),
+                    array("web" => array("notification" => array(
+                    "title" => "📣 Hai, ada update antrian!",
+                    "body" => "Ada perubahan pada antrian " . $antrian->ticket_order . " (" . $antrian->order->title ."), cek sekarang !",
+                    )),
+                ));
 
-        foreach($users as $user){
-            $publishResponse = $beamsClient->publishToUsers(
-                array($user),
-                array("web" => array("notification" => array(
-                "title" => "📣 Cek sekarang, ada antrian baru !",
-                "body" => "Cek pekerjaan baru sekarang, cepat kerjakan biar cepet pulang !",
-                )),
-            ));
+                $user = str_replace('user-', '', $user);
+                $user = User::find($user);
+                $user->notify(new AntrianDiantrikan($antrian));
+            }
         }
 
         return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');

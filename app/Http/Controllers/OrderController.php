@@ -235,14 +235,14 @@ class OrderController extends Controller
         $order->title = $request->title;
         $order->sales_id = $request->sales;
         $order->job_id = $request->job;
-        $order->description = $request->description;
+        $order->description = $request->description != null ? $request->description : '-';
         $order->type_work = $request->jenisPekerjaan;
         $order->desain = $fileName;
         $order->status = '0';
         $order->is_priority = $request->priority ? '1' : '0';
         $order->save();
 
-        return redirect()->route('design.index')->with('success', 'Design berhasil ditambahkan');
+        return redirect()->route('design.index')->with('success', 'Project berhasil ditambahkan !');
     }
 
     public function revisiDesain($id)
@@ -356,7 +356,11 @@ class OrderController extends Controller
         $order->save();
         //designer load -1
         $employee = Employee::find($order->employee_id);
-        $employee->design_load -= 1;
+        if($employee->design_load > 0){
+            $employee->design_load -= 1;
+        }else{
+            $employee->design_load = 0;
+        }
         $employee->save();
 
         // Menampilkan push notifikasi saat selesai
@@ -373,7 +377,7 @@ class OrderController extends Controller
             )),
         ));
 
-        return redirect()->route('design.index')->with('success-submit', 'File berhasil diupload');
+        return redirect()->route('design.index')->with('success', 'File berhasil diupload');
     }
 
     public function uploadRevisi(Request $request)
@@ -429,7 +433,7 @@ class OrderController extends Controller
             )),
         ));
 
-        return redirect()->route('design.index')->with('success-submit', 'File revisi desain berhasil diupload');
+        return redirect()->route('design.index')->with('success', 'File revisi desain berhasil diupload');
     }
 
     public function toAntrian(string $id){

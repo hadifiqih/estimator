@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Dompdf\Dompdf;
 use App\Models\Sales;
-use App\Models\Antrian;
 
+use App\Models\Antrian;
+use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class ReportController extends Controller
 {
@@ -71,7 +76,7 @@ class ReportController extends Controller
             ->where('id', $id)
             ->first();
 
-        $pdf = PDF::loadview('page.antrian-workshop.cetak-spk-workshop', compact('antrian'));
+        $pdf = PDF::loadview('page.antrian-workshop.cetak-spk-workshop', compact('antrian'))->setPaper('folio', 'portrait');
         return $pdf->stream($antrian->ticket_order . '-espk.pdf');
 
         // return view('page.antrian-workshop.cetak-spk-workshop', compact('antrian'));
@@ -126,4 +131,13 @@ class ReportController extends Controller
         return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'date'));
     }
 
+    public function reportFormOrder($id)
+    {
+     $antrian = Antrian::with('customer', 'sales', 'payment', 'operator', 'finishing', 'job', 'order')
+            ->where('ticket_order', $id)
+            ->first();
+     // return view('page.antrian-workshop.form-order', compact('antrian'));
+        $pdf = PDF::loadview('page.antrian-workshop.form-order', compact('antrian'))->setPaper('a4', 'portrait');
+        return $pdf->stream($antrian->ticket_order . '-form-order.pdf');
+    }
 }

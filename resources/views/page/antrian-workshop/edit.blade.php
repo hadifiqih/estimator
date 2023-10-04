@@ -16,7 +16,7 @@
                 <h2 class="card-title">Edit Antrian #{{ $antrian->ticket_order }}</h2>
             </div>
             <div class="card-body">
-    <form action="{{ route('antrian.update', $antrian->id) }}" method="POST">
+    <form id="formEditAntrian" action="{{ route('antrian.update', $antrian->id) }}" method="POST">
     @csrf
     @method('PUT')
     <div class="row ml-1">
@@ -154,7 +154,10 @@
         <textarea class="form-control" id="keterangan" rows="3" name="catatan">{{ $antrian->admin_note != null ? $antrian->admin_note : "" }}</textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">Simpan</button>
+    <input type="hidden" name="isEdited" value="{{ $isEdited }}">
+    <div class="d-flex align-items-center">
+        <input id="submitEdit" type="submit" class="btn btn-primary"><span id="loader" class="loader m-2" style="display: none"></span>
+    </div>
 </form>
 </div>
 </div>
@@ -165,6 +168,12 @@
 @section('script')
 <script>
     $(document).ready(function() {
+
+        $('#formEditAntrian').on('submit', function() {
+            $(this).find('input[type="submit"]').prop('disabled', true);
+            $('#loader').show();
+        });
+
         $('.select2').select2({
             placeholder: "Pilih Mesin",
             allowClear: true,

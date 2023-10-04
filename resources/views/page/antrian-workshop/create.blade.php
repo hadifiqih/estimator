@@ -283,7 +283,7 @@
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary" id="submitPelanggan">Simpan</button><span id="loader" class="loader" style="display: none;"></span>
+                <input type="submit" class="btn btn-primary" id="submitPelanggan"><span id="loader" class="loader" style="display: none;"></span>
                 </div>
             </form>
             </div>
@@ -384,6 +384,10 @@
 
    $('#pelanggan-form').on('submit', function(e){
        e.preventDefault();
+
+       $(this).find('#submitPelanggan').prop('disabled', true);
+       $(this).find('#loader').show();
+
        const formData = $(this).serialize();
        $.ajaxSetup({
            headers: {

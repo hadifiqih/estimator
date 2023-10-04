@@ -87,7 +87,13 @@
                                     <tbody>
                                         @foreach($antrians as $antrian)
                                             <tr>
-                                                <td>{{ $antrian->ticket_order }}</td>
+                                                <td>
+                                                @if($antrian->end_job == null)
+                                                    <p class="text-danger">{{ $antrian->ticket_order }}<i class="fas fa-circle"></i></p>
+                                                @else
+                                                    <p class="text-success">{{ $antrian->ticket_order }}</p>
+                                                @endif
+                                                </td>
                                                 <td>{{ $antrian->sales->sales_name }}</td>
                                                 <td>{{ $antrian->job->job_name }} <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailAntrian{{ $antrian->id }}"><i class="fas fa-info-circle"></i></button></td>
                                                 <td>{{ $antrian->qty }}</td>
