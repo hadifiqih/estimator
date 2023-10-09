@@ -303,7 +303,7 @@
 <script src="{{ asset('adminlte') }}/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
 <script src="{{ asset('adminlte') }}/plugins/datatables-buttons/js/buttons.print.min.js"></script>
 <script src="{{ asset('adminlte') }}/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-
+@yield('script')
 {{-- Select2 --}}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
@@ -394,7 +394,6 @@
 
 </script>
 
-@yield('script')
 <script>
     function sendReminder() {
             $.ajax({

@@ -248,7 +248,6 @@ class AntrianController extends Controller
 
     public function update(Request $request, $id)
     {
-
         $antrian = Antrian::find($id);
 
         //Jika input operator adalah array, lakukan implode lalu simpan ke database
@@ -313,42 +312,43 @@ class AntrianController extends Controller
 
                 $user = str_replace('user-', '', $user);
                 $user = User::find($user);
-                $user->notify(new AntrianDiantrikan($antrian));
+                if($user != 'rekanan'){
+                    $user->notify(new AntrianDiantrikan($antrian));
+                }
             }
         }else{
             foreach($users as $user){
-                $publishResponse = $beamsClient->publishToUsers(
-                    array($user),
-                    array("web" => array("notification" => array(
-                    "title" => "📣 Hai, ada update antrian!",
-                    "body" => "Ada perubahan pada antrian " . $antrian->ticket_order . " (" . $antrian->order->title ."), cek sekarang !",
-                    )),
-                ));
+                if($user != 'user-rekananSBY' || $user != 'user-rekananKDR' || $user != 'user-rekananMLG'){
+                    $publishResponse = $beamsClient->publishToUsers(
+                        array($user),
+                        array("web" => array("notification" => array(
+                        "title" => "📣 Hai, ada update antrian!",
+                        "body" => "Ada perubahan pada antrian " . $antrian->ticket_order . " (" . $antrian->order->title ."), cek sekarang !",
+                        )),
+                    ));
+                }
 
                 $user = str_replace('user-', '', $user);
                 $user = User::find($user);
-                $user->notify(new AntrianDiantrikan($antrian));
+                if($user != 'rekanan'){
+                    $user->notify(new AntrianDiantrikan($antrian));
+                }
             }
         }
 
         return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
     }
 
-    public function updateDeadline(Request $request, $id)
+    public function updateDeadline(Request $request)
     {
-        // dd(request()->all());
-        // melakukan update ajax untuk deadline_status
-        $antrian = Antrian::find($id);
-        $status = $request->input('deadline_status');
-
+        $antrian = Antrian::find($request->id);
+        if (now() > $antrian->end_job) {
+            $status = 2;
+        }
         $antrian->deadline_status = $status;
         $antrian->save();
 
-        if($status == 1){
-            return response()->json(['success' => true]);
-        }elseif($status == 2){
-            return response()->json(['success' => false]);
-        }
+        return response()->json(['message' => 'Success'], 200);
     }
     public function destroy($id)
     {
@@ -415,8 +415,22 @@ class AntrianController extends Controller
 
     public function getMachine(Request $request){
         //Menampilkan data mesin pada tabel Machines
-        $machines = Machine::get();
-        return response()->json($machines);
+        $search = $request->search;
+
+        if($search == ''){
+            $machines = Machine::get();
+        }else{
+            $machines = Machine::orderby('machine_code','asc')->select('machine_code', 'machine_name')->where('machine_name', 'like', '%' .$search . '%')->get();
+        }
+
+        $response = array();
+        foreach($machines as $machine){
+            $response[] = array(
+                "id" => $machine->machine_code,
+                "text" => $machine->machine_name
+            );
+        }
+        return response()->json($response);
     }
 
     public function showProgress($id){

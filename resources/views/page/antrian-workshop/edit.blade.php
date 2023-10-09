@@ -11,6 +11,26 @@
 @section('content')
 <div class="container-fluid">
     <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Informasi Produk</h2>
+            </div>
+            <div class="card-body">
+            <div class="form-group">
+                <label for="nama">Nama Produk</label>
+                <input type="text" class="form-control" id="namaproduk" aria-describedby="nama" name="namaproduk" value="{{ $antrian->job->job_name }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="jumlah">Jumlah</label>
+                <input type="number" class="form-control" id="jumlah" aria-describedby="jumlah" name="jumlah" value="{{ $antrian->qty }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="keterangan">Keterangan / Spesifikasi</label>
+                <textarea class="form-control" id="keterangan" rows="5" name="keterangan" readonly>{{ $antrian->note }}</textarea>
+            </div>
+            </div>
+        </div>
+
         <div class="card mb-4">
             <div class="card-header">
                 <h2 class="card-title">Edit Antrian #{{ $antrian->ticket_order }}</h2>
@@ -20,7 +40,7 @@
     @csrf
     @method('PUT')
     <div class="row ml-1">
-      <h6>Pilih Operator :</h6>
+      <h6 class="font-weight-bold">Pilih Operator :</h6>
       @if($operators != null)
       @foreach($operators as $operator)
       <div class="col-sm">
@@ -48,7 +68,7 @@
 
 
     <div class="row ml-1">
-      <h6>Pilih Finishing :</h6>
+      <h6 class="font-weight-bold">Pilih Finishing :</h6>
       @if($operators != null)
       @foreach($operators as $finishing)
       <div class="col-sm">
@@ -75,7 +95,7 @@
     <hr>
 
     <div class="row ml-1">
-      <h6>Pilih QC : </h6>
+      <h6 class="font-weight-bold">Pilih QC : </h6>
       @if($qualitys != null)
       @foreach($qualitys as $quality)
       <div class="col-sm">
@@ -97,7 +117,7 @@
     {{-- Memilih tempat pengerjaan di Surabaya, Kediri, Malang --}}
     <div class="mb-3">
         {{-- Pilih Tempat Pengerjaan Menggunakan Checkbox --}}
-        <h6>Tempat Pengerjaan :</h6>
+        <h6 class="font-weight-bold">Tempat Pengerjaan :</h6>
         @php
             $isCheckedS = is_array($tempat) && in_array('Surabaya', $tempat);
             $isCheckedK = is_array($tempat) && in_array('Kediri', $tempat);
@@ -127,8 +147,7 @@
     <div class="mb-3">
         <div class="form-group">
             <label>Jenis Mesin :</label>
-            <select class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
-
+            <select id="cariMesin" class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
             </select>
             @if($antrian->working_at != null)
             <p class="text-sm text-danger font-italic mt-1">*Jika tidak ada perubahan, <strong>biarkan kosong.</strong></p>
@@ -147,16 +166,15 @@
         <label for="deadline" class="form-label">Deadline<span class="text-danger">*</span></label>
         <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="deadline" value="{{ $antrian->end_job }}" required>
     </div>
-
     <div class="mb-3">
         {{-- Masukkan Keterangan --}}
-        <label for="keterangan" class="form-label">Catatan Admin</label>
+        <label for="keterangan" class="form-label">Catatan Admin <span class="text-muted font-italic text-sm">(Opsional)</span></label>
         <textarea class="form-control" id="keterangan" rows="3" name="catatan">{{ $antrian->admin_note != null ? $antrian->admin_note : "" }}</textarea>
     </div>
 
     <input type="hidden" name="isEdited" value="{{ $isEdited }}">
     <div class="d-flex align-items-center">
-        <input id="submitEdit" type="submit" class="btn btn-primary"><span id="loader" class="loader m-2" style="display: none"></span>
+        <input id="submitEdit" type="submit" class="btn btn-primary" value="Submit"><span id="loader" class="loader m-2" style="display: none"></span>
     </div>
 </form>
 </div>
@@ -180,19 +198,21 @@
             ajax: {
                 url: "{{ route('antrian.getMachine') }}",
                 dataType: 'json',
+                type: "POST",
                 delay: 250,
-                processResults: function (data) {
+                data: function (params) {
                     return {
-                        results:  $.map(data, function (item) {
-                        return {
-                            text: item.machine_name,
-                            id: item.machine_code
-                        }
-                        })
+                        _token: "{{ csrf_token() }}",
+                        search: params.term
+                    };
+                },
+                processResults: function (response) {
+                    return {
+                        results: response
                     };
                 },
                 cache: true
-            }
+            },
         });
     });
 </script>

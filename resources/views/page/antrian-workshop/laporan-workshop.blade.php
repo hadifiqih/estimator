@@ -74,7 +74,7 @@
 </head>
 <body>
     <h1 class="text-center">Laporan Produktifitas Workshop</h1>
-    <h6 class="text-center">Tanggal : {{ $tanggal }}</h6>
+    <h6 class="text-center">Tanggal : {{ $tanggalAwal . "-" . $tanggalAkhir }} </h6>
     <hr>
     <table class="table table-bordered table-striped">
         <thead class="text-center">
@@ -173,6 +173,8 @@
                         <span class="badge bg-danger">Terlambat</span>
                         <br>
                         <span class="badge bg-dark">{{ $antrian->end_job }}</span>
+                    @elseif ($antrian->deadline_status == "0")
+                        <span class="badge bg-danger">Belum Diantrikan</span>
                     @endif
                 </td>
                 <td class="text-center"> {{ number_format($antrian->omset, 0, ',', '.'); }} </td>

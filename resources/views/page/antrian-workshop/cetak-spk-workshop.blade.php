@@ -182,7 +182,7 @@
                     <th class="table-header">Jenis Pekerjaan</th>
                     <td>: {{ $antrian->job->job_name }}</td>
                     <td rowspan="7" class="text-center">
-                        <img src="{{ asset('storage/acc-desain/' . $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="50%">
+                        <img src="{{ asset('storage/acc-desain/' . $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="70%">
                     </td>
                 </tr>
                 <tr>

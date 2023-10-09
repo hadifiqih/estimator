@@ -397,6 +397,7 @@
                                         @csrf
                                         <input type="hidden" name="id" value="{{ $desain->id }}">
                                     </form>
+
                                     <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
                                     <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
                                 </div>
@@ -480,7 +481,11 @@
                                     <td><span class="badge badge-success">Selesai</span></td>
                                 @endif
 
-                                <td>{{ $desain->file_cetak }}</td>
+                                <td>{{ $desain->file_cetak }}
+                                    @if(auth()->user()->role == 'desain' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                        <button class="btn btn-sm btn-warning" data-target="#modalReuploadFile{{ $desain->id }}" data-toggle="modal">Reupload File</button>
+                                    @endif
+                                </td>
 
 
                             </tr>
@@ -489,6 +494,37 @@
                     </table>
                     {{-- End Menampilkan Antrian Desain --}}
                   </div>
+                  @foreach ($listSelesai as $desain)
+                  {{-- Modal Reupload File Desain --}}
+                  <div class="modal fade" id="modalReuploadFile{{ $desain->id }}" aria-labelledby="modalReuploadFile{{ $desain->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Reupload Desain#{{ $desain->id }}</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {{-- Dropzone JS --}}
+                                <form action="{{ route('design.reuploadFile') }}" class="dropzone" id="my-dropzone-reupload{{ $desain->id }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="id" value="{{ $desain->id }}">
+                                </form>
+                                <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
+                                <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
+                            </div>
+
+                            <div class="modal-footer justify-content-between">
+                                <a id="submitReupload" type="button" href="{{ route('design.submitReuploadFile', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+                {{-- End Modal Reupload File Desain --}}
+                @endforeach
                 </div>
             </div>
             @if(auth()->user()->role == 'sales')
@@ -682,6 +718,7 @@
             clickable: true,
             acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
             dictInvalidFileType: "Type file ini tidak dizinkan",
+            maxFileSize: 50000000,
             addRemoveLinks: true,
             dictRemoveFile: "Hapus file",
             timeout: 5000,
@@ -693,6 +730,19 @@
                 clickable: true,
                 acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
                 dictInvalidFileType: "Type file ini tidak dizinkan",
+                maxFileSize: 50000000,
+                addRemoveLinks: true,
+                dictRemoveFile: "Hapus file",
+                timeout: 5000,
+            };
+        @endforeach
+        @foreach ($listSelesai as $item)
+            Dropzone.options.myDropzoneReupload{{ $item->id }} = { // camelized version of the `id`
+                paramName: "fileReupload", // The name that will be used to transfer the file
+                clickable: true,
+                acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
+                dictInvalidFileType: "Type file ini tidak dizinkan",
+                maxFileSize: 50000000,
                 addRemoveLinks: true,
                 dictRemoveFile: "Hapus file",
                 timeout: 5000,

@@ -179,15 +179,17 @@ Route::controller(OrderController::class)->group(function(){
     Route::put('/order/{id}/revisi-desain', 'updateRevisiDesain')->name('order.updateRevisiDesain');
     Route::post('/order/upload-revisi-desain', 'uploadRevisi')->name('order.uploadRevisi');
     Route::get('/order/{id}/submit-revisi', 'submitRevisi')->middleware('auth')->name('order.submitRevisi');
+    Route::post('/design/reupload-file', 'reuploadFileDesain')->name('design.reuploadFile');
+    Route::get('/design/submit-reupload-file/{id}', 'submitReuploadFile')->name('design.submitReuploadFile');
 });
 
 Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/storeToAntrian', 'store')->middleware('auth')->name('antrian.store');
-    Route::post('/antrian/{id}/updateDeadline', 'updateDeadline')->middleware('auth')->name('antrian.updateDeadline');
+    Route::post('/antrian/updateDeadline', 'updateDeadline')->middleware('auth')->name('antrian.updateDeadline');
     Route::get('/antrian/dokumentasi/{id}', 'showDokumentasi')->middleware('auth')->name('antrian.showDokumentasi');
     Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware('auth')->name('antrian.storeDokumentasi');
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
-    Route::get('/list-machines', 'getMachine')->name('antrian.getMachine');
+    Route::post('/list-machines', 'getMachine')->name('antrian.getMachine');
     Route::get('/estimator/index', 'estimatorIndex')->middleware('auth')->name('estimator.index');
     Route::get('/antrian/showProgress/{id}', 'showProgress')->middleware('auth')->name('antrian.showProgress');
     Route::post('/antrian/storeProgress', 'storeProgressProduksi')->middleware('auth')->name('store.progressProduksi');
@@ -195,6 +197,10 @@ Route::controller(AntrianController::class)->group(function(){
     Route::get('/antrian/download-produksi-file/{id}', 'downloadProduksiFile')->middleware('auth')->name('antrian.downloadProduksi');
     Route::get('/antrian/reminder', 'reminderProgress')->middleware('auth')->name('antrian.reminder');
     Route::get('/antrian/tandai-selesai/{id}', 'markSelesai')->middleware('auth')->name('antrian.markSelesai');
+});
+
+Route::controller(PaymentController::class)->group(function(){
+    Route::put('/payment/pelunasan', 'updatePelunasan')->name('payment.pelunasan');
 });
 
 Route::controller(ProductController::class)->group(function(){

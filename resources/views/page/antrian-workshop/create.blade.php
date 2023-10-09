@@ -220,7 +220,9 @@
                     <div class="card-body text-right">
                         <input type="hidden" name="sales" value="{{ $order->sales_id }}">
                         {{-- Tombol Submit --}}
-                        <button id="submitToAntrian" type="submit" class="btn btn-primary">Submit</button> <span id="loader" class="loader" style="display: none;"></span>
+                        <div class="d-flex align-items-center">
+                            <button id="submitToAntrian" type="submit" class="btn btn-primary"><div id="loader" class="loader" style="display: none;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -237,7 +239,7 @@
                 </button>
                 </div>
                 <div class="modal-body">
-                    <form id="pelanggan-form" method="post">
+                    <form id="pelanggan-form" method="POST">
                     @csrf
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan <span class="text-danger">*</span></label>
@@ -421,8 +423,8 @@
         });
     });
 
-    $('#submitToAntrian').on('click', function(){
-        $('#submitToAntrian').attr('disabled', true);
+    $('#submitToAntrian').on('submit', function(){
+        $(this).find('#submitToAntrian').prop('disabled', true);
         $('#loader').show();
     });
 

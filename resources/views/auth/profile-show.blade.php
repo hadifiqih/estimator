@@ -106,8 +106,8 @@
                     @if($employee->jenis_kelamin == null)
                     <select id="jenis_kelamin" class="custom-select rounded-1" name="jenis_kelamin">
                         <option value='' {{ $employee->jenis_kelamin == null ? 'selected disabled' : '' }}>Pilih Jenis Kelamin</option>
-                        <option value="pria" {{ $employee->jenis_kelamin == 'pria' ? 'selected' : '' }}>Pria</option>
-                        <option value="wanita" {{ $employee->jenis_kelamin == 'wanita' ? 'selected' : '' }}>Wanita</option>
+                        <option value="pria" {{ $employee->jenis_kelamin == 'pria' ? 'selected' : '' }}>Laki-Laki</option>
+                        <option value="wanita" {{ $employee->jenis_kelamin == 'wanita' ? 'selected' : '' }}>Perempuan</option>
                     </select>
                     @else
                     <input type="text" class="form-control" id="jenis_kelamin" name="jenis_kelamin" value="{{ ucwords($employee->jenis_kelamin) }}" readonly>

@@ -400,6 +400,39 @@ class OrderController extends Controller
         return response()->json(['success' => $fileName]);
     }
 
+    public function reuploadFileDesain(Request $request){
+        //Hapus file lama / sebelumnya diupload
+        $orderLama = Order::find($request->id);
+        $oldFile = $orderLama->file_cetak;
+        if($oldFile != ""){
+            Storage::disk('public')->delete('file-cetak/' . $oldFile);
+        }
+        //Menyimpan file cetak dari form dropzone
+        $file = $request->file('fileReupload');
+        $fileName = time() . '.' . $file->getClientOriginalName();
+        $path = 'file-cetak/' . $fileName;
+        Storage::disk('public')->put($path, $file->get());
+
+        $orderLama->file_cetak = $fileName;
+        $orderLama->save();
+
+        return response()->json(['success' => $fileName]);
+    }
+
+    public function submitReuploadFile($id){
+        $order = Order::find($id);
+
+        if(!$order->file_cetak){
+            return redirect()->back()->with('error-filecetak', 'File cetak belum diupload, silahkan ulangi proses upload file cetak');
+        }
+
+        $order->status = 2;
+        $order->time_end = now();
+        $order->save();
+
+        return redirect()->route('design.index')->with('success', 'File Reupload berhasil diunggah !');
+    }
+
     public function submitRevisi($id)
     {
         $order = Order::find($id);

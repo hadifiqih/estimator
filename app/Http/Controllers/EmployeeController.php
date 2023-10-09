@@ -114,7 +114,7 @@ class EmployeeController extends Controller
         $employee->office = $request->office;
         $employee->joining_date = $request->tanggalMulaiKerja;
         $employee->bank_name = $request->bank_name;
-        $employee->bank_account = $request->nomorRekening;
+        $employee->bank_account = $request->nomerRekening;
         $employee->save();
 
         return redirect()->route('employee.show', $id)->with('success', 'Data berhasil diubah');

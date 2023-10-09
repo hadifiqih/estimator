@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
 use App\Models\Antrian;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
@@ -102,9 +104,48 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function updatePelunasan(Request $request)
     {
+        try {
+            $payment = Payment::where('ticket_order', $request->ticketAntrian)
+                          ->orderBy('created_at', 'desc')
+                          ->first();
+        } catch (\Throwable $th) {
+            return redirect()->back()->json(['error' => 'Pembayaran tidak ditemukan !']);
+        }
 
+        //menghilangkan Rp dan titik
+        $jumlahPembayaran = str_replace(['Rp ', '.'], '', $request->jumlahPembayaran);
+        //convert ke integer
+        $jumlahPembayaran = (int) $jumlahPembayaran;
+        //total pembayaran
+        $totalPembayaran = $jumlahPembayaran + $payment->payment_amount;
+        //total sisa pembayaran
+        $sisaPembayaran = $payment->total_payment - $totalPembayaran;
+
+        if($sisaPembayaran < 0){
+            return redirect()->back()->with('error', 'Jumlah pembayaran melebihi total pembayaran !');
+        }elseif($sisaPembayaran == 0){
+            $payment->payment_status = "Lunas";
+            $payment->payment_amount = $totalPembayaran;
+        }else{
+            $payment->payment_status = "DP";
+            $payment->payment_amount = $totalPembayaran;
+        }
+
+        //Menyimpan bukti pembayaran ke dalam folder bukti-pembayaran
+        try {
+        $file = $request->file('filePelunasan');
+        $fileName = time() . '.' . $file->getClientOriginalExtension();
+        $path = 'bukti-pembayaran/' . $fileName;
+        Storage::disk('public')->put($path, $file->get());
+        $payment->payment_proof = $fileName;
+        $payment->save();
+        } catch (Throwable $th) {
+            return redirect()->back()->with('error', 'Bukti pembayaran gagal diupload !');
+        }
+
+        return redirect()->route('antrian.index')->with('success', 'Pembayaran berhasil diperbarui !');
     }
 
     /**

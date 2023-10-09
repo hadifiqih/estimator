@@ -6,7 +6,7 @@ use Dompdf\Dompdf;
 use App\Models\Sales;
 
 use App\Models\Antrian;
-use Barryvdh\DomPDF\Facade\PDF;
+use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +32,7 @@ class ReportController extends Controller
 
     public function exportLaporanDesainPDF(Request $request)
     {
+
         $tanggal = $request->tanggal;
         //Mengambil data antrian dengan relasi customer, sales, payment, operator, finishing, job, order pada tanggal yang dipilih dan menghitung total omset dan total order
         $antrians = Antrian::with('customer', 'sales', 'payment', 'operator', 'finishing', 'job', 'order')
@@ -50,25 +51,63 @@ class ReportController extends Controller
         // return $pdf->download($tanggal . '-laporan-workshop.pdf');
     }
 
-    public function exportLaporanWorkshopPDF(Request $request)
-    {
-        $tanggal = $request->tanggal;
+    public function exportLaporanWorkshopPDF(Request $request){
+
+        $jenis = $request->jenis_laporan;
+        $tempat = $request->tempat_workshop;
+        // $tanggalAwal adalah selalu tanggal 1 dari bulan yang dipilih
+        $tanggalAwal = date('Y-m-01');
+        // $tanggalAkhir adalah selalu tanggal sekarang dari bulan yang dipilih
+        $tanggalAkhir = date('Y-m-d');
+
         //Mengambil data antrian dengan relasi customer, sales, payment, operator, finishing, job, order pada tanggal yang dipilih dan menghitung total omset dan total order
         $antrians = Antrian::with('customer', 'sales', 'payment', 'operator', 'finishing', 'job', 'order')
-            ->whereDate('created_at', $tanggal)
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+            ->whereHas('sales', function ($query) use ($tempat){
+                $query->where('sales_name', 'like', '%' . $tempat . '%');
+            })
+            ->whereHas('job', function ($query) use ($jenis) {
+                $query->where('job_type', 'like', '%' . $jenis . '%');
+            })
             ->get();
 
         $totalOmset = 0;
         $totalQty = 0;
+
         foreach ($antrians as $antrian) {
             $totalOmset += $antrian->omset;
             $totalQty += $antrian->qty;
         }
-        // return view('page.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty'));
-        $pdf = PDF::loadview('page.antrian-workshop.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty', 'tanggal'));
-        return $pdf->stream($tanggal . '-laporan-workshop.pdf');
-        // return $pdf->download($tanggal . '-laporan-workshop.pdf');
+
+        $pdf = PDF::loadview('page.antrian-workshop.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty', 'tanggalAwal', 'tanggalAkhir', 'jenis', 'tempat'))->setPaper('folio', 'landscape');
+        return $pdf->stream($jenis . " - " . $tempat . " - " . $tanggalAkhir .'.pdf');
+
+
+
+
     }
+
+    // public function exportLaporanWorkshopPDF(Request $request)
+    // {
+    //     $tanggal = $request->tanggal;
+    //     $tempat = $request->tempat;
+
+    //     //Mengambil data antrian dengan relasi customer, sales, payment, operator, finishing, job, order pada tanggal yang dipilih dan menghitung total omset dan total order
+    //     $antrians = Antrian::with('customer', 'sales', 'payment', 'operator', 'finishing', 'job', 'order')
+    //         ->whereDate('created_at', $tanggal)
+    //         ->get();
+
+    //     $totalOmset = 0;
+    //     $totalQty = 0;
+    //     foreach ($antrians as $antrian) {
+    //         $totalOmset += $antrian->omset;
+    //         $totalQty += $antrian->qty;
+    //     }
+    //     // return view('page.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty'));
+    //     $pdf = PDF::loadview('page.antrian-workshop.laporan-workshop', compact('antrians', 'totalOmset', 'totalQty', 'tanggal'))->setPaper('folio', 'landscape');
+    //     return $pdf->stream($tanggal . '-laporan-workshop.pdf');
+    //     // return $pdf->download($tanggal . '-laporan-workshop.pdf');
+    // }
 
     public function cetakEspk($id)
     {
@@ -76,7 +115,7 @@ class ReportController extends Controller
             ->where('id', $id)
             ->first();
 
-        $pdf = PDF::loadview('page.antrian-workshop.cetak-spk-workshop', compact('antrian'))->setPaper('folio', 'portrait');
+        $pdf = PDF::loadview('page.antrian-workshop.cetak-spk-workshop', compact('antrian'))->setPaper('folio', 'landscape');
         return $pdf->stream($antrian->ticket_order . '-espk.pdf');
 
         // return view('page.antrian-workshop.cetak-spk-workshop', compact('antrian'));
