@@ -30,7 +30,11 @@
         .info p {
             margin: 5px 0;
         }
-
+        
+        .spesifikasi {
+            white-space: pre-line;
+        }
+        
         .job-details {
             margin-top: 20px;
             border: 1px solid #ccc;
@@ -181,9 +185,13 @@
                 <tr>
                     <th class="table-header">Jenis Pekerjaan</th>
                     <td>: {{ $antrian->job->job_name }}</td>
-                    <td rowspan="7" class="text-center">
+                    <td rowspan="9" class="text-center">
                         <img src="{{ asset('storage/acc-desain/' . $antrian->order->acc_desain) }}" alt="Gambar Pekerjaan" width="70%">
                     </td>
+                </tr>
+                <tr>
+                    <th class="table-header">Sales</th>
+                    <td>: {{ $antrian->sales->sales_name }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Jumlah</th>
@@ -191,11 +199,19 @@
                 </tr>
                 <tr>
                     <th class="table-header">Deskripsi</th>
-                    <td>: {{ $antrian->note }}</td>
+                    <td class="spesifikasi">: {{ $antrian->note }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Lokasi Workshop</th>
                     <td>: {{ $antrian->working_at }}</td>
+                </tr>
+                <tr>
+                    <th class="table-header">Omset</th>
+                    <td>: Rp{{ number_format($antrian->omset,0,',','.') }}</td>
+                </tr>
+                <tr>
+                    <th class="table-header">Desainer</th>
+                    <td>: {{ $antrian->order->employee->name }}</td>
                 </tr>
                 <tr>
                     <th class="table-header">Operator</th>

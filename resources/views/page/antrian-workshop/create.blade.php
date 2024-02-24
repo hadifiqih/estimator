@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="keterangan">Keterangan Spesfikasi <span class="text-danger">*</span></label>
+                        <label for="keterangan">Keterangan Spesifikasi <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="keterangan" rows="5" placeholder="Keterangan" name="keterangan"></textarea>
                     </div>
               </div>
@@ -106,7 +106,7 @@
                             <option value="Transfer Mandiri">Transfer Mandiri</option>
                             <option value="Saldo Tokopedia">Marketplace Tokopedia</option>
                             <option value="Saldo Shopee">Marketplace Shopee</option>
-                            <option value="Saldo Shopee">Marketplace Bukalapak</option>
+                            <option value="Saldo Bukalapak">Marketplace Bukalapak</option>
                             <option value="Bayar Waktu Ambil">Bayar Waktu Ambil</option>
                         </select>
                     </div>
@@ -137,6 +137,12 @@
                         {{-- Biaya Jasa Pemasangan --}}
                         <label for="biayaPemasangan">Biaya Jasa Pemasangan <span class="text-sm text-muted font-italic">(Opsional)</span></label>
                         <input type="text" class="form-control rupiah" id="biayaPemasangan" placeholder="Rp" name="biayaPemasangan">
+                    </div>
+                    
+                    <div class="form-group">
+                         {{-- Biaya jasa pengemasan --}}
+                        <label for="biayaPengemasan">Biaya Jasa Packing <span class="text-sm text-muted font-italic">(Opsional)</span></label>
+                        <input type="text" class="form-control rupiah" id="biayaPengemasan" placeholder="Rp" name="biayaPengemasan">
                     </div>
 
                     <div class="form-group">
@@ -221,7 +227,7 @@
                         <input type="hidden" name="sales" value="{{ $order->sales_id }}">
                         {{-- Tombol Submit --}}
                         <div class="d-flex align-items-center">
-                            <button id="submitToAntrian" type="submit" class="btn btn-primary"><div id="loader" class="loader" style="display: none;"></div>
+                            <button id="submitToAntrian" type="submit" class="btn btn-primary">Submit<div id="loader" class="loader" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -252,16 +258,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="alamat">Alamat</label>
-                        <input type="text" class="form-control" id="modalAlamat" placeholder="Alamat Pelanggan" name="modalAlamat">
+                        <label for="alamat">Alamat <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="modalAlamat" placeholder="Alamat Pelanggan" name="modalAlamat" required>
                     </div>
                     <div class="form-group">
-                        <label for="instansi">Instansi</label>
-                        <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan" name="modalInstansi">
+                        <label for="instansi">Instansi <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan" name="modalInstansi" required>
+                        <p class="text-muted mt-2">*Jika tidak tau, beri tanda "-"</p>
                     </div>
                     <div class="form-group">
-                        <label for="infoPelanggan">Sumber Pelanggan</label>
-                        <select class="custom-select rounded-0" id="infoPelanggan" name="modalInfoPelanggan">
+                        <label for="infoPelanggan">Sumber Pelanggan <span class="text-danger">*</span></label>
+                        <select class="custom-select rounded-0" id="infoPelanggan" name="modalInfoPelanggan" required>
                             <option value="default" selected>Pilih Sumber Pelanggan</option>
                             <option value="Google">Google</option>
                             <option value="G-Maps">G-Maps</option>
@@ -276,22 +283,32 @@
                             <option value="OLX">OLX</option>
                             <option value="Teman/Keluarga/Kerabat">Teman/Keluarga/Kerabat</option>
                             <option value="Iklan Facebook">Iklan Facebook</option>
+                            <option value="Iklan Meta">Iklan Meta</option>
                             <option value="Iklan Instagram">Iklan Instagram</option>
                             <option value="Iklan Google">Iklan Google</option>
                             <option value="Iklan Tiktok">Iklan Tiktok</option>
+                            <option value="Iklan Shopee">Iklan Shopee</option>
+                            <option value="Iklan Tokopedia">Iklan Tokopedia</option>
+                            <option value="Salescall">Salescall</option>
+                            <option value="Visit">Visit / Kunjungan</option>
+                            <option value="Follow Up">Follow Up</option>
+                            <option value="RO WA">RO WhatsApp</option>
+                            <option value="Pengunjung Mall">Pengunjung Mall</option>
+                            <option value="Manajemen Royal">Manajemen Royal</option>
+                            <option value="Tenant Royal">Tenant Royal</option>
+                            <option value="Google Bisnis">Google Bisnis</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <input type="submit" class="btn btn-primary" id="submitPelanggan"><span id="loader" class="loader" style="display: none;"></span>
+                <input type="submit" class="btn btn-primary" id="submitPelanggan" value="Tambah"><span id="loader" class="loader" style="display: none;"></span>
                 </div>
             </form>
             </div>
             </div>
         </div>
-
 </div>
 
 @endsection
@@ -423,9 +440,11 @@
         });
     });
 
-    $('#submitToAntrian').on('submit', function(){
+    $('#submitToAntrian').on('submit', function(e){
+        e.preventDefault();
         $(this).find('#submitToAntrian').prop('disabled', true);
         $('#loader').show();
+        this.submit();
     });
 
 });

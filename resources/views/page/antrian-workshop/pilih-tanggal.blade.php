@@ -30,18 +30,7 @@
                                         <option value="Surabaya">Surabaya</option>
                                         <option value="Malang">Malang</option>
                                         <option value="Kediri">Kediri</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    {{-- Pilih jenis Laporan --}}
-                                    <label for="jenis_laporan">Pilih Jenis Laporan</label>
-                                    <select class="form-control" id="jenis_laporan" name="jenis_laporan" required>
-                                        <option value="" selected disabled>Pilih Jenis Laporan</option>
-                                        <option value="Stempel">Stempel</option>
-                                        <option value="Advertising">Advertising</option>
-                                        <option value="Non Stempel">Non Stempel</option>
+                                        <option value="Sidoarjo">Sidoarjo</option>
                                     </select>
                                 </div>
                             </div>

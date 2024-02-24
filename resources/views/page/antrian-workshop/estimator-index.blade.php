@@ -21,6 +21,39 @@
 @endif
     {{-- Form Upload Progress Produksi (Foto atau Video) dengan keterangan --}}
     <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-md-4">
+            <form id="filterByCategory" action="{{ route('estimator.filter') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <label for="kategori">Kategori Pekerjaan</label>
+                    @if(isset($filtered))
+                    <select id="kategori" name="kategori" class="custom-select rounded-1" disabled>
+                        <option value="Semua">Semua</option>
+                        <option value="Stempel" {{ $filtered == "Stempel" ? "selected" : "" }}>Stempel</option>
+                        <option value="Advertising" {{ $filtered == "Advertising" ? "selected" : "" }}>Advertising</option>
+                        <option value="Non Stempel" {{ $filtered == "Non Stempel" ? "selected" : "" }}>Non Stempel</option>
+                        <option value="Digital Printing" {{ $filtered == "Digital Printing" ? "selected" : "" }}>Digital Printing</option>
+                    </select>
+                    @else
+                    <select id="kategori" name="kategori" class="custom-select rounded-1">
+                        <option value="Semua">Semua</option>
+                        <option value="Stempel">Stempel</option>
+                        <option value="Advertising">Advertising</option>
+                        <option value="Non Stempel">Non Stempel</option>
+                        <option value="Digital Printing">Digital Printing</option>
+                    </select>
+                    @endif
+            </div>
+            <div class="col-md-2 align-self-end">
+                @if(isset($filtered))
+                <a href="{{ route('estimator.index') }}" class="btn btn-danger mt-1">Reset</a>
+                @else
+                <button type="submit" class="btn btn-primary mt-1">Filter</button>
+                @endif
+            </div>
+            </form>
+        </div>
+
         <div class="row">
             <div class="col-md-12">
                 <ul class="nav nav-tabs mb-2" id="custom-content-below-tab" role="tablist">
@@ -287,7 +320,7 @@
                                                 <td>{{ $antrian->qty }}</td>
                                                 <td>{{ $antrian->order->employee->name }}</td>
                                                 <td class="text-center">
-                                                    <a href="#" target="_blank" class="btn btn-primary btn-sm">Download</a>
+                                                    <a href="{{ route('design.download', $antrian->id) }}" target="_blank" class="btn btn-primary btn-sm">Download</a>
                                                 </td>
                                                 <td class="text-center">
                                                     @if($antrian->design_id == null)
@@ -313,7 +346,7 @@
                                         </button>
                                         </div>
                                         <div class="modal-body">
-                                        <form action="{{ route('simpanFileProduksi') }}" method="POST" enctype="multipart/form-data">
+                                        <form id="formUploadProduksi" action="{{ route('simpanFileProduksi') }}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                                 <input type="hidden" name="idAntrian" id="antrian_id" value="{{ $antrian->id }}">
                                                 <input type="hidden" name="ticketOrder" id="ticketOrder" value="{{ $antrian->ticket_order }}">
@@ -330,7 +363,7 @@
                                             </div>
                                             <div class="modal-footer justify-content-between">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-                                            <button type="submit" class="btn btn-primary">Upload</button>
+                                            <button type="submit" class="btn btn-primary submitUpload">Upload</button>
                                         </form>
                                         </div>
                                     </div>
@@ -576,11 +609,11 @@
                                                                 <div class="row">
                                                                     <div class="col-md-6">
                                                                         <label>Preview ACC Desain</label>
-                                                                        <div class="text-muted font-italic">{{ strlen($antrian->order->acc_desain) > 25 ? substr($antrian->order->acc_desain, 0, 25) . '...' : $antrian->order->acc_desain }}<button type="button" class="btn btn-sm btn-primary ml-3" data-toggle="modal" data-target="#modal-accdesain{{ $antrian->id }}">Lihat</button></div>
+                                                                        <div class="text-muted font-italic">{{ strlen($antrian->order->acc_desain) > 25 ? substr($antrian->order->acc_desain, 0, 25) . '...' : $antrian->order->acc_desain }}<button type="button" class="btn btn-sm btn-primary ml-3" data-toggle="modal" data-target="#modal-accdesainpro{{ $antrian->id }}">Lihat</button></div>
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <label>Preview Bukti Pembayaran</label>
-                                                                        <div class="text-muted font-italic">{{ strlen($antrian->payment->payment_proof) > 25 ? substr($antrian->payment->payment_proof, 0, 25) . '...' : $antrian->payment->payment_proof }}<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-buktiPembayaran{{ $antrian->id }}">Lihat</button></div>
+                                                                        <div class="text-muted font-italic">{{ strlen($antrian->payment->payment_proof) > 25 ? substr($antrian->payment->payment_proof, 0, 25) . '...' : $antrian->payment->payment_proof }}<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-buktiPembayaranPro{{ $antrian->id }}">Lihat</button></div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -612,7 +645,7 @@
                                                             $dokumproses = App\Models\Dokumproses::where('antrian_id', $antrian->id)->orderBy('created_at', 'desc')->first();
                                                         }
                                                     @endphp
-                                                        <strong class="text-danger">{{ $antrian->design_id != null ? $dokumproses->note : '-' }}</strong><button class="btn btn-sm bg-dark m-2" data-toggle="modal" data-target="#modalProgress{{ $antrian->id }}" >Lihat</button>
+                                                        <strong class="text-danger">{{ $antrian->design_id != null && $dokumproses ? $dokumproses->note : '-' }}</strong><button class="btn btn-sm bg-dark m-2" data-toggle="modal" data-target="#modalProgress{{ $antrian->id }}" >Lihat</button>
                                                         {{-- Modal --}}
 
                                                 </td>
@@ -635,7 +668,7 @@
                                         <div class="modal-body">
                                             <div class="mb-3">
                                             <p><strong>Gambar</strong></p>
-                                                @if($antrian->design_id != null)
+                                                @if($antrian->design_id != null && $dokumproses)
                                                 <img src="{{ asset('storage/dokum-proses/'.$dokumproses->file_gambar) }}" alt="" class="img-fluid">
                                                 @else
                                                 <p class="text-danger">Tidak ada gambar</p>
@@ -643,7 +676,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <p><strong>Video</strong></p>
-                                                @if($antrian->design_id != null)
+                                                @if($antrian->design_id != null && $dokumproses)
                                                 <video src="{{ asset('storage/dokum-proses/'.$dokumproses->file_video) }}" controls class="img-fluid"></video>
                                                 @else
                                                 <p class="text-danger">Tidak ada video</p>
@@ -976,11 +1009,127 @@
                                 </div>
                                 <!-- /.modal -->
                                 @endforeach
-
                             </div>
                         </div>
                     </div>
+                    @foreach ($fileBaruMasuk as $antrian)
+                    <div class="modal fade" id="modal-accdesain{{ $antrian->id }}">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">Preview File Acc Desain</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                                <img class="img-fluid" src="{{ asset('storage/acc-desain/'.$antrian->order->acc_desain) }}">
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
+                    @endforeach
 
+                    <!-- Modal ACC Desain -->
+                    @foreach ($progressProduksi as $antrian)
+                    <div class="modal fade" id="modal-accdesainpro{{ $antrian->id }}">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">Preview File Acc Desain</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                                <img class="img-fluid" src="{{ asset('storage/acc-desain/'.$antrian->order->acc_desain) }}">
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
+                    @endforeach
+                    <!-- Modal ACC Desain -->
+
+                    <!-- Modal Bukti Pembayaran -->
+                    @foreach ($fileBaruMasuk as $antrian)
+                    <div class="modal fade" id="modal-buktiPembayaran{{ $antrian->id }}">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">File Bukti Pembayaran</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                                {{-- Menampilkan payment_proof dari tabel payments --}}
+                                @php
+                                    $paymentProof = \App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
+                                @endphp
+                                @foreach ($paymentProof as $item)
+                                    @if($item->payment_proof == null)
+                                        <p class="text-danger">Tidak ada file</p>
+                                    @else
+                                    <img class="img-fluid" src="{{ asset('storage/bukti-pembayaran/'.$item->payment_proof) }}">
+                                    @endif
+                                @endforeach
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
+                @endforeach
+
+                @foreach ($progressProduksi as $antrian)
+                    <div class="modal fade" id="modal-buktiPembayaranPro{{ $antrian->id }}">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">File Bukti Pembayaran</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                                {{-- Menampilkan payment_proof dari tabel payments --}}
+                                @php
+                                    $paymentProof = \App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
+                                @endphp
+                                @foreach ($paymentProof as $item)
+                                    @if($item->payment_proof == null)
+                                        <p class="text-danger">Tidak ada file</p>
+                                    @else
+                                    <img class="img-fluid" src="{{ asset('storage/bukti-pembayaran/'.$item->payment_proof) }}">
+                                    @endif
+                                @endforeach
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
+                @endforeach
                 </div>
             </div>
         </div>
@@ -998,19 +1147,25 @@
                 'responsive': true,
                 'autoWidth': false
             });
-
             $('#selesaiProduksi').DataTable({
                 'responsive': true,
                 'autoWidth': false
             });
+        });
 
-            @if(session('success'))
+        @if(session('success'))
                 Swal.fire(
                     'Berhasil!',
                     '{{ session('success') }}',
                     'success'
                 )
-            @endif
+        @endif
+
+        //Menutup modal saat modal lainnya dibuka
+        $('.modal').on('show.bs.modal', function (e) {
+                $('.modal').not($(this)).each(function () {
+                    $(this).modal('hide');
+                });
         });
     </script>
 @endsection

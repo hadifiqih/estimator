@@ -49,7 +49,17 @@
   {{-- Pusher --}}
   <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
   <script>
-    navigator.serviceWorker.register('/service-worker.js');
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
   </script>
 </head>
 
@@ -172,7 +182,7 @@
                 </p>
             </a>
             <ul class="nav nav-treeview">
-                @if(auth()->user()->role == 'sales' || auth()->user()->employee->can_design == 1 || auth()->user()->role == 'desain')
+                @if(auth()->user()->role == 'sales' || auth()->user()->employee->can_design == 1 || auth()->user()->role == 'desain' || auth()->user()->role == 'manager')
                 <li class="nav-item">
                     <a href="{{ route('design.index') }}" class="nav-link {{ request()->routeIs('design.index') || request()->routeIs('order.edit') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
@@ -195,7 +205,7 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'supervisor')
+                @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'dokumentasi' || auth()->user()->role == 'supervisor' || auth()->user()->role == 'manager' || auth()->user()->role == 'estimator')
                 <li class="nav-item">
                     <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
@@ -204,7 +214,7 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->role == 'admin')
+                @if(auth()->user()->role == 'admin' || auth()->user()->id == 45 || auth()->user()->id == 16)
                 {{-- Memilih tanggal untuk Unduh Laporan Workshop --}}
                 <li class="nav-item">
                     <a href="{{ route('laporan.workshop') }}" class="nav-link {{ request()->routeIs('laporan.workshop') ? 'active' : '' }}">
@@ -221,11 +231,32 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'staffGudang' )
+                @if(auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'staffGudang' || auth()->user()->role == 'adminKeuangan')
                     <li class="nav-item">
-                        <a href="{{ route('antrian.index') }}" class="nav-link">
+                        <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('laporan.workshop') ? 'active' : '' }}">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Antrian Workshop</p>
+                        </a>
+                    </li>
+                @endif
+
+                @if(auth()->user()->role == 'adminKeuangan')
+                    <li class="nav-item">
+                        <a href="{{ route('omset.globalSales') }}" class="nav-link {{ request()->routeIs('omset.globalSales') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Omset Global Sales</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('omset.perCabang') }}" class="nav-link {{ request()->routeIs('omset.perCabang') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Omset Cabang</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('omset.perProduk') }}" class="nav-link {{ request()->routeIs('omset.perProduk') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Omset Produk</p>
                         </a>
                     </li>
                 @endif
@@ -350,6 +381,7 @@
           window.location.href = "{{ route('auth.logout') }}";
         }
     }
+
 </script>
 <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 <script>

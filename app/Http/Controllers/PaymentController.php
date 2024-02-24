@@ -84,12 +84,6 @@ class PaymentController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $payments = Payment::where('ticket_order', $id)->first();
@@ -97,63 +91,56 @@ class PaymentController extends Controller
         return view('antrian.payment.edit', compact('payments'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function updatePelunasan(Request $request)
     {
-        try {
-            $payment = Payment::where('ticket_order', $request->ticketAntrian)
-                          ->orderBy('created_at', 'desc')
-                          ->first();
-        } catch (\Throwable $th) {
-            return redirect()->back()->json(['error' => 'Pembayaran tidak ditemukan !']);
-        }
-
-        //menghilangkan Rp dan titik
-        $jumlahPembayaran = str_replace(['Rp ', '.'], '', $request->jumlahPembayaran);
-        //convert ke integer
-        $jumlahPembayaran = (int) $jumlahPembayaran;
-        //total pembayaran
-        $totalPembayaran = $jumlahPembayaran + $payment->payment_amount;
-        //total sisa pembayaran
-        $sisaPembayaran = $payment->total_payment - $totalPembayaran;
-
-        if($sisaPembayaran < 0){
-            return redirect()->back()->with('error', 'Jumlah pembayaran melebihi total pembayaran !');
-        }elseif($sisaPembayaran == 0){
-            $payment->payment_status = "Lunas";
-            $payment->payment_amount = $totalPembayaran;
+        if(isset($request->filePelunasan)){
+            $file = $request->file('filePelunasan');
+            $fileName = time() . '.' . $file->getClientOriginalExtension();
+            $path = 'bukti-pembayaran/' . $fileName;
+            Storage::disk('public')->put($path, file_get_contents($file));
         }else{
-            $payment->payment_status = "DP";
-            $payment->payment_amount = $totalPembayaran;
+            $fileName = null;
         }
 
-        //Menyimpan bukti pembayaran ke dalam folder bukti-pembayaran
-        try {
-        $file = $request->file('filePelunasan');
-        $fileName = time() . '.' . $file->getClientOriginalExtension();
-        $path = 'bukti-pembayaran/' . $fileName;
-        Storage::disk('public')->put($path, $file->get());
-        $payment->payment_proof = $fileName;
-        $payment->save();
-        } catch (Throwable $th) {
-            return redirect()->back()->with('error', 'Bukti pembayaran gagal diupload !');
+        $metodePembayaran = $request->metodePembayaran;
+        $jumlahPembayaran = str_replace(['Rp ', '.'], '', $request->jumlahPembayaran);
+        $jumlahPembayaran = (int)$jumlahPembayaran;
+        $ticket = $request->ticketAntrian;
+
+        $payment = Payment::where('ticket_order', $ticket)->orderBy('created_at', 'desc')->first();
+        $hutang = $payment->remaining_payment;
+        $totalOmset = $payment->total_payment;
+        $dibayar = $payment->payment_amount + $jumlahPembayaran;
+        $ongkir = $payment->shipping_cost;
+        $pasang = $payment->installation_cost;
+
+        if($hutang == $jumlahPembayaran){
+            $hutang = 0;
+            $status = "Lunas";
+        }else{
+            $hutang = $hutang - $jumlahPembayaran;
+            $status = "DP";
         }
 
-        return redirect()->route('antrian.index')->with('success', 'Pembayaran berhasil diperbarui !');
+        try{
+            $payment = new Payment;
+            $payment->ticket_order = $ticket;
+            $payment->total_payment = $totalOmset;
+            $payment->payment_amount = $dibayar;
+            $payment->shipping_cost = $ongkir;
+            $payment->installation_cost = $pasang;
+            $payment->remaining_payment = $hutang;
+            $payment->payment_status = $status;
+            $payment->payment_method = $metodePembayaran;
+            $payment->payment_proof = $fileName;
+            $payment->save();
+        }catch(Throwable $e){
+            return redirect()->back()->with('error', 'Pelunasan gagal diperbarui !');
+        }
+
+        return redirect()->route('antrian.index')->with('success', 'Pelunasan berhasil diperbarui !');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

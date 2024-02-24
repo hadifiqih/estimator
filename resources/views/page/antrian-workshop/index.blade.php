@@ -53,6 +53,38 @@
 
 {{-- Content Table --}}
     <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-md-4">
+            <form id="filterByCategory" action="{{ route('antrian.filterByCategory') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <label for="kategori">Kategori Pekerjaan</label>
+                    @if(isset($filtered))
+                    <select id="kategori" name="kategori" class="custom-select rounded-1" disabled>
+                        <option value="Semua">Semua</option>
+                        <option value="Stempel" {{ $filtered == "Stempel" ? "selected" : "" }}>Stempel</option>
+                        <option value="Advertising" {{ $filtered == "Advertising" ? "selected" : "" }}>Advertising</option>
+                        <option value="Non Stempel" {{ $filtered == "Non Stempel" ? "selected" : "" }}>Non Stempel</option>
+                        <option value="Digital Printing" {{ $filtered == "Digital Printing" ? "selected" : "" }}>Digital Printing</option>
+                    </select>
+                    @else
+                    <select id="kategori" name="kategori" class="custom-select rounded-1">
+                        <option value="Semua">Semua</option>
+                        <option value="Stempel">Stempel</option>
+                        <option value="Advertising">Advertising</option>
+                        <option value="Non Stempel">Non Stempel</option>
+                        <option value="Digital Printing">Digital Printing</option>
+                    </select>
+                    @endif
+            </div>
+            <div class="col-md-2 align-self-end">
+                @if(isset($filtered))
+                <a href="{{ route('antrian.index') }}" class="btn btn-danger mt-1">Reset</a>
+                @else
+                <button type="submit" class="btn btn-primary mt-1">Filter</button>
+                @endif
+            </div>
+            </form>
+        </div>
         <div class="row">
             <div class="col-12">
                 <ul class="nav nav-tabs mb-2" id="custom-content-below-tab" role="tablist">
@@ -62,7 +94,7 @@
                     <li class="nav-item">
                       <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#custom-content-below-profile" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Selesai</a>
                     </li>
-                  </ul>
+                </ul>
                 <div class="tab-content" id="custom-content-below-tabContent">
                     <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
                         <div class="card">
@@ -76,6 +108,7 @@
                                         <tr>
                                             <th scope="col">Ticket Order</th>
                                             <th scope="col">Sales</th>
+                                            <th scope="col">Nama Customer</th>
                                             <th scope="col">Jenis Produk</th>
                                             <th scope="col">Qty</th>
                                             <th scope="col">Deadline</th>
@@ -91,7 +124,7 @@
                                             <th scope="col">Catatan Admin</th>
                                             @if(auth()->user()->role == 'admin')
                                                 <th scope="col">Aksi</th>
-                                            @elseif(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                            @elseif(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->id == '28')
                                             <th scope="col">Progress</th>
                                             @endif
                                         </tr>
@@ -106,20 +139,37 @@
                                                     <p class="text-success">{{ $antrian->ticket_order }}</p>
                                                 @endif
                                                 </td>
-                                                <td>{{ $antrian->sales->sales_name }}</td>
+                                                <td>{{ $antrian->sales->sales_name }}
+                                                @if($antrian->order->is_priority == 1)
+                                                    <span><i class="fas fa-star text-warning"></i></span>
+                                                @endif
+                                                </td>
+                                                <td>{{ $antrian->customer->nama }}</td>
                                                 <td>{{ $antrian->job->job_name }} <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailAntrian{{ $antrian->id }}"><i class="fas fa-info-circle"></i></button></td>
                                                 <td>{{ $antrian->qty }}</td>
 
-                                                <td id="waktu{{ $antrian->id }}" class="text-center"></td>
+                                                <td class="text-center">
+                                                    <span class="countdown" data-countdown="{{ $antrian->end_job }}">Loading..</span>
+                                                </td>
 
                                                 {{-- File dari Desainer --}}
                                                 <td class="text-center">
-                                                    @if($antrian->order->ada_revisi == 0)
-                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
-                                                    @elseif($antrian->order->ada_revisi == 1)
-                                                    <a class="btn btn-secondary btn-sm disabled" href="#">Download</a><span class="text-danger text-sm">(Sedang Direvisi)</span>
-                                                    @elseif($antrian->order->ada_revisi == 2)
-                                                    <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a><span class="text-danger text-sm">(Sudah Direvisi)</span>
+                                                    @if($antrian->order->link_file == null)
+                                                        @if($antrian->order->ada_revisi == 0)
+                                                        <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
+                                                        @elseif($antrian->order->ada_revisi == 1)
+                                                        <span class="text-danger text-sm">(Sedang Direvisi)</span>
+                                                        @elseif($antrian->order->ada_revisi == 2)
+                                                        <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a><span class="text-danger text-sm">(Sudah Direvisi)</span>
+                                                        @endif
+                                                    @else
+                                                        @if($antrian->order->ada_revisi == 0)
+                                                        <a class="btn btn-dark btn-sm" href="{{ $antrian->order->link_file }}" target="_blank">Akses Link</a>
+                                                        @elseif($antrian->order->ada_revisi == 1)
+                                                        <span class="text-danger text-sm">(Sedang Direvisi)</span>
+                                                        @elseif($antrian->order->ada_revisi == 2)
+                                                        <a class="btn btn-success btn-sm" href="{{ $antrian->order->link_file }}" target="_blank">Akses Link</a><span class="text-danger text-sm">(Sudah Direvisi)</span>
+                                                        @endif
                                                     @endif
                                                 </td>
 
@@ -131,7 +181,7 @@
                                                         </td>
                                                     @elseif($antrian->design_id == null && $antrian->is_aman == 1)
                                                         <td>
-                                                            <a class="btn bg-success btn-sm disabled" href="#">File Desain Aman</a>
+                                                            <p class="text-success"><i class="fas fa-check-circle"></i> File Desain Aman</p>
                                                         </td>
                                                     @elseif($antrian->design_id == null && $antrian->is_aman == 0)
                                                         <td>
@@ -150,7 +200,7 @@
                                                 </td>
 
                                                 <td>
-                                                    @if($antrian->operator_id)
+                                                    @if($antrian->operator_id != null)
                                                     @php
                                                         $operatorId = explode(',', $antrian->operator_id);
                                                         foreach ($operatorId as $item) {
@@ -175,7 +225,7 @@
                                                 </td>
 
                                                 <td>
-                                                    @if($antrian->finisher_id)
+                                                    @if($antrian->finisher_id != null)
                                                     @php
                                                         $finisherId = explode(',', $antrian->finisher_id);
                                                         foreach ($finisherId as $item) {
@@ -277,7 +327,7 @@
                                                 </td>
                                                 @endif
 
-                                                @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
+                                                @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->id == '28')
                                                 <td>
                                                     @php
                                                         $waktuSekarang = date('H:i');
@@ -319,15 +369,19 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="form-group">
-                                                <label class="form-label">Nama Project</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->order->title }}" readonly>
+                                                <label for="tanggalOrder">Tanggal Order</label>
+                                                <input id="tanggalOrder{{ $antrian->id }}" name="tanggalOrder" type="text" class="form-control" value="{{ $antrian->created_at->format('d F Y') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label">Sales</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->sales->sales_name }}" readonly>
+                                                <label class="form-label" for="nama-project{{ $antrian->id }}">Nama Project</label>
+                                                <input id="nama-project{{ $antrian->id }}" name="nama-project{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->order->title }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Nama Pelanggan
+                                                <label class="form-label" for="sales{{ $antrian->id }}">Sales</label>
+                                                <input id="sales{{ $antrian->id }}" name="sales{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->sales->sales_name }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="nama-pelanggan{{ $antrian->id }}">Nama Pelanggan
                                                     @if($antrian->customer->frekuensi_order == 0)
                                                     <span class="badge badge-danger">New Leads</span>
                                                     @elseif($antrian->customer->frekuensi_order == 1)
@@ -336,31 +390,47 @@
                                                     <span class="badge badge-success">Repeat Order</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control" value="{{ $antrian->customer->nama }}" readonly>
+                                                <input id="nama-pelanggan{{ $antrian->id }}" name="nama-pelanggan{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->nama }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Nama Produk</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->job->job_name }}" readonly>
+                                                <label class="form-label" for="telepon{{ $antrian->id }}">Telepon/WA</label>
+                                                <input id="telepon{{ $antrian->id }}" name="telepon{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->telepon }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Jumlah Produk (Qty)</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
+                                                <label class="form-label" for="alamat{{ $antrian->id }}">Alamat Pelanggan</label>
+                                                <textarea id="alamat{{ $antrian->id }}" name="alamat{{ $antrian->id }}" class="form-control" rows="3" readonly>{{ $antrian->customer->alamat }}</textarea>
                                             </div>
                                             <div class="form-group">
-                                                <label for="">Keterangan / Spesifikasi Produk</label>
-                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->note }}</textarea>
+                                                <label class="form-label" for="sumber-pelanggan{{ $antrian->id }}">Sumber Pelanggan</label>
+                                                <input id="sumber-pelanggan{{ $antrian->id }}" name="sumber-pelanggan{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->infoPelanggan }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Deadline</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->end_job }}" readonly>
+                                                <label class="form-label" for="nama-produk{{ $antrian->id }}">Nama Produk</label>
+                                                <input id="nama-produk{{ $antrian->id }}" name="nama-produk{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->job->job_name }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Desainer</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
+                                                <label class="form-label" for="jumlah-produk{{ $antrian->id }}">Jumlah Produk (Qty)</label>
+                                                <input id="jumlah-produk{{ $antrian->id }}" name="jumlah-produk{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="keterangan{{ $antrian->id }}">Keterangan / Spesifikasi Produk</label>
+                                                <textarea id="keterangan{{ $antrian->id }}" name="keterangan{{ $antrian->id }}" class="form-control" rows="6" readonly>{{ $antrian->note }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="mulai{{ $antrian->id }}">Mulai</label>
+                                                <input id="mulai{{ $antrian->id }}" name="mulai{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->start_job }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="deadline{{ $antrian->id }}">Deadline</label>
+                                                <input id="deadline{{ $antrian->id }}" name="deadline{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->end_job }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="desainer{{ $antrian->id }}">Desainer</label>
+                                                <input id="desainer{{ $antrian->id }}" name="desainer{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label for="form-label">Tempat : </label>
+                                                <span class="form-label font-weight-bold"> Tempat : </span>
                                                     @php
                                                         $tempat = explode(',', $antrian->working_at);
                                                         foreach ($tempat as $item) {
@@ -393,7 +463,7 @@
                                             <div class="form-group">
                                                 <div class="row">
                                                     <div class="col-md-4 rounded-2">
-                                                <label>Operator</label>
+                                                <span class="form-label font-weight-bold">Operator</span>
                                                 <p>
                                                 @if($antrian->operator_id)
                                                     @php
@@ -420,7 +490,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-4 rounded-2">
-                                                <label>Finishing</label>
+                                                <span class="form-label font-weight-bold">Finishing</span>
                                                 <p>
                                                 @if($antrian->finisher_id)
                                                     @php
@@ -447,7 +517,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-4 rounded-2">
-                                                <label>Pengawas / QC</label>
+                                                <span class="form-label font-weight-bold">Pengawas / QC</span>
                                                 <p>
                                                 @if($antrian->qc_id)
                                                     @php
@@ -472,7 +542,7 @@
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label for="">Mesin : </label>
+                                                <span class="form-label font-weight-bold">Mesin : </span>
                                                 @if($antrian->machine_code)
                                                         @php
                                                             $machineCode = explode(',', $antrian->machine_code);
@@ -494,24 +564,40 @@
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label>Nominal Omset</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="nominal-omset{{ $antrian->id }}">Nominal Omset</label>
+                                                <input id="nominal-omset{{ $antrian->id }}" name="nominal-omset{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Harga Produk</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="harga-produk{{ $antrian->id }}">Harga Produk</label>
+                                                <input id="harga-produk{{ $antrian->id }}" name="harga-produk{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Biaya Jasa Pasang</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : number_format($antrian->payment->installation_cost, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="status-pembayaran{{ $antrian->id }}">Status Pembayaran</label>
+                                                <input id="status-pembayaran{{ $antrian->id }}" name="status-pembayaran{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->payment->payment_status }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Biaya Jasa Pengiriman</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : number_format($antrian->payment->shipping_cost, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="metode{{ $antrian->id }}">Metode Pembayaran</label>
+                                                <input id="metode{{ $antrian->id }}" name="metode{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->payment->payment_method }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Alamat Pengiriman</label>
-                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->alamat_pengiriman == null ? '-' : $antrian->alamat_pengiriman }}</textarea>
+                                                <label class="form-label" for="bayar{{ $antrian->id }}">Nominal Pembayaran</label>
+                                                <input id="bayar{{ $antrian->id }}" name="bayar{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->payment->payment_amount, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="sisa{{ $antrian->id }}">Sisa Pembayaran</label>
+                                                <input id="sisa{{ $antrian->id }}" name="sisa{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->payment->remaining_payment, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="pasang{{ $antrian->id }}">Biaya Jasa Pasang</label>
+                                                <input id="pasang{{ $antrian->id }}" name="pasang{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : number_format($antrian->payment->installation_cost, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="pengiriman{{ $antrian->id }}">Biaya Jasa Pengiriman</label>
+                                                <input id="pengiriman{{ $antrian->id }}" name="pengiriman{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : number_format($antrian->payment->shipping_cost, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="alamat-kirim{{ $antrian->id }}">Alamat Pengiriman</label>
+                                                <textarea id="alamat-kirim{{ $antrian->id }}" name="alamat-kirim{{ $antrian->id }}" class="form-control" rows="6" readonly>{{ $antrian->alamat_pengiriman == null ? '-' : $antrian->alamat_pengiriman }}</textarea>
                                             </div>
                                             <div class="form-group">
                                                 <div class="row">
@@ -553,11 +639,12 @@
                                         <tr>
                                             <th scope="col">Ticket Order</th>
                                             <th scope="col">Keyword Project</th>
+                                            <th scope="col">Nama Customer</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Jenis Produk</th>
                                             <th scope="col">Desain</th>
                                             <th scope="col">Dokumentasi</th>
-                                            @if(auth()->user()->role == 'sales')
+                                            @if(auth()->user()->role == 'sales' || auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
                                             <th scope="col">Pelunasan</th>
                                             @endif
                                         </tr>
@@ -567,7 +654,12 @@
                                             <tr>
                                                 <td>{{ $antrian->ticket_order }}</td>
                                                 <td>{{ $antrian->order->title }}</td>
-                                                <td>{{ $antrian->sales->sales_name }}</td>
+                                                <td>{{ $antrian->customer->nama }}</td>
+                                                <td>{{ $antrian->sales->sales_name }}
+                                                    @if($antrian->order->is_priority == 1)
+                                                    <span><i class="fas fa-star text-warning"></i></span>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $antrian->job->job_name }} <button class="btn btn-primary btn-sm" data-target="#detailAntrianSelesai{{ $antrian->id }}" data-toggle="modal"><i class="fas fa-info-circle"></i></button></td>
 
                                                 <td class="text-center">
@@ -620,53 +712,83 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                @if(auth()->user()->role == 'sales')
+                                                @if(auth()->user()->role == 'sales' || auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
                                                 <td>
-                                                        @if($antrian->payment->payment_status == 'Belum Bayar' || $antrian->payment->payment_status == 'DP')
-                                                        <button class="btn btn-sm btn-danger" data-target="#modalPelunasan{{ $antrian->id }}" data-toggle="modal" ><i class="fas fa-upload"></i> Pelunasan</button>
-                                                        {{-- Modal Pelunasan  --}}
-                                                        <div class="modal fade" id="modalPelunasan{{ $antrian->id }}">
-                                                            <div class="modal-dialog modal-sm">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                <h4 class="modal-title">Upload Pelunasan</h4>
-                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
+                                                        @php
+                                                            $latestPayment = App\Models\Payment::where('ticket_order', $antrian->ticket_order)->latest()->first();
+                                                        @endphp
+                                                        @if($latestPayment->payment_status == 'Belum Bayar' || $latestPayment->payment_status == 'DP')
+                                                            @if(auth()->user()->role == 'sales')
+                                                                <button id="btnModalPelunasan{{ $antrian->id }}" class="btn btn-sm btn-danger btnModalPelunasan" data-toggle="modal" data-target="#modalPelunasan{{ $antrian->id }}"><i class="fas fa-upload"></i> Pelunasan</button>
+                                                                @includeIf('page.antrian-workshop.modal-pelunasan')
+                                                            @elseif(auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
+                                                                <button class="btn btn-sm btn-secondary disabled"> Belum Pelunasan</button>
+                                                            @endif
+                                                        @elseif($latestPayment->payment_status == 'Lunas')
+                                                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalTampilBP{{ $antrian->id }}"><i class="fas fa-check-circle"></i> Lihat</button>
+                                                            <!-- Modal -->
+                                                            <div class="modal fade" id="modalTampilBP{{ $antrian->id }}" tabindex="-1" aria-labelledby="TampilBPLabel{{ $antrian->id }}" aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                    <h5 class="modal-title" id="TampilBPLabel{{ $antrian->id }}">Data Pembayaran</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <h5 class="bg-danger p-2 rounded"><strong>Total Omset : </strong>Rp {{ number_format($antrian->omset, 0, ',', '.') }}</h5>
+                                                                        <hr>
+                                                                        @php
+                                                                            $buktiPembayaran = App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
+                                                                        @endphp
+                                                                        @foreach ($buktiPembayaran as $bukti)
+                                                                            <table class="table table-borderless table-responsive">
+                                                                                <tr>
+                                                                                    <th>Tanggal Pembayaran</th>
+                                                                                    <td>{{ $bukti->created_at }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Status Pembayaran</th>
+                                                                                    <td>{{ $bukti->payment_status }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Metode Pembayaran</th>
+                                                                                    <td>{{ $bukti->payment_method }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Jumlah Pembayaran</th>
+                                                                                    <td>Rp {{ number_format($bukti->payment_amount, 0, ',', '.') }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Biaya Pengiriman</th>
+                                                                                    <td>Rp {{ number_format($bukti->shipping_cost, 0, ',', '.') }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Biaya Pemasangan</th>
+                                                                                    <td>Rp {{ number_format($bukti->installation_cost, 0, ',', '.') }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Sisa Pembayaran</th>
+                                                                                    <td>Rp {{ number_format($bukti->remaining_payment, 0, ',', '.') }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Bukti Pembayaran</th>
+                                                                                    <td>
+                                                                                        <a href="{{ $bukti->payment_proof != null ? asset('storage/bukti-pembayaran/'.$bukti->payment_proof) : "#" }}" target="_blank">
+                                                                                            {{ $bukti->payment_proof == null ? "-" : $bukti->payment_proof }}
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        @endforeach
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="modal-body">
-                                                                    <form action="{{ route('payment.pelunasan') }}" method="POST" enctype="multipart/form-data">
-                                                                        @csrf
-                                                                        @method('PUT')
-                                                                        {{-- Jumlah Pembayaran --}}
-                                                                        <div class="form-group mb-1">
-                                                                            <label for="form-label">Jumlah Pembayaran</label>
-                                                                            <input id="jumlahPembayaran" type="text" class="form-control maskRupiah" name="jumlahPembayaran" placeholder="Contoh : Rp 10.000" required>
-                                                                        </div>
-                                                                            <p id="keterangan" class="my-1"></p>
-                                                                        {{-- File Bukti Pembayaran --}}
-                                                                        <p class="mb-2"><strong>Bukti Pembayaran</strong></p>
-                                                                        <div class="input-group">
-                                                                            <div class="custom-file">
-                                                                            <input type="file" class="custom-file-input" id="exampleInputFile" name="filePelunasan" required>
-                                                                            <label class="custom-file-label" for="exampleInputFile">Pilih File</label>
-                                                                            </div>
-                                                                        </div>
-                                                                        <p class="text-danger mt-2 mb-0">Sisa Tagihan : <strong>Rp {{ number_format($antrian->payment->remaining_payment, 0, ',', '.') }}</strong></p>
-                                                                </div>
-                                                                <div class="modal-footer justify-content-between">
-                                                                    <input type="hidden" name="ticketAntrian" value="{{ $antrian->ticket_order }}">
-                                                                    <input id="submitUnggahBayar" type="submit" class="btn btn-primary" value="Unggah">
-                                                                </form>
                                                                 </div>
                                                             </div>
-                                                            <!-- /.modal-content -->
-                                                            </div>
-                                                            <!-- /.modal-dialog -->
-                                                        </div>
-                                                        <!-- /.modal -->
-                                                        @elseif($antrian->payment->payment_status == 'Lunas')
-                                                            <p class="text-success text-center"><i class="fas fa-check-circle"></i> Lunas</p>
                                                         @endif
                                                 </td>
                                                 @endif
@@ -676,6 +798,7 @@
                                 </table>
                                 <!-- /.card -->
                             </div>
+
                             @foreach($antrianSelesai as $antrian)
                             <div class="modal fade" id="detailAntrianSelesai{{ $antrian->id }}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -688,15 +811,19 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="form-group">
-                                                <label class="form-label">Nama Project</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->order->title }}" readonly>
+                                                <label for="tanggalOrder">Tanggal Order</label>
+                                                <input id="tanggalOrder{{ $antrian->id }}" name="tanggalOrder" type="text" class="form-control" value="{{ $antrian->created_at->format('d F Y') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label">Sales</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->sales->sales_name }}" readonly>
+                                                <label class="form-label" for="nama-project{{ $antrian->id }}">Nama Project</label>
+                                                <input id="nama-project{{ $antrian->id }}" name="nama-project{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->order->title }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Nama Pelanggan
+                                                <label class="form-label" for="sales{{ $antrian->id }}">Sales</label>
+                                                <input id="sales{{ $antrian->id }}" name="sales{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->sales->sales_name }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="nama-pelanggan{{ $antrian->id }}">Nama Pelanggan
                                                     @if($antrian->customer->frekuensi_order == 0)
                                                     <span class="badge badge-danger">New Leads</span>
                                                     @elseif($antrian->customer->frekuensi_order == 1)
@@ -705,31 +832,47 @@
                                                     <span class="badge badge-success">Repeat Order</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control" value="{{ $antrian->customer->nama }}" readonly>
+                                                <input id="nama-pelanggan{{ $antrian->id }}" name="nama-pelanggan{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->nama }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Nama Produk</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->job->job_name }}" readonly>
+                                                <label class="form-label" for="telepon{{ $antrian->id }}">Telepon/WA</label>
+                                                <input id="telepon{{ $antrian->id }}" name="telepon{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->telepon }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Jumlah Produk (Qty)</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
+                                                <label class="form-label" for="alamat{{ $antrian->id }}">Alamat Pelanggan</label>
+                                                <textarea id="alamat{{ $antrian->id }}" name="alamat{{ $antrian->id }}" class="form-control" rows="3" readonly>{{ $antrian->customer->alamat }}</textarea>
                                             </div>
                                             <div class="form-group">
-                                                <label for="">Keterangan / Spesifikasi Produk</label>
-                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->note }}</textarea>
+                                                <label class="form-label" for="sumber-pelanggan{{ $antrian->id }}">Sumber Pelanggan</label>
+                                                <input id="sumber-pelanggan{{ $antrian->id }}" name="sumber-pelanggan{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->customer->infoPelanggan }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="form-label">Deadline</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->end_job }}" readonly>
+                                                <label class="form-label" for="nama-produk{{ $antrian->id }}">Nama Produk</label>
+                                                <input id="nama-produk{{ $antrian->id }}" name="nama-produk{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->job->job_name }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Desainer</label>
-                                                <input type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
+                                                <label class="form-label" for="jumlah-produk{{ $antrian->id }}">Jumlah Produk (Qty)</label>
+                                                <input id="jumlah-produk{{ $antrian->id }}" name="jumlah-produk{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->qty }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="keterangan{{ $antrian->id }}">Keterangan / Spesifikasi Produk</label>
+                                                <textarea id="keterangan{{ $antrian->id }}" name="keterangan{{ $antrian->id }}" class="form-control" rows="6" readonly>{{ $antrian->note }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="mulai{{ $antrian->id }}">Mulai</label>
+                                                <input id="mulai{{ $antrian->id }}" name="mulai{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->start_job }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="deadline{{ $antrian->id }}">Deadline</label>
+                                                <input id="deadline{{ $antrian->id }}" name="deadline{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->end_job }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="desainer{{ $antrian->id }}">Desainer</label>
+                                                <input id="desainer{{ $antrian->id }}" name="desainer{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->order->employee->name }}" readonly>
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label for="form-label">Tempat : </label>
+                                                <span class="form-label font-weight-bold"> Tempat : </span>
                                                     @php
                                                         $tempat = explode(',', $antrian->working_at);
                                                         foreach ($tempat as $item) {
@@ -762,7 +905,7 @@
                                             <div class="form-group">
                                                 <div class="row">
                                                     <div class="col-md-4 rounded-2">
-                                                <label>Operator</label>
+                                                <span class="form-label font-weight-bold">Operator</span>
                                                 <p>
                                                 @if($antrian->operator_id)
                                                     @php
@@ -789,7 +932,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-4 rounded-2">
-                                                <label>Finishing</label>
+                                                <span class="form-label font-weight-bold">Finishing</span>
                                                 <p>
                                                 @if($antrian->finisher_id)
                                                     @php
@@ -816,7 +959,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-4 rounded-2">
-                                                <label>Pengawas / QC</label>
+                                                <span class="form-label font-weight-bold">Pengawas / QC</span>
                                                 <p>
                                                 @if($antrian->qc_id)
                                                     @php
@@ -841,7 +984,7 @@
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label for="">Mesin : </label>
+                                                <span class="form-label font-weight-bold">Mesin : </span>
                                                 @if($antrian->machine_code)
                                                         @php
                                                             $machineCode = explode(',', $antrian->machine_code);
@@ -863,24 +1006,40 @@
                                             </div>
                                             <hr>
                                             <div class="form-group">
-                                                <label>Nominal Omset</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="nominal-omset{{ $antrian->id }}">Nominal Omset</label>
+                                                <input id="nominal-omset{{ $antrian->id }}" name="nominal-omset{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->omset, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Harga Produk</label>
-                                                <input type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="harga-produk{{ $antrian->id }}">Harga Produk</label>
+                                                <input id="harga-produk{{ $antrian->id }}" name="harga-produk{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->harga_produk, 0, ',', '.') }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Biaya Jasa Pasang</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : number_format($antrian->payment->installation_cost, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="status-pembayaran{{ $antrian->id }}">Status Pembayaran</label>
+                                                <input id="status-pembayaran{{ $antrian->id }}" name="status-pembayaran{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->payment->payment_status }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Biaya Jasa Pengiriman</label>
-                                                <input type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : number_format($antrian->payment->shipping_cost, 0, ',', '.') }}" readonly>
+                                                <label class="form-label" for="metode{{ $antrian->id }}">Metode Pembayaran</label>
+                                                <input id="metode{{ $antrian->id }}" name="metode{{ $antrian->id }}" type="text" class="form-control" value="{{ $antrian->payment->payment_method }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Alamat Pengiriman</label>
-                                                <textarea class="form-control" rows="6" readonly>{{ $antrian->alamat_pengiriman == null ? '-' : $antrian->alamat_pengiriman }}</textarea>
+                                                <label class="form-label" for="bayar{{ $antrian->id }}">Nominal Pembayaran</label>
+                                                <input id="bayar{{ $antrian->id }}" name="bayar{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->payment->payment_amount, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="sisa{{ $antrian->id }}">Sisa Pembayaran</label>
+                                                <input id="sisa{{ $antrian->id }}" name="sisa{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ number_format($antrian->payment->remaining_payment, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="pasang{{ $antrian->id }}">Biaya Jasa Pasang</label>
+                                                <input id="pasang{{ $antrian->id }}" name="pasang{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ $antrian->payment->installation_cost == null ? '-' : number_format($antrian->payment->installation_cost, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="pengiriman{{ $antrian->id }}">Biaya Jasa Pengiriman</label>
+                                                <input id="pengiriman{{ $antrian->id }}" name="pengiriman{{ $antrian->id }}" type="text" class="form-control" value="Rp {{ $antrian->payment->shipping_cost == null ? '-' : number_format($antrian->payment->shipping_cost, 0, ',', '.') }}" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="alamat-kirim{{ $antrian->id }}">Alamat Pengiriman</label>
+                                                <textarea id="alamat-kirim{{ $antrian->id }}" name="alamat-kirim{{ $antrian->id }}" class="form-control" rows="6" readonly>{{ $antrian->alamat_pengiriman == null ? '-' : $antrian->alamat_pengiriman }}</textarea>
                                             </div>
                                             <div class="form-group">
                                                 <div class="row">
@@ -907,6 +1066,9 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- /.row -->
     <!-- /.container-fluid -->
     @foreach ($antrians as $antrian)
     <div class="modal fade" id="modal-accdesain{{ $antrian->id }}">
@@ -969,7 +1131,7 @@
                 <div class="modal-body">
                     {{-- Menampilkan payment_proof dari tabel payments --}}
                     @php
-                        $paymentProof = \App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
+                        $paymentProof = \App\Models\Payment::where('ticket_order', $antrian->ticket_order)->orderBy('created_at', 'desc')->get();
                     @endphp
                     @foreach ($paymentProof as $item)
                         @if($item->payment_proof == null)
@@ -1006,7 +1168,7 @@
                         $paymentProof = \App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
                     @endphp
                     @foreach ($paymentProof as $item)
-                    <img class="img-fluid" src="storage/bukti-pembayaran/{{ $item->payment_proof }}">
+                    <img class="img-fluid" src="{{ asset('storage/bukti-pembayaran/'.$item->payment_proof) }}">
                     @endforeach
                 </div>
                 <div class="modal-footer justify-content-between">
@@ -1023,18 +1185,27 @@
 @endsection
 
 @section('script')
+<script>
+
+</script>
+
 <script src="{{ asset('adminlte/dist/js/maskMoney.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+
             $('.maskRupiah').maskMoney({prefix:'Rp ', thousands:'.', decimal:',', precision:0});
 
             $("#dataAntrian").DataTable({
                 "responsive": true,
                 "autoWidth": false,
+                "order": [[ 0, "desc" ]],
+                "pageLength": 25,
             });
             $("#dataAntrianSelesai").DataTable({
                 "responsive": true,
                 "autoWidth": false,
+                "order": [[ 0, "desc" ]],
+                "pageLength": 25,
             });
 
             //Menutup modal saat modal lainnya dibuka
@@ -1044,81 +1215,73 @@
                 });
             });
 
-            //saat tombol submitUnggahBayar di submit, maka tombol tersebut akan disabled
-            $('#formUnggahBayar').on('submit', function () {
-                $('#submitUnggahBayar').attr('disabled', true);
+            $('.countdown').each(function() {
+                var element = $(this);
+                var countDownDate = new Date(element.data('countdown')).getTime();
+
+                if (isNaN(countDownDate)) {
+                    element.html("<span class='text-danger'>BELUM DIANTRIKAN</span>");
+                } else {
+                    var x = setInterval(function() {
+                        var now = new Date().getTime();
+                        var distance = countDownDate - now;
+
+                        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                        element.html("<span class='text-success'>" + days + "d " + hours + "h " + minutes + "m " + seconds + "s " + "</span>");
+
+                        if (distance < 0) {
+                            clearInterval(x);
+                            element.html("<span class='text-danger'>TERLAMBAT</span>");
+                        }
+                    }, 1000);
+                }
             });
 
-            $('#jumlahPembayaran').on('keyup', function(){
-                var sisatagihan = {{ $antrian->payment->remaining_payment }};
-                var jumlahpembayaran = $(this).val().replace(/Rp\s|\.+/g, '');
-                //convert ke integer
-                sisatagihan = parseInt(sisatagihan);
-                jumlahpembayaran = parseInt(jumlahpembayaran);
-
-                //jika jumlah pembayaran lebih besar dari sisa tagihan, maka akan muncul keterangan dibawah input jumlah pembayaran
-                if(jumlahpembayaran > sisatagihan){
-                    $('#keterangan').html('<span class="text-danger">Jumlah pembayaran melebihi sisa tagihan.</span>');
-                    $('#submitUnggahBayar').attr('disabled', true);
+            $('.metodePembayaran').on('change', function(){
+                var id = $(this).attr('id').split('metodePembayaran')[1];
+                var metode = $(this).val();
+                if(metode == 'Tunai' || metode == 'Cash'){
+                    $('.filePelunasan').hide();
+                    $('#filePelunasan'+id).removeAttr('required');
                 }
                 else{
-                    $('#keterangan').html('');
-                    $('#submitUnggahBayar').attr('disabled', false);
+                    $('.filePelunasan').show();
+                    $('#filePelunasan'+id).attr('required', true);
                 }
+            });
 
+            $('.btnModalPelunasan').on('click', function(){
+                //ambil id dari tombol submitUnggahBayar
+                var id = $(this).attr('id').split('btnModalPelunasan')[1];
+
+                $('#jumlahPembayaran'+id).on('keyup', function(){
+                //ambil value dari jumlahPembayaran
+                var jumlah = $('#jumlahPembayaran'+id).val().replace(/Rp\s|\.+/g, '');
+                //ambil value dari sisaPembayaran
+                var sisa = $('#sisaPembayaran'+id).val().replace(/Rp\s|\.+/g, '');
+                //inisialisasi variabel keterangan
+                var keterangan = $('#keterangan'+id);
+                //inisialisasi variabel submit
+                var submit = $('#submitUnggahBayar'+id);
+                //jika jumlah pembayaran melebihi sisa pembayaran
+                if(parseInt(jumlah) > parseInt(sisa)){
+                    //tampilkan keterangan
+                    keterangan.html('<span class="text-danger">Jumlah pembayaran melebihi sisa pembayaran</span>');
+                    //tombol submit disabled
+                    submit.attr('disabled', true);
+                }
+                else{
+                    //sembunyikan keterangan
+                    keterangan.html('');
+                    //tombol submit enabled
+                    submit.attr('disabled', false);
+                }
+                });
             });
         });
     </script>
-
-        {{-- Script untuk countdown timer --}}
-    @foreach($antrians as $antrian)
-    <script>
-    @if($antrian->end_job != null && $antrian->deadline_status == 0)
-    // Set the date we're counting down to
-    var countDownDate{{ $antrian->id }} = new Date("{{ $antrian->end_job }}").getTime();
-    var endJob{{ $antrian->id }} = new Date("{{ $antrian->end_job }}");
-    var deadline{{ $antrian->id }} = "{{ $antrian->deadline_status }}";
-    var timerStop{{ $antrian->id }} = new Date("{{ $antrian->timer_stop }}");
-
-    // Update the count down every 1 second
-    var x{{ $antrian->id }} = setInterval(function() {
-        // Get today's date and time
-        var now{{ $antrian->id }} = new Date().getTime();
-        // Find the distance between now and the count down date
-        var distance{{ $antrian->id }} = countDownDate{{ $antrian->id }} - now{{ $antrian->id }};
-        // Time calculations for days, hours, minutes and seconds
-        var days{{ $antrian->id }} = Math.floor(distance{{ $antrian->id }} / (1000 * 60 * 60 * 24));
-        var hours{{ $antrian->id }} = Math.floor((distance{{ $antrian->id }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        var minutes{{ $antrian->id }} = Math.floor((distance{{ $antrian->id }} % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds{{ $antrian->id }} = Math.floor((distance{{ $antrian->id }} % (1000 * 60)) / 1000);
-        // Output the result in an element with id="demo"
-        document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-dark'>" + days{{ $antrian->id }} + "h " + hours{{ $antrian->id }} + "j " +
-            minutes{{ $antrian->id }} + "m " + seconds{{ $antrian->id }} + "d " + "</span>";
-        // If the count down is over, write some text
-        if (distance{{ $antrian->id }} < 0) {
-                clearInterval(x{{ $antrian->id }});
-                //memperbarui deadline_status menjadi terlambat
-                $.ajax({
-                    url: "{{ route('antrian.updateDeadline') }}",
-                    method: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        id: "{{ $antrian->id }}"
-                    },
-                    success: function(response) {
-                        console.log(response);
-                    }
-                });
-            }
-        }, 1000);
-    @elseif($antrian->end_job != null && $antrian->deadline_status == 1)
-        document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-success'>Tepat Waktu</span>";
-    @elseif($antrian->end_job != null && $antrian->deadline_status == 2)
-        document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-danger'>Terlambat</span>";
-    @elseif($antrian->end_job == null)
-        document.getElementById("waktu{{ $antrian->id }}").innerHTML = "<span class='badge bg-warning'>-</span>";
-    @endif
-    </script>
-    @endforeach
-
 @endsection

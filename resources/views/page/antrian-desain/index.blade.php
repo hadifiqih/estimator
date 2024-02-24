@@ -28,7 +28,6 @@
     </div>
 @endif
 
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -72,6 +71,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Ticket Order</th>
                             <th>Judul Desain</th>
                             <th>Ref. Desain</th>
                             <th>Jenis Pekerjaan</th>
@@ -90,6 +90,8 @@
                                     <i class="fas fa-star text-warning"></i>
                                 @endif
                             </td>
+                            
+                            <td>{{ $desain->ticket_order }}</td>
 
                             <td>{{ $desain->title }}</td>
 
@@ -310,7 +312,7 @@
                                     <a type="button" href="{{ url('order/'. $desain->id .'/edit') }}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
                                     @endif
 
-                                    @if(Auth::user()->role == 'desain' || Auth::user()->role == 'stempel' || Auth::user()->role == 'advertising')
+                                    @if(Auth::user()->role == 'desain' || Auth::user()->role == 'stempel' || Auth::user()->role == 'advertising' || Auth::user()->role == 'estimator' || Auth::user()->role == 'supervisor')
                                         {{-- Button untuk menampilkan modal Upload --}}
                                         <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalUpload{{ $desain->id }}"><i class="fas fa-upload"></i> Upload Desain</button>
                                     @endif
@@ -396,16 +398,25 @@
                                     <form action="{{ route('design.upload') }}" class="dropzone" id="my-dropzone{{ $desain->id }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="id" value="{{ $desain->id }}">
+                                        <input type="hidden" name="linkFile" value="">
+                                        <a href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary btn-sm submitButtonUpload">Unggah</a>
                                     </form>
 
-                                    <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
-                                    <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
+                                    <div class="form-group mt-2">
+                                        <form action="{{ route('submitLinkUpload') }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <label for="linkFileUpload{{ $desain->id }}">Link File <span class="text-muted font-italic text-sm">*Opsional</span></label>
+                                            <input type="text" class="form-control" id="linkFileUpload{{ $desain->id }}" name="linkFileUpload" placeholder="https://drive.google.com/xxxxx">
+                                            <input type="hidden" name="id" value="{{ $desain->id }}">
+                                            <input type="submit" class="btn btn-primary btn-sm mt-2 submitLink disabled" value="Simpan">
+                                        </form>
+                                    </div>
                                 </div>
 
                                 <div class="modal-footer justify-content-between">
-                                    <a id="submitUploadDesain" type="button" href="{{ route('submit.file-cetak', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
+                                    <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
+                                    <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
                                 </div>
-
                             </div>
                             <!-- /.modal-content -->
                         </div>
@@ -431,6 +442,7 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>Ticket Order</th>
                                 <th>Sales</th>
                                 <th>Judul Desain</th>
                                 <th>Waktu Selesai</th>
@@ -451,6 +463,8 @@
                                         <i class="fas fa-star text-warning"></i>
                                     @endif
                                 </td>
+                                
+                                <td>{{ $desain->ticket_order }}</td>
 
                                 <td>{{ $desain->sales->sales_name }}</td>
 
@@ -482,8 +496,12 @@
                                 @endif
 
                                 <td>{{ $desain->file_cetak }}
-                                    @if(auth()->user()->role == 'desain' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
-                                        <button class="btn btn-sm btn-warning" data-target="#modalReuploadFile{{ $desain->id }}" data-toggle="modal">Reupload File</button>
+                                    @if(auth()->user()->role == 'desain' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising' || auth()->user()->role == 'supervisor')
+                                        @if($desain->toWorkshop == 0)
+                                            <button class="btn btn-sm btn-warning" data-target="#modalReuploadFile{{ $desain->id }}" data-toggle="modal">Reupload</button>
+                                        @else
+                                            <button class="btn btn-sm btn-warning disabled">Sudah Diantrikan</button>
+                                        @endif
                                     @endif
                                 </td>
 
@@ -510,13 +528,23 @@
                                 <form action="{{ route('design.reuploadFile') }}" class="dropzone" id="my-dropzone-reupload{{ $desain->id }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <input type="hidden" name="id" value="{{ $desain->id }}">
+                                    <input type="hidden" name="linkReupload" value="">
+                                    <a href="{{ route('submit.reupload', $desain->id) }}" class="btn btn-primary btn-sm submitButtonReupload">Unggah</a>
                                 </form>
-                                <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
-                                <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
+                                <div class="form-group mt-2">
+                                    <form action="{{ route('submitLinkReupload') }}" enctype="multipart/form-data" method="POST">
+                                        @csrf
+                                        <label for="linkReupload{{ $desain->id }}">Link File</label>
+                                        <input type="text" class="form-control" id="linkReupload{{ $desain->id }}" name="linkReupload" placeholder="https://drive.google.com/xxxxx">
+                                        <input type="hidden" name="id" value="{{ $desain->id }}">
+                                        <input type="submit" class="btn btn-primary btn-sm mt-2 submitLinkReupload" value="Simpan">
+                                    </form>
+                                </div>
                             </div>
 
                             <div class="modal-footer justify-content-between">
-                                <a id="submitReupload" type="button" href="{{ route('design.submitReuploadFile', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
+                                <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
+                                <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
                             </div>
                         </div>
                         <!-- /.modal-content -->
@@ -540,6 +568,7 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
+                                    <th>Ticket Order</th>
                                     <th>Sales</th>
                                     <th>Judul Desain</th>
                                     <th>Jenis Produk</th>
@@ -560,6 +589,8 @@
                                             <i class="fas fa-star text-warning"></i>
                                         @endif
                                     </td>
+                                    
+                                    <td>{{ $desain->ticket_order }}</td>
 
                                     <td>{{ $desain->sales->sales_name }}</td>
 
@@ -679,18 +710,25 @@
                                         </div>
                                         <div class="modal-body">
                                             {{-- Dropzone JS --}}
-                                            <form action="{{ route('order.uploadRevisi') }}" class="dropzone" id="my-dropzone-revisi{{ $desain->id }}" method="POST" enctype="multipart/form-data">
+                                            <form action="{{ route('uploadRevisi') }}" class="dropzone" id="my-dropzone-revisi{{ $desain->id }}" method="POST" enctype="multipart/form-data">
                                                 @csrf
                                                 <input type="hidden" name="id" value="{{ $desain->id }}">
+                                                <input type="hidden" name="linkReupload" value="">
+                                                <a href="{{ route('submitRevisi', $desain->id) }}" class="btn btn-primary btn-sm submitButtonRevisi">Unggah</a>
                                             </form>
+                                            <div class="form-group mt-2">
+                                                <form action="{{ route('submitLinkRevisi') }}" enctype="multipart/form-data" method="POST">
+                                                    @csrf
+                                                    <label for="linkRevisi{{ $desain->id }}">Link File</label>
+                                                    <input type="text" class="form-control" id="linkRevisi{{ $desain->id }}" name="linkRevisi" placeholder="https://drive.google.com/xxxxx">
+                                                    <input type="hidden" name="id" value="{{ $desain->id }}">
+                                                    <input type="submit" class="btn btn-primary btn-sm mt-2 submitLinkRevisi" value="Simpan">
+                                                </form>
+                                            </div>
+
                                             <p class="text-sm text-danger mt-1 mb-0"><strong>Perhatian!</strong></p>
                                             <p class="text-sm text-secondary font-italic">*Pastikan file yang diunggah sudah benar, jika ada kesalahan cetak dari file yang diupload, maka biaya kerugian cetak ditanggung pribadi.</p>
                                         </div>
-
-                                        <div class="modal-footer justify-content-between">
-                                            <a id="submitRevisiDesain" type="button" href="{{ route('order.submitRevisi', $desain->id) }}" class="btn btn-primary submitButton">Upload</a><div id="loader" class="loader" style="display: none;"></div>
-                                        </div>
-
                                     </div>
                                     <!-- /.modal-content -->
                                 </div>
@@ -716,37 +754,51 @@
         Dropzone.options.myDropzone{{ $desain->id }} = { // camelized version of the `id`
             paramName: "fileCetak", // The name that will be used to transfer the file
             clickable: true,
-            acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
+            acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd, .blend, .skp",
             dictInvalidFileType: "Type file ini tidak dizinkan",
-            maxFileSize: 50000000,
             addRemoveLinks: true,
             dictRemoveFile: "Hapus file",
-            timeout: 5000,
+            maxFileSize: 52428800,
         };
+
+        //Jika input submitLink kosong, maka tambahkan class disabled pada button submit
+        $('#linkFileUpload'+{{ $desain->id }}).on('keyup', function() {
+            var linkFile = $('#linkFileUpload'+{{ $desain->id }}).val();
+            if(linkFile == '') {
+                $('.submitLink').addClass('disabled');
+                $('.submitButtonUpload').removeClass('disabled');
+            } else {
+                $('.submitLink').removeClass('disabled');
+                $('.submitButtonUpload').addClass('disabled');
+            }
+        });
+
         @endforeach
+
         @foreach ($listRevisi as $revisi)
             Dropzone.options.myDropzoneRevisi{{ $revisi->id }} = { // camelized version of the `id`
                 paramName: "fileRevisi", // The name that will be used to transfer the file
                 clickable: true,
                 acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
                 dictInvalidFileType: "Type file ini tidak dizinkan",
-                maxFileSize: 50000000,
                 addRemoveLinks: true,
                 dictRemoveFile: "Hapus file",
-                timeout: 5000,
+                maxFileSize: 52428800,
             };
+
         @endforeach
+
         @foreach ($listSelesai as $item)
             Dropzone.options.myDropzoneReupload{{ $item->id }} = { // camelized version of the `id`
                 paramName: "fileReupload", // The name that will be used to transfer the file
                 clickable: true,
                 acceptedFiles: ".jpeg, .jpg, .png, .pdf, .cdr, .ai, .psd",
                 dictInvalidFileType: "Type file ini tidak dizinkan",
-                maxFileSize: 50000000,
                 addRemoveLinks: true,
                 dictRemoveFile: "Hapus file",
-                timeout: 5000,
+                maxFileSize: 52428800,
             };
+
         @endforeach
     </script>
 

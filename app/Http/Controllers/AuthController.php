@@ -105,7 +105,10 @@ class AuthController extends Controller
             $tempatKerja = "2";
         }else if ($tempatKerja == "Kediri"){
             $tempatKerja = "3";
+        }else if ($tempatKerja == "Sidoarjo"){
+            $tempatKerja = "4";
         }
+        
         $indexTempatKerja = $request->lokasi;
 
         //menentukan divisi

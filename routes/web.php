@@ -148,6 +148,11 @@ Route::controller(ReportController::class)->group(function(){
     Route::get('/sales/report', 'reportSales')->name('report.sales');
     Route::post('/sales/report', 'reportSalesByDate')->name('report.salesByDate');
     Route::get('/report-form-order/{id}', 'reportFormOrder')->name('report.formOrder');
+    Route::get('/report/custom-report/', 'customReport')->name('report.custom');
+    //Admin Keuangan
+    Route::get('/antrian/omset-global-sales', 'omsetGlobalSales')->name('omset.globalSales');
+    Route::get('/antrian/omset-percabang', 'omsetPerCabang')->name('omset.perCabang');
+    Route::get('/antrian/omset-perproduk', 'omsetPerProduk')->name('omset.perProduk');
 });
 
 Route::controller(DesignController::class)->group(function(){
@@ -168,19 +173,31 @@ Route::controller(OrderController::class)->group(function(){
     Route::put('/order/{id}', 'update')->name('order.update');
     Route::delete('/order/{id}', 'destroy')->name('order.destroy');
     Route::get('/design', 'antrianDesain')->name('design.index');
-    Route::get('/order/{id}/take', 'ambilDesain')->name('order.take');
-    Route::post('/order/upload-print-file', 'uploadPrintFile')->name('design.upload');
-    Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
+
     Route::get('/order/{id}/toAntrian', 'toAntrian')->middleware(['auth', 'checkrole:sales'])->name('order.toAntrian');
     Route::post('/order/tambahProdukByModal', 'tambahProdukByModal')->name('tambahProdukByModal');
     Route::get('/get-jobs-by-category/{category_id}', 'getJobsByCategory')->name('getJobsByCategory');
     Route::post('/order/set-desainer/', 'bagiDesain')->name('order.bagiDesain');
+    //--------------------------------------------
+    // Route File Desain FIX
+    //--------------------------------------------
+    Route::post('/order/upload-print-file', 'uploadPrintFile')->name('design.upload');
+    Route::get('/design/submit-file-cetak/{id}', 'submitFileCetak')->name('submit.file-cetak');
+    Route::post('/submit-link', 'submitLinkUpload')->name('submitLinkUpload');
+    //--------------------------------------------
+    // Route Revisi Desain
+    //--------------------------------------------
     Route::get('/order/{id}/revisi-desain', 'revisiDesain')->name('order.revisiDesain');
     Route::put('/order/{id}/revisi-desain', 'updateRevisiDesain')->name('order.updateRevisiDesain');
-    Route::post('/order/upload-revisi-desain', 'uploadRevisi')->name('order.uploadRevisi');
-    Route::get('/order/{id}/submit-revisi', 'submitRevisi')->middleware('auth')->name('order.submitRevisi');
+    Route::post('/order/upload-revisi-desain', 'uploadRevisi')->name('uploadRevisi');
+    Route::get('/order/{id}/submit-revisi-desain', 'submitRevisi')->name('submitRevisi');
+    Route::post('/order/submit-revisi', 'submitLinkRevisi')->middleware('auth')->name('submitLinkRevisi');
+    //--------------------------------------------
+    // Route Reupload File
+    //--------------------------------------------
     Route::post('/design/reupload-file', 'reuploadFileDesain')->name('design.reuploadFile');
-    Route::get('/design/submit-reupload-file/{id}', 'submitReuploadFile')->name('design.submitReuploadFile');
+    Route::get('/design/submit-reupload-file/{id}', 'submitReuploadFile')->name('submit.reupload');
+    Route::post('/design/submit-reupload-link', 'submitLinkReupload')->name('submitLinkReupload');
 });
 
 Route::controller(AntrianController::class)->group(function(){
@@ -190,17 +207,24 @@ Route::controller(AntrianController::class)->group(function(){
     Route::post('/antrian/storeDokumentasi', 'storeDokumentasi')->middleware('auth')->name('antrian.storeDokumentasi');
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
     Route::post('/list-machines', 'getMachine')->name('antrian.getMachine');
-    Route::get('/estimator/index', 'estimatorIndex')->middleware('auth')->name('estimator.index');
+
+    Route::get('/estimator/index', 'estimatorPage')->middleware('auth')->name('estimator.index');
+    Route::get('/estimator/all', 'estimatorIndex')->middleware('auth')->name('estimator.all');
+    Route::post('/estimator/filterByCategory', 'estimatorFilter')->middleware('auth')->name('estimator.filter');
+    Route::get('/estimator/filterByJob/', 'estimatorFilterByJob')->middleware('auth')->name('estimator.filterByJob');
+    Route::get('/antrian/by-job/{id}', 'antrianByJob')->middleware('auth')->name('antrian.byJob');
+
     Route::get('/antrian/showProgress/{id}', 'showProgress')->middleware('auth')->name('antrian.showProgress');
     Route::post('/antrian/storeProgress', 'storeProgressProduksi')->middleware('auth')->name('store.progressProduksi');
     Route::get('/antrian/mark-aman/{id}', 'markAman')->middleware('auth')->name('antrian.markAman');
     Route::get('/antrian/download-produksi-file/{id}', 'downloadProduksiFile')->middleware('auth')->name('antrian.downloadProduksi');
     Route::get('/antrian/reminder', 'reminderProgress')->middleware('auth')->name('antrian.reminder');
     Route::get('/antrian/tandai-selesai/{id}', 'markSelesai')->middleware('auth')->name('antrian.markSelesai');
+    Route::post('/antrian/filterByCategory', 'filterProcess')->middleware('auth')->name('antrian.filterByCategory');
 });
 
 Route::controller(PaymentController::class)->group(function(){
-    Route::put('/payment/pelunasan', 'updatePelunasan')->name('payment.pelunasan');
+    Route::post('/payment/pelunasan', 'updatePelunasan')->name('payment.pelunasan');
 });
 
 Route::controller(ProductController::class)->group(function(){

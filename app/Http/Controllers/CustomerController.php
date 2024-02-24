@@ -25,8 +25,12 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        //Menyimpan no.telp dalam format seperti berikut 081234567890, tanpa spasi. strip, titik, dll
+        $telp = preg_replace('/\D/', '', $request->modalTelepon);
+
         $customer = new Customer;
-        $customer->telepon = $request->modalTelepon;
+
+        $customer->telepon = $telp;
 
         if($request->modalNama){
             $customer->nama = $request->modalNama;

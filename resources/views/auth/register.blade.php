@@ -218,6 +218,7 @@
                         <option value="Malang">Malang</option>
                         <option value="Surabaya">Surabaya</option>
                         <option value="Kediri">Kediri</option>
+                        <option value="Sidoarjo">Sidoarjo</option>
                       </select>
                 </div>
 
