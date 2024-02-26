@@ -41,9 +41,22 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.estimator-by-job', compact('jobs'));
     }
 
-    public function estimatorFilterByJob($id)
+    //--------------------------------------------------------------------------
+    //Estimator
+    //--------------------------------------------------------------------------
+    public function estimatorPage()
     {
-        $antrians = Antrian::where('job_id', $id)->get();
+        $jobs = Job::all();
+        return view('page.antrian-workshop.estimator-data', compact('jobs'));
+    }
+
+    public function estimatorIndex(Request $request)
+    {
+        if($request->kategori == null){
+            $antrians = Antrian::with('employee')->orderByDesc('created_at')->get();
+        }else{
+            $antrians = Antrian::with('employee')->where('job_id', $request->kategori)->orderByDesc('created_at')->get();
+        }
 
         return Datatables::of($antrians)
             ->addColumn('ticket_order', function($antrian){
@@ -53,7 +66,7 @@ class AntrianController extends Controller
                 return $antrian->sales->sales_name;
             })
             ->addColumn('customer', function($antrian){
-                return $antrian->customer->customer_name;
+                return $antrian->customer->nama;
             })
             ->addColumn('jenis_produk', function($antrian){
                 return $antrian->job->job_name;
@@ -62,40 +75,84 @@ class AntrianController extends Controller
                 return $antrian->qty;
             })
             ->addColumn('deadline', function($antrian){
-                return $antrian->deadline;
+                return $antrian->end_job;
             })
             ->addColumn('file_desain', function($antrian){
-                return $antrian->order->acc_desain;
+                return $antrian->order->file_cetak;
             })
             ->addColumn('desainer', function($antrian){
-                return $antrian->order->desainer;
+                return $antrian->order->employee->name;
             })
             ->addColumn('operator', function($antrian){
-                $operator = explode(',', $antrian->operator_id);
-                $operatorName = [];
-                foreach($operator as $op){
-                    $operatorName[] = Employee::find($op)->operator->name;
+                if(isset($antrian->operator->name)){
+                    $arr = explode(',', $antrian->operator_id);
+                    $kumpulanOperator = [];
+                    foreach($arr as $id){
+                        if($id == 'rekanan'){
+                            $kumpulanOperator[] = 'Rekanan';
+                        }else{
+                            $kumpulanOperator[] = Employee::find($id)->name;
+                        }
+                    }
+                    return implode(', ', $kumpulanOperator);
+                }else{
+                    if($antrian->operator_id == 'rekanan'){
+                        return 'Rekanan';
+                    }else{
+                        return 'Belum ditentukan';
+                    }
                 }
-                return implode(', ', $operatorName);
             })
             ->addColumn('finishing', function($antrian){
-                $finisher = explode(',', $antrian->finisher_id);
-                $finisherName = [];
-                foreach($finisher as $fin){
-                    $finisherName[] = Employee::find($fin)->finishing->name;
+                if(isset($antrian->finishing->name)){
+                    $arr = explode(',', $antrian->finisher_id);
+                    $kumpulanFinisher = [];
+                    foreach($arr as $id){
+                        if($id == 'rekanan'){
+                            $kumpulanFinisher[] = 'Rekanan';
+                        }else{
+                            $kumpulanFinisher[] = Employee::find($id)->name;
+                        }
+                    }
+                    return implode(', ', $kumpulanFinisher);
+                }else{
+                    if($antrian->finisher_id == 'rekanan'){
+                        return 'Rekanan';
+                    }else{
+                        return 'Belum ditentukan';
+                    }
                 }
-                return implode(', ', $finisherName);
             })
             ->addColumn('qc', function($antrian){
-                return $antrian->quality->name;
+                if(isset($antrian->quality->name)){
+                    $arr = explode(',', $antrian->qc_id);
+                    $kumpulanQuality = [];
+                    foreach($arr as $id){
+                        if($id == 'rekanan'){
+                            $kumpulanQuality[] = 'Rekanan';
+                        }else{
+                            $kumpulanQuality[] = Employee::find($id)->name;
+                        }
+                    }
+                    return implode(', ', $kumpulanQuality);
+                }else{
+                    if($antrian->qc_id == 'rekanan'){
+                        return 'Rekanan';
+                    }else{
+                        return 'Belum ditentukan';
+                    }
+                }
             })
             ->addColumn('tempat', function($antrian){
                 return $antrian->working_at;
             })
             ->addColumn('catatan_admin', function($antrian){
-                return $antrian->admin_note;
+                return $antrian->admin_note ? $antrian->admin_note : '-';
             })
-            ->rawColumns(['file_desain', 'jenis_produk'])
+            ->addColumn('action', function($antrian){
+                return '<button type="button" onclick="modalDetail('. $antrian->id .')" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</button>';
+            })
+            ->rawColumns(['file_desain', 'jenis_produk', 'operator', 'finishing', 'qc', 'action'])
             ->make(true);
     }
 
@@ -210,89 +267,6 @@ class AntrianController extends Controller
     public function serviceCreate(){
 
         return view('page.antrian-service.create');
-    }
-
-    //--------------------------------------------------------------------------
-    //Estimator
-    //--------------------------------------------------------------------------
-    public function estimatorPage()
-    {
-        $jobs = Job::all();
-        return view('page.antrian-workshop.estimator-data', compact('jobs'));
-    }
-
-    public function estimatorIndex()
-    {
-        $antrians = Antrian::with('employee')->orderByDesc('created_at')->get();
-
-        return Datatables::of($antrians)
-            ->addColumn('ticket_order', function($antrian){
-                return $antrian->ticket_order;
-            })
-            ->addColumn('sales', function($antrian){
-                return $antrian->sales->sales_name;
-            })
-            ->addColumn('customer', function($antrian){
-                return $antrian->customer->nama;
-            })
-            ->addColumn('jenis_produk', function($antrian){
-                return $antrian->job->job_name;
-            })
-            ->addColumn('qty', function($antrian){
-                return $antrian->qty;
-            })
-            ->addColumn('deadline', function($antrian){
-                return $antrian->end_job;
-            })
-            ->addColumn('file_desain', function($antrian){
-                return $antrian->order->file_cetak;
-            })
-            ->addColumn('desainer', function($antrian){
-                return $antrian->order->employee->name;
-            })
-            ->addColumn('operator', function($antrian){
-                $operatorId = explode(',', $antrian->operator_id);
-                    foreach ($operatorId as $item) {
-                        if($item == 'rekanan'){
-                            echo '- Rekanan';
-                        }
-                        else{
-                            $antriann = App\Models\Employee::find($item);
-                            //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                            if($antriann->id == end($operatorId)){
-                                echo '- ' . $antriann->name;
-                            }
-                            else{
-                                echo '- ' . $antriann->name . "<br>";
-                            }
-                        }
-                    }
-            })
-            ->addColumn('finishing', function($antrian){
-                $finisherID = explode(',', $antrian->finisher_id);
-                //jika jumlah finisher lebih dari 1, maka tampilkan nama finisher yang lebih dari 1
-                $finisherName = [];
-                foreach($finisherID as $fin){
-                    if($fin == 'rekanan'){
-                        $finisherName[] = 'rekanan';
-                    }else{
-                        $finisherName[] = Employee::find($fin)->name;
-                    }
-                }
-                $finishers = implode(', ', $finisherName);
-                return $finishers;
-            })
-            ->addColumn('qc', function($antrian){
-                return $antrian->quality->name;
-            })
-            ->addColumn('tempat', function($antrian){
-                return $antrian->working_at;
-            })
-            ->addColumn('catatan_admin', function($antrian){
-                return $antrian->admin_note;
-            })
-            ->rawColumns(['file_desain', 'jenis_produk'])
-            ->make(true);
     }
 
     public function estimatorFilter(Request $request)

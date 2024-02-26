@@ -9,12 +9,14 @@
 @section('breadcrumb', 'Estimator By Job')
 
 @section('content')
-
+<style>
+    .select2-container .select2-selection--single {
+        height: 38px;
+    }
+</style>
 <div class="container">
     <div class="row mb-3">
         <div class="col-md-4">
-        <form id="filterByCategory" action="{{ route('estimator.filterByJob') }}" method="POST" enctype="multipart/form-data">
-            @csrf
             <label for="kategori">Jenis Pekerjaan</label>
             <select class="form-control select2" name="kategori" id="kategori">
                 <option value="">Pilih Jenis Pekerjaan</option>
@@ -23,14 +25,6 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-2 align-self-end">
-            @if(isset($filtered))
-            <a href="{{ route('antrian.index') }}" class="btn btn-danger mt-1">Reset</a>
-            @else
-            <button type="submit" class="btn btn-primary mt-1">Filter</button>
-            @endif
-        </div>
-        </form>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -53,20 +47,21 @@
                                     <th>QC</th>
                                     <th>Tempat</th>
                                     <th>Catatan Admin</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
                 </div>
-</div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
 <script>
     $(document).ready(function() {
-        $('#tableEstimator').DataTable({
-            responsive: true,
-            autoWidth: false,
+        var table = $('#tableEstimator').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -85,9 +80,19 @@
                 { data: 'finishing', name: 'finishing' },
                 { data: 'qc', name: 'qc' },
                 { data: 'tempat', name: 'tempat' },
-                { data: 'catatan_admin', name: 'catatan_admin' }
+                { data: 'catatan_admin', name: 'catatan_admin' },
+                { data: 'action', name: 'action' }
             ]
         });
+
+        //update table
+        $('#kategori').on('change', function() {
+            var kategori = $(this).val();
+            table.ajax.url("{{ route('estimator.all') }}?kategori=" + kategori).load();
+        });
+
+        //select2
+        $('.select2').select2();
     });
 </script>
 @endsection
