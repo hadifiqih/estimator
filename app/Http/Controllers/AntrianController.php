@@ -156,6 +156,14 @@ class AntrianController extends Controller
             ->make(true);
     }
 
+    public function estimatorShow(Request $request)
+    {
+        $antrian = Antrian::where('id', $request->id)->with('job', 'sales', 'order', 'payment', 'customer', 'design', 'operator', 'finishing', 'quality', 'documentation', 'dokumproses')
+        ->first();
+
+        return response()->json($antrian);
+    }
+
     public function index()
     {
         if(auth()->user()->role == 'sales'){
