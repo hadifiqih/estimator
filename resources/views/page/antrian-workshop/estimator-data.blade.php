@@ -57,56 +57,10 @@
         </div>
     </div>
 </div>
-@include('page.antrian-workshop.modal.modal-detail-antrian')
 @endsection
 
 @section('script')
 <script>
-    //tampilkan modal
-    function modalDetail(id) {
-            //show modal
-            $('#modalDetailAntrian').modal('show');
-            //ajax
-            $.ajax({
-                url: "{{ route('estimator.show') }}",
-                type: "GET",
-                data: {
-                    id: id
-                },
-                success: function(data) {
-                    $('#modalDetailAntrian').modal('show');
-                    $('#tanggalOrder').val(data.created_at);
-                    $('#ticketOrder').text(data.ticket_order);
-                    $('#namaProject').val(data.order.title);
-                    $('#sales').val(data.sales.sales_name);
-                    $('#namaPelanggan').val(data.customer.nama);
-                    $('#telepon').val(data.customer.telepon);
-                    $('#alamat').val(data.customer.alamat);
-                    $('#sumberPelanggan').val(data.customer.infoPelanggan);
-                    $('#namaProduk').val(data.job.job_name);
-                    $('#jumlahProduk').val(data.qty);
-                    $('#keterangan').val(data.note);
-                    $('#mulai').val(data.start_job);
-                    $('#deadline').val(data.end_job);
-                    $('#desainer').val(data.order.employee.name);
-                    $('#tempat').val(data.working_at);
-                    $('#operator').val(data.operator);
-                    $('#finishing').val(data.finishing);
-                    $('#qc').val(data.qc);
-                    $('#mesin').val(data.machine.machine_name);
-                    $('#nominalOmset').val(data.omset);
-                    $('#hargaProduk').val(data.harga_produk);
-                    $('#statusPembayaran').val(data.payment.payment_status);
-                    $('#metode').val(data.payment.payment_method);
-                    $('#bayar').val(data.payment.payment_amount);
-                    $('#sisa').val(data.payment.remaining_payment);
-                    $('#pasang').val(data.payment.installation_cost);
-                    $('#pengiriman').val(data.payment.shipping_cost);
-                    $('#alamatKirim').val(data.alamat_pengiriman);
-                }
-            });
-        }
-
     $(document).ready(function() {
         var table = $('#tableEstimator').DataTable({
             processing: true,

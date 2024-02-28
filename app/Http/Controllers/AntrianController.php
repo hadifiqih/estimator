@@ -150,18 +150,18 @@ class AntrianController extends Controller
                 return $antrian->admin_note ? $antrian->admin_note : '-';
             })
             ->addColumn('action', function($antrian){
-                return '<button type="button" onclick="modalDetail('. $antrian->id .')" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</button>';
+                return '<a href="'.route("estimator.show", $antrian->id).'" type="button" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</a>';
             })
             ->rawColumns(['file_desain', 'jenis_produk', 'operator', 'finishing', 'qc', 'action'])
             ->make(true);
     }
 
-    public function estimatorShow(Request $request)
+    public function estimatorShow($id)
     {
-        $antrian = Antrian::where('id', $request->id)->with('job', 'sales', 'order', 'payment', 'customer', 'design', 'operator', 'finishing', 'quality', 'documentation', 'dokumproses')
+        $antrian = Antrian::find($id)->with('job', 'sales', 'order', 'payment', 'customer', 'design', 'operator', 'finishing', 'quality', 'documentation', 'dokumproses')
         ->first();
 
-        return response()->json($antrian);
+        return view('page.antrian-workshop.estimator-show', compact('antrian'));
     }
 
     public function index()

@@ -210,7 +210,7 @@ Route::controller(AntrianController::class)->group(function(){
 
     Route::get('/estimator/index', 'estimatorPage')->middleware('auth')->name('estimator.index');
     Route::get('/estimator/all', 'estimatorIndex')->middleware('auth')->name('estimator.all');
-    Route::get('/estimator/show', 'estimatorShow')->middleware('auth')->name('estimator.show');
+    Route::get('/estimator/show/{id}', 'estimatorShow')->middleware('auth')->name('estimator.show');
     Route::get('/antrian/by-job/{id}', 'antrianByJob')->middleware('auth')->name('antrian.byJob');
 
     Route::get('/antrian/showProgress/{id}', 'showProgress')->middleware('auth')->name('antrian.showProgress');
