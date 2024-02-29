@@ -53,9 +53,9 @@ class AntrianController extends Controller
     public function estimatorIndex(Request $request)
     {
         if($request->kategori == null){
-            $antrians = Antrian::with('employee')->orderByDesc('created_at')->get();
+            $antrians = Antrian::with('employee')->orderByDesc('created_at')->take(100)->get();
         }else{
-            $antrians = Antrian::with('employee')->where('job_id', $request->kategori)->orderByDesc('created_at')->get();
+            $antrians = Antrian::with('employee')->where('job_id', $request->kategori)->orderByDesc('created_at')->take(100)->get();
         }
 
         return Datatables::of($antrians)
@@ -150,7 +150,7 @@ class AntrianController extends Controller
                 return $antrian->admin_note ? $antrian->admin_note : '-';
             })
             ->addColumn('action', function($antrian){
-                return '<a href="'.route("estimator.show", $antrian->id).'" type="button" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</a>';
+                return '<a href="'.route("estimator.show", $antrian->ticket_order).'" type="button" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</a>';
             })
             ->rawColumns(['file_desain', 'jenis_produk', 'operator', 'finishing', 'qc', 'action'])
             ->make(true);
@@ -158,7 +158,7 @@ class AntrianController extends Controller
 
     public function estimatorShow($id)
     {
-        $antrian = Antrian::find($id)->with('job', 'sales', 'order', 'payment', 'customer', 'design', 'operator', 'finishing', 'quality', 'documentation', 'dokumproses')
+        $antrian = Antrian::where('ticket_order', $id)->with('job', 'sales', 'order', 'payment', 'customer', 'design', 'operator', 'finishing', 'quality', 'documentation', 'dokumproses')
         ->first();
 
         return view('page.antrian-workshop.estimator-show', compact('antrian'));

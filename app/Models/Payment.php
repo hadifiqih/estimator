@@ -9,6 +9,8 @@ use App\Models\Antrian;
 
 class Payment extends Model
 {
+    protected $table = 'payments';
+
     use HasFactory;
 
     //relasi dengan tabel antrian dengan foreign key ticket_order

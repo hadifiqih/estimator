@@ -9,8 +9,32 @@
 @section('breadcrumb', 'Estimator By Job')
 
 @section('content')
+<style>
+    .scroll-to-top-btn {
+        position: fixed;
+        bottom: 60px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        cursor: pointer;
+        display: none;
+    }
+
+    .scroll-to-top-btn i {
+        font-size: 20px;
+    }
+
+</style>
 <div class="container">
         <div class="card">
+            <div id="scroll-to-top-btn" class="scroll-to-top-btn">
+                <i class="fas fa-arrow-up"></i>
+            </div>
             <div class="card-header">
                 <h3 class="card-title">Detail Antrian</h3>
             </div>
@@ -254,7 +278,7 @@
                         </div>
                         <div class="col-md-6">
                             <label>Preview Bukti Pembayaran</label>
-                            <div class="text-muted font-italic">{{ strlen($antrian->payment->payment_proof) > 25 ? substr($antrian->payment->payment_proof, 0, 25) . '...' : $antrian->payment->payment_proof }}<button type="button" class="btn btn-sm btn-primary ml-3" data-toggle="modal" data-target="#modal-buktiPembayaran">Lihat</button></div>
+                            <div class="text-muted font-italic">{{ $antrian->ticket_order . "-" . $antrian->payment->payment_proof }}<button id="lihatPembayaran" type="button" class="btn btn-sm btn-primary ml-3">Lihat</button></div>
                         </div>
                     </div>
                 </div>
@@ -272,7 +296,7 @@
               </button>
             </div>
             <div class="modal-body">
-                <img class="img-fluid" src="storage/acc-desain/{{ $antrian->order->acc_desain }}">
+                <img class="img-fluid" src="{{ asset('storage/acc-desain/' . $antrian->order->acc_desain) }}">
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
@@ -283,13 +307,54 @@
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+
+      <div class="modal fade" id="modal-buktiPembayaran">
+        <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h4 class="modal-title">File Bukti Pembayaran</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <img class="img-fluid" src="{{ asset('storage/bukti-pembayaran/'. $antrian->payment->payment_proof) }}">
+            </div>
+            <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 @endsection
 
 @section('script')
 <script>
     $(document).ready(function() {
         $('#lihatAcc').on('click', function() {
-            $('#modal-tampil-acc').modal('show');
+            $('#modal-accdesain').modal('show');
+        });
+
+        $('#lihatPembayaran').on('click', function() {
+            $('#modal-buktiPembayaran').modal('show');
+        });
+
+        // Munculkan tombol ketika pengguna mulai menggulir ke bawah
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 100) {
+                $('#scroll-to-top-btn').fadeIn();
+            } else {
+                $('#scroll-to-top-btn').fadeOut();
+            }
+        });
+
+        // Animasi scroll ke atas ketika tombol diklik
+        $('#scroll-to-top-btn').click(function() {
+            $('html, body').animate({scrollTop : 0}, 800);
+            return false;
         });
     })
 </script>
